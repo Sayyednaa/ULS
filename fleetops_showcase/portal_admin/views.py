@@ -404,15 +404,23 @@ class DriverProfilePrintView(StaffRequiredMixin, View):
         })
 
 
+import json
+
 class DeductionListView(AccountantSuperAdminMixin, View):
     def get(self, request):
         form = DeductionForm()
         form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
         form.fields['employee'].queryset = Profile.objects.exclude(role='driver')
+        
+        # Prepare driver data for dynamic filtering in frontend
+        active_drivers = Driver.objects.filter(is_active=True).values('id', 'full_name', 'contract_type')
+        drivers_json = json.dumps(list(active_drivers), default=str)
+        
         deductions = Deduction.objects.select_related('driver', 'employee', 'submitted_by').all()
         return render(request, 'admin_portal/deduction_invoices.html', {
             'form': form,
             'deductions': deductions,
+            'drivers_json': drivers_json,
         })
 
     def post(self, request):

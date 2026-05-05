@@ -98,61 +98,6 @@ class EmployeeDriverAddView(StaffRequiredMixin, View):
         })
 
 
-class EmployeeDeductionAddView(StaffRequiredMixin, View):
-    def get(self, request):
-        form = EmployeeDeductionForm()
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
-        return render(request, 'employee_portal/deduction_form.html', {
-            'form': form,
-            'title': 'Submit Deduction', 'subtitle': 'Process a driver deduction record',
-            'breadcrumb': 'Employee → Deduction → Add', 'icon': '🧾'
-        })
-
-    def post(self, request):
-        form = EmployeeDeductionForm(request.POST, request.FILES)
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
-        if form.is_valid():
-            deduction = form.save(commit=False)
-            deduction.submitted_by = request.user
-            deduction.save()
-            messages.success(request, 'Deduction submitted successfully.')
-            return redirect('employee_dashboard')
-        return render(request, 'employee_portal/deduction_form.html', {
-            'form': form,
-            'title': 'Submit Deduction', 'subtitle': 'Process a driver deduction record',
-            'breadcrumb': 'Employee → Deduction → Add', 'icon': '🧾'
-        })
-
-class EmployeeDeductionListView(StaffRequiredMixin, View):
-    def get(self, request):
-        form = EmployeeDeductionForm()
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
-        deductions = Deduction.objects.select_related('driver', 'employee', 'submitted_by').all()
-        return render(request, 'admin_portal/deduction_invoices.html', {
-            'form': form,
-            'deductions': deductions,
-            'portal': 'employee',
-        })
-
-class EmployeePendingDuesView(StaffRequiredMixin, View):
-    def get(self, request):
-        installments = DeductionInstallment.objects.select_related(
-            'deduction__driver', 'deduction__employee'
-        ).order_by('status', 'due_date')
-        
-        q = request.GET.get('q', '')
-        if q:
-            installments = installments.filter(
-                Q(deduction__driver__full_name__icontains=q) |
-                Q(deduction__reason__icontains=q)
-            )
-
-        return render(request, 'admin_portal/pending_dues.html', {
-            'installments': installments,
-            'q': q,
-            'portal': 'employee',
-        })
-
 class EmployeeDriverEditView(DriverEditView):
     pass
 
@@ -160,10 +105,6 @@ class EmployeeDriverDeleteView(DriverDeleteView):
     pass
 
 class EmployeeDriverToggleView(DriverToggleActiveView):
-    pass
-
-
-class EmployeeMarkPaidView(MarkInstallmentPaidView):
     pass
 
 class EmployeeDriverPrintView(DriverProfilePrintView):

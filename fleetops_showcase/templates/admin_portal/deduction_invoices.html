@@ -11,7 +11,7 @@
         <div class="bg-app-card border border-app-border rounded-2xl p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-app-text flex items-center gap-2"><span>📝</span> <span x-text="t('Add Deduction')"></span></h3>
-                <a href="{% if portal == 'admin' %}{% url 'admin_pending_dues' %}{% elif portal == 'manager' %}{% url 'manager_pending_dues' %}{% else %}{% url 'employee_pending_dues' %}{% endif %}" class="text-xs text-orange-500 hover:underline" x-text="t('View Pending Dues →')"></a>
+                <a href="{% url 'admin_pending_dues' %}" class="text-xs text-orange-500 hover:underline" x-text="t('View Pending Dues →')"></a>
             </div>
 
             <div class="p-3 bg-app-bg border border-app-border border-dashed rounded-xl mb-6 flex items-center justify-between gap-3">
@@ -36,13 +36,51 @@
             {% if form.errors %}
             <div class="mb-4 p-3 bg-red-900/30 border border-red-800 rounded-xl text-red-300 text-sm">{{ form.errors }}</div>
             {% endif %}
-            <form method="post" enctype="multipart/form-data" class="space-y-4">
+            <script>
+                document.addEventListener('alpine:init', () => {
+                    Alpine.data('deductionForm', () => ({
+                        selectedCompany: '',
+                        allDrivers: {{ drivers_json|safe }},
+                        filteredDrivers: [],
+                        updateDrivers() {
+                            if (!this.selectedCompany) {
+                                this.filteredDrivers = [];
+                            } else {
+                                this.filteredDrivers = this.allDrivers.filter(d => d.contract_type === this.selectedCompany);
+                            }
+                        }
+                    }))
+                })
+            </script>
+            <form method="post" enctype="multipart/form-data" class="space-y-4" x-data="deductionForm()" x-init="updateDrivers()">
                 {% csrf_token %}
-                <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Driver')"></label>{{ form.driver }}</div>
+                
+                <div>
+                    <label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Contracting Company *')"></label>
+                    <select name="contracting_company" class="block w-full rounded-md border border-app-border bg-app-bg py-2 px-3 text-app-text sm:text-sm sm:leading-6 transition-colors shadow-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand cursor-pointer" x-model="selectedCompany" @change="updateDrivers()" required>
+                        <option value="">Select Company</option>
+                        {% for val, label in form.fields.contracting_company.choices %}
+                            {% if val %}
+                                <option value="{{ val }}">{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Driver')"></label>
+                    <select name="driver" class="block w-full rounded-md border border-app-border bg-app-bg py-2 px-3 text-app-text sm:text-sm sm:leading-6 transition-colors shadow-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand cursor-pointer">
+                        <option value="">Select Driver</option>
+                        <template x-for="driver in filteredDrivers" :key="driver.id">
+                            <option :value="driver.id" x-text="driver.full_name"></option>
+                        </template>
+                    </select>
+                </div>
+
                 <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Employee')"></label>{{ form.employee }}</div>
                 <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Reason *')"></label>{{ form.reason }}</div>
                 <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Date *')"></label>{{ form.deduction_date }}</div>
-                <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Contracting Company *')"></label>{{ form.contracting_company }}</div>
+                
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Contractor KD')"></label>{{ form.contractor_deduction_kd }}</div>
                     <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Company KD')"></label>{{ form.company_deduction_kd }}</div>

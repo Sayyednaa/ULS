@@ -12,9 +12,7 @@ urlpatterns = [
     path('salary-slips/', views.AccountantSalarySlipListView.as_view(), name='accountant_salary_slip_list'),
     path('salary-slips/<uuid:pk>/', views.AccountantSalarySlipView.as_view(), name='accountant_salary_slip'),
     
-    # Forms
     path('driver-add/', views.AccountantDriverAddView.as_view(), name='accountant_driver_add'),
-    path('deduction-add/', views.AccountantDeductionAddView.as_view(), name='accountant_deduction_add'),
     
     # Excel Operations
     path('excel/download-template/<str:model_type>/', views.accountant_download_template, name='accountant_download_template'),

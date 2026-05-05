@@ -253,35 +253,6 @@ class AccountantDriverAddView(AccountantMixin, View):
             'breadcrumb': 'Accountant → Drivers → Add', 'icon': '🚗'
         })
 
-class AccountantDeductionAddView(AccountantMixin, View):
-    def get(self, request):
-        from core.models import Driver, Profile
-        form = DeductionForm()
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
-        form.fields['employee'].queryset = Profile.objects.exclude(role='driver')
-        return render(request, 'employee_portal/deduction_form.html', {
-            'form': form, 'portal': 'accountant',
-            'title': 'Submit Deduction', 'subtitle': 'Process a driver or staff deduction record',
-            'breadcrumb': 'Accountant → Deduction → Add', 'icon': '🧾'
-        })
-
-    def post(self, request):
-        from core.models import Driver, Profile
-        form = DeductionForm(request.POST, request.FILES)
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
-        form.fields['employee'].queryset = Profile.objects.exclude(role='driver')
-        if form.is_valid():
-            deduction = form.save(commit=False)
-            deduction.submitted_by = request.user
-            deduction.save()
-            messages.success(request, 'Deduction submitted successfully.')
-            return redirect('accountant_talabat')
-        return render(request, 'employee_portal/deduction_form.html', {
-            'form': form, 'portal': 'accountant',
-            'title': 'Submit Deduction', 'subtitle': 'Process a driver or staff deduction record',
-            'breadcrumb': 'Accountant → Deduction → Add', 'icon': '🧾'
-        })
-
 from django.contrib.auth.decorators import login_required, user_passes_test
 from core.excel_utils import generate_excel_template, export_talabat_excel, export_contract_excel, import_from_excel
 

@@ -9,8 +9,4 @@ urlpatterns = [
     path('drivers/<uuid:pk>/delete/', views.EmployeeDriverDeleteView.as_view(), name='employee_driver_delete'),
     path('drivers/<uuid:pk>/toggle-active/', views.EmployeeDriverToggleView.as_view(), name='employee_driver_toggle'),
     path('drivers/<uuid:pk>/print/', views.EmployeeDriverPrintView.as_view(), name='employee_driver_print'),
-    path('deductions/', views.EmployeeDeductionListView.as_view(), name='employee_deductions'),
-    path('deductions/add/', views.EmployeeDeductionAddView.as_view(), name='employee_deduction_add'),
-    path('pending-dues/', views.EmployeePendingDuesView.as_view(), name='employee_pending_dues'),
-    path('pending-dues/<uuid:pk>/pay/', views.EmployeeMarkPaidView.as_view(), name='employee_mark_paid'),
 ]
