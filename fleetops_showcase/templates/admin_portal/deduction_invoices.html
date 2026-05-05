@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load kwd_filters translation_tags %}
-{% block title %}{{ "Deductions"|t:lang }} — NAJMAT ALWESAM{% endblock %}
+{% block title %}{{ "Deductions"|t:lang }} — SAYEDNA LOGISTICS{% endblock %}
 {% block page_title %}{% if portal == 'manager' %}Manager{% elif portal == 'employee' %}Employee{% else %}Admin{% endif %} → {{ "Deductions"|t:lang }}{% endblock %}
 {% block breadcrumb %}<span x-text="t('{% if portal == 'manager' %}Manager{% elif portal == 'employee' %}Employee{% else %}Admin{% endif %}')"></span> → <span x-text="t('Deductions')"></span>{% endblock %}
 

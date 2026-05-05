@@ -1,11 +1,11 @@
 
-# Translation mapping for Najmat Alwesam
+# Translation mapping for Sayedna Logistics
 # This file contains the English to Arabic mappings for the entire application.
 
 TRANSLATIONS = {
     # Navigation & Sidebar
-    "NAJMAT ALWESAM": "نجمة الوسام",
-    "Kuwait Operations": "عمليات الكويت",
+    "SAYEDNA LOGISTICS": "سيدنا للخدمات اللوجستية",
+    "Gulf Operations": "عمليات الخليج",
     "Dashboard": "لوحة التحكم",
     "Team Management": "إدارة الفريق",
     "Manage Team": "إدارة الفريق",
@@ -172,7 +172,7 @@ TRANSLATIONS = {
     "Clear": "مسح",
     
     # UI Misc
-    "KUWAIT DELIVERY OPERATIONS": "عمليات التوصيل في الكويت",
+    "GULF DELIVERY OPERATIONS": "عمليات التوصيل في الخليج",
     "Modern Delivery Services": "خدمات توصيل حديثة",
     "Get Started": "ابدأ الآن",
     "Our Services": "خدماتنا",
@@ -291,17 +291,17 @@ TRANSLATIONS = {
     "Talabat": "طلبات",
     "Burger King": "برجر كنج",
     "Pharmazone": "فارمازون",
-    "NAJMAT ALWESAM": "نجمة الوسام",
+    "SAYEDNA LOGISTICS": "سيدنا للخدمات اللوجستية",
     "Active": "نشط",
     "Car": "سيارة",
     "Bike": "دراجة",
     "Motorcycle": "دراجة نارية",
-    "National Bank of Kuwait (NBK)": "بنك الكويت الوطني (NBK)",
-    "Kuwait Finance House (KFH)": "بيت التمويل الكويتي (KFH)",
+    "National Bank of Gulf (NBK)": "بنك الخليج الوطني (NBK)",
+    "Gulf Finance House (KFH)": "بيت التمويل الخليجي (KFH)",
     "Gulf Bank": "بنك الخليج",
     "Burgan Bank": "بنك برقان",
-    "Al Ahli Bank of Kuwait": "البنك الأهلي الكويتي",
-    "Commercial Bank of Kuwait": "البنك التجاري الكويتي",
+    "Al Ahli Bank of Gulf": "البنك الأهلي الخليجي",
+    "Commercial Bank of Gulf": "البنك التجاري الخليجي",
     "Boubyan Bank": "بنك بوبيان",
     "Speedy": "سبيدي",
     "Other": "آخر",

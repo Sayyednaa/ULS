@@ -6,7 +6,7 @@ register = template.Library()
 
 @register.filter
 def kwd(value):
-    """Format a decimal value as Kuwaiti Dinar with 3 decimal places.
+    """Format a decimal value as Gulfi Dinar with 3 decimal places.
     
     Usage: {{ invoice.cash|kwd }} → "1,234.500 KD"
     """
@@ -50,7 +50,7 @@ def amount_in_words(value):
         words = []
         if kd > 0:
             words.append(n2w(kd))
-            words.append("Kuwaiti Dinar")
+            words.append("Gulfi Dinar")
         
         if fils > 0:
             if kd > 0: words.append("and")

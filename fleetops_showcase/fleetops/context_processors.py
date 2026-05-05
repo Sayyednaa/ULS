@@ -5,7 +5,7 @@ import json
 
 def global_context(request):
     """
-    Global context processor for Najmat Alwesam.
+    Global context processor for Sayedna Logistics.
     Provides role information, unread counts, and translations.
     """
     context = {}

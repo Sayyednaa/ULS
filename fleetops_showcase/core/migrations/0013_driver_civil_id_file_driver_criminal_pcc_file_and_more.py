@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='driver',
             name='company_name',
-            field=models.CharField(choices=[('najmat', 'NAJMAT ALWESAM'), ('speedy', 'Speedy'), ('other', 'Other')], default='najmat', max_length=50),
+            field=models.CharField(choices=[('najmat', 'SAYEDNA LOGISTICS'), ('speedy', 'Speedy'), ('other', 'Other')], default='najmat', max_length=50),
         ),
         migrations.AlterField(
             model_name='profile',

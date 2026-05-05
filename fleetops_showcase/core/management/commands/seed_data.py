@@ -8,10 +8,10 @@ from core.models import (
 )
 
 class Command(BaseCommand):
-    help = 'Seed the database with NAJMAT ALWESAM showcase data'
+    help = 'Seed the database with SAYEDNA LOGISTICS showcase data'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING('Seeding NAJMAT ALWESAM data...'))
+        self.stdout.write(self.style.WARNING('Seeding SAYEDNA LOGISTICS data...'))
 
         if Profile.objects.exists():
             self.stdout.write(self.style.SUCCESS('Data already exists. Skipping seed.'))
@@ -21,8 +21,8 @@ class Command(BaseCommand):
         self.stdout.write('Creating users...')
 
         superadmin_user = Profile.objects.create_user(
-            username='admin@najmatalwesam.com',
-            email='admin@najmatalwesam.com',
+            username='admin@sayednalogistics.com',
+            email='admin@sayednalogistics.com',
             password='admin123',
             first_name='Super',
             last_name='Admin',
@@ -31,8 +31,8 @@ class Command(BaseCommand):
         )
 
         manager_user = Profile.objects.create_user(
-            username='manager@najmatalwesam.com',
-            email='manager@najmatalwesam.com',
+            username='manager@sayednalogistics.com',
+            email='manager@sayednalogistics.com',
             password='manager123',
             first_name='Sara',
             last_name='Al-Mutairi',
@@ -41,8 +41,8 @@ class Command(BaseCommand):
         )
 
         employee_user = Profile.objects.create_user(
-            username='employee@najmatalwesam.com',
-            email='employee@najmatalwesam.com',
+            username='employee@sayednalogistics.com',
+            email='employee@sayednalogistics.com',
             password='employee123',
             first_name='Khalid',
             last_name='Al-Enezi',
@@ -51,8 +51,8 @@ class Command(BaseCommand):
         )
 
         accountant_user = Profile.objects.create_user(
-            username='accountant@najmatalwesam.com',
-            email='accountant@najmatalwesam.com',
+            username='accountant@sayednalogistics.com',
+            email='accountant@sayednalogistics.com',
             password='accountant123',
             first_name='Fatima',
             last_name='Al-Sabah',
@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
         # Talabat drivers
         talabat_drivers = [
-            ('Ahmed Hassan', 'bike', 'Kuwait City'),
+            ('Ahmed Hassan', 'bike', 'Gulf City'),
             ('John Doe', 'car', 'Salmiya'),
             ('Ali Reza', 'car', 'Hawally'),
             ('Omar Nabil', 'bike', 'Farwaniya'),
@@ -79,7 +79,7 @@ class Command(BaseCommand):
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'290{random.randint(100000000, 999999999)}',
                 working_id=f'WID-{random.randint(1000, 9999)}',
-                company_name='najmat', contract_type='talabat',
+                company_name='sayedna', contract_type='talabat',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 driver_license_expiry=today + timedelta(days=random.randint(15, 200)),
@@ -90,7 +90,7 @@ class Command(BaseCommand):
         # Pharma Zone drivers
         pharma_drivers = [
             ('Mohamed Ali', 'bike', 'Salmiya'),
-            ('Yusuf Ibrahim', 'car', 'Kuwait City'),
+            ('Yusuf Ibrahim', 'car', 'Gulf City'),
             ('Rashid Khalil', 'bike', 'Hawally'),
         ]
         for name, v, z in pharma_drivers:
@@ -98,7 +98,7 @@ class Command(BaseCommand):
                 full_name=name,
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'280{random.randint(100000000, 999999999)}',
-                company_name='najmat', contract_type='pharmazone',
+                company_name='sayedna', contract_type='pharmazone',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 is_active=True
@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 full_name=name,
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'281{random.randint(100000000, 999999999)}',
-                company_name='najmat', contract_type='burger_king',
+                company_name='sayedna', contract_type='burger_king',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 is_active=True
@@ -124,7 +124,7 @@ class Command(BaseCommand):
 
         # Other contract drivers
         other_drivers = [
-            ('Imran Sheikh', 'car', 'Kuwait City'),
+            ('Imran Sheikh', 'car', 'Gulf City'),
             ('Naveed Akhtar', 'bike', 'Salmiya'),
         ]
         for name, v, z in other_drivers:
@@ -132,7 +132,7 @@ class Command(BaseCommand):
                 full_name=name,
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'282{random.randint(100000000, 999999999)}',
-                company_name='najmat', contract_type='other',
+                company_name='sayedna', contract_type='other',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 is_active=True
@@ -169,7 +169,7 @@ class Command(BaseCommand):
         self.stdout.write('Creating messages...')
         msg = Message.objects.create(
             sender=manager_user,
-            subject='Welcome to NAJMAT ALWESAM',
+            subject='Welcome to SAYEDNA LOGISTICS',
             body='Welcome to the new system. Please ensure your documents are up to date.'
         )
         MessageRecipient.objects.create(message=msg, recipient=employee_user)
@@ -184,4 +184,4 @@ class Command(BaseCommand):
         Task.objects.create(user=employee_user, title='Check vehicle maintenance')
         Task.objects.create(user=accountant_user, title='Prepare salary sheets')
 
-        self.stdout.write(self.style.SUCCESS('NAJMAT ALWESAM data seeded successfully!'))
+        self.stdout.write(self.style.SUCCESS('SAYEDNA LOGISTICS data seeded successfully!'))

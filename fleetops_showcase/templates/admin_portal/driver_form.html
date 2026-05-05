@@ -1,9 +1,9 @@
 {% extends 'shared/generic_form.html' %}
 {% load translation_tags %}
 
-{% block title %}{% if editing %}{{ "Edit"|t:lang }}{% else %}{{ "Add"|t:lang }}{% endif %} {{ "Driver"|t:lang }} — NAJMAT ALWESAM{% endblock %}
+{% block title %}{% if editing %}{{ "Edit"|t:lang }}{% else %}{{ "Add"|t:lang }}{% endif %} {{ "Driver"|t:lang }} — SAYEDNA LOGISTICS{% endblock %}
 {% block page_title %}{% if editing %}Update Driver Details{% else %}Add New Driver{% endif %}{% endblock %}
-{% block breadcrumb %}<span x-text="t('NAJMAT ALWESAM')"></span> / <span x-text="t('{% if portal == 'manager' %}Manager{% elif portal == 'employee' %}Employee{% elif portal == 'accountant' %}Accountant{% else %}Admin{% endif %}')"></span> / <span x-text="t('Drivers')"></span> / <span x-text="t('{% if editing %}Edit{% else %}Add{% endif %}')"></span>{% endblock %}
+{% block breadcrumb %}<span x-text="t('SAYEDNA LOGISTICS')"></span> / <span x-text="t('{% if portal == 'manager' %}Manager{% elif portal == 'employee' %}Employee{% elif portal == 'accountant' %}Accountant{% else %}Admin{% endif %}')"></span> / <span x-text="t('Drivers')"></span> / <span x-text="t('{% if editing %}Edit{% else %}Add{% endif %}')"></span>{% endblock %}
 
 {% block form_icon %}🚗{% endblock %}
 {% block form_title %}<span x-text="t('{% if editing %}Update Driver Details{% else %}Add New Driver{% endif %}')"></span>{% endblock %}

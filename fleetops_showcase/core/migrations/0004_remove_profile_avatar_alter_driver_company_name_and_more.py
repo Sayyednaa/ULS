@@ -17,12 +17,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='driver',
             name='company_name',
-            field=models.CharField(choices=[('najmat', 'Najmat Alwesam'), ('speedy', 'Speedy'), ('other', 'Other')], default='najmat', max_length=50),
+            field=models.CharField(choices=[('najmat', 'Sayedna Logistics'), ('speedy', 'Speedy'), ('other', 'Other')], default='najmat', max_length=50),
         ),
         migrations.AlterField(
             model_name='profile',
             name='bank_name',
-            field=models.CharField(choices=[('nbk', 'National Bank of Kuwait (NBK)'), ('kfh', 'Kuwait Finance House (KFH)'), ('gulf_bank', 'Gulf Bank'), ('burgan', 'Burgan Bank'), ('al_ahli', 'Al Ahli Bank of Kuwait'), ('commercial', 'Commercial Bank of Kuwait'), ('boubyan', 'Boubyan Bank'), ('other', 'Other')], default='nbk', max_length=30),
+            field=models.CharField(choices=[('nbk', 'National Bank of Gulf (NBK)'), ('kfh', 'Gulf Finance House (KFH)'), ('gulf_bank', 'Gulf Bank'), ('burgan', 'Burgan Bank'), ('al_ahli', 'Al Ahli Bank of Gulf'), ('commercial', 'Commercial Bank of Gulf'), ('boubyan', 'Boubyan Bank'), ('other', 'Other')], default='nbk', max_length=30),
         ),
         migrations.AlterField(
             model_name='profile',

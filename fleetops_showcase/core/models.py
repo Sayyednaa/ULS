@@ -43,18 +43,18 @@ POSITION_CHOICES = [
 ]
 
 BANK_CHOICES = [
-    ('nbk', 'National Bank of Kuwait (NBK)'),
-    ('kfh', 'Kuwait Finance House (KFH)'),
+    ('nbk', 'National Bank of Gulf (NBK)'),
+    ('kfh', 'Gulf Finance House (KFH)'),
     ('gulf_bank', 'Gulf Bank'),
     ('burgan', 'Burgan Bank'),
-    ('al_ahli', 'Al Ahli Bank of Kuwait'),
-    ('commercial', 'Commercial Bank of Kuwait'),
+    ('al_ahli', 'Al Ahli Bank of Gulf'),
+    ('commercial', 'Commercial Bank of Gulf'),
     ('boubyan', 'Boubyan Bank'),
     ('other', 'Other'),
 ]
 
 COMPANY_CHOICES = [
-    ('najmat', 'NAJMAT ALWESAM'),
+    ('najmat', 'SAYEDNA LOGISTICS'),
     ('speedy', 'Speedy'),
     ('other', 'Other'),
 ]
@@ -223,6 +223,15 @@ class Driver(models.Model):
 
     def has_expiry_warning(self):
         return any(d['status'] in ['warning', 'expired'] for d in self.get_expiring_documents())
+
+    def get_warning_summary(self):
+        warnings = []
+        for d in self.get_expiring_documents():
+            if d['status'] == 'expired':
+                warnings.append(f"{d['label']} Expired")
+            elif d['status'] == 'warning':
+                warnings.append(f"{d['label']} Expiring Soon")
+        return ", ".join(warnings)
 
     class Meta:
         ordering = ['full_name']
