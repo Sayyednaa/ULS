@@ -50,7 +50,7 @@
                         <td class="px-6 py-4 text-app-text-muted">{{ driver.phone }}</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
-                                {% if driver.contract_type == 'talabat' %}bg-orange-500/10 text-orange-400
+                                {% if driver.contract_type == 'talabat' %}bg-emerald-500/10 text-emerald-400
                                 {% elif driver.contract_type == 'pharmazone' %}bg-blue-500/10 text-blue-400
                                 {% else %}bg-gray-500/10 text-gray-400{% endif %}">
                                 {{ driver.get_contract_type_display }}
@@ -59,7 +59,7 @@
                         <td class="px-6 py-4">
                             <div x-data="{ showPicker: false }" class="relative flex items-center justify-center">
                                 <button @click="showPicker = !showPicker"
-                                        class="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/30 rounded-lg text-xs font-bold transition-all">
+                                        class="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white border border-emerald-500/30 rounded-lg text-xs font-bold transition-all">
                                     <span>🖨️</span> <span x-text="t('Salary Slip')"></span>
                                 </button>
 
@@ -76,7 +76,7 @@
                                                        class="w-full bg-app-bg border border-app-border rounded-lg px-3 py-2 text-sm text-app-text focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none transition-all">
                                             </div>
                                             <button type="submit"
-                                                    class="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-lg shadow-orange-500/20 transition-all" x-text="t('Generate Slip')">
+                                                    class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all" x-text="t('Generate Slip')">
                                             </button>
                                         </div>
                                     </form>
@@ -100,3 +100,5 @@
     </div>
 </div>
 {% endblock %}
+
+

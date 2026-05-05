@@ -2,7 +2,7 @@
 <!-- Usage: include 'components/document_badge.html' with doc=doc -->
 <div class="flex items-center justify-between p-3 rounded-xl border transition-all
     {% if doc.status == 'ok' %}bg-emerald-500/5 border-emerald-500/20
-    {% elif doc.status == 'warning' %}bg-amber-500/5 border-amber-500/20
+    {% elif doc.status == 'warning' %}bg-emerald-500/5 border-emerald-500/20
     {% elif doc.status == 'expired' %}bg-red-500/5 border-red-500/20
     {% else %}bg-gray-500/5 border-gray-500/20{% endif %}">
     <div class="flex items-center gap-3">
@@ -13,7 +13,7 @@
             <p class="text-sm font-medium text-white">{{ doc.label }}</p>
             <p class="text-xs
                 {% if doc.status == 'ok' %}text-emerald-400
-                {% elif doc.status == 'warning' %}text-amber-400
+                {% elif doc.status == 'warning' %}text-emerald-400
                 {% elif doc.status == 'expired' %}text-red-400
                 {% else %}text-gray-500{% endif %}">
                 {% if doc.status == 'ok' %}Expires: {{ doc.expiry|date:"M d, Y" }}
@@ -25,9 +25,11 @@
     </div>
     <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full
         {% if doc.status == 'ok' %}bg-emerald-500/20 text-emerald-400
-        {% elif doc.status == 'warning' %}bg-amber-500/20 text-amber-400
+        {% elif doc.status == 'warning' %}bg-emerald-500/20 text-emerald-400
         {% elif doc.status == 'expired' %}bg-red-500/20 text-red-400
         {% else %}bg-gray-500/20 text-gray-500{% endif %}">
         {{ doc.status|upper }}
     </span>
 </div>
+
+

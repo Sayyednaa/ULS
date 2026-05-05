@@ -7,7 +7,7 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-brand to-amber-600 rounded-2xl p-6 lg:p-8 text-white shadow-lg shadow-brand/20 relative overflow-hidden">
+    <div class="bg-gradient-to-r from-brand to-emerald-600 rounded-2xl p-6 lg:p-8 text-white shadow-lg shadow-brand/20 relative overflow-hidden">
         <div class="relative z-10">
             <h2 class="text-2xl lg:text-3xl font-bold mb-2"><span x-text="t('Welcome back')"></span>, {{ request.user.first_name }}! 👋</h2>
             <p class="text-white/80 max-w-2xl text-sm lg:text-base" x-text="t('Here\'s an overview of the active drivers and contracts you are managing.')"></p>
@@ -20,7 +20,7 @@
         <!-- Talabat -->
         <div class="bg-app-card rounded-2xl p-6 border border-app-border shadow-sm hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center text-2xl">🍔</div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-2xl">🍔</div>
                 <span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full" x-text="t('Active')"></span>
             </div>
             <h3 class="text-2xl font-bold text-app-text mb-1">{{ talabat_count }}</h3>
@@ -73,8 +73,8 @@
                         <p class="text-xs text-app-text-muted" x-text="t('Register a new driver')"></p>
                     </div>
                 </a>
-                <a href="{% url 'accountant_deduction_add' %}" class="flex items-center gap-4 p-4 rounded-xl border border-app-border hover:bg-app-bg hover:border-orange-500/30 transition-all group">
-                    <div class="w-10 h-10 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">🧾</div>
+                <a href="{% url 'accountant_deduction_add' %}" class="flex items-center gap-4 p-4 rounded-xl border border-app-border hover:bg-app-bg hover:border-emerald-500/30 transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">🧾</div>
                     <div>
                         <h4 class="font-bold text-sm text-app-text" x-text="t('Add Deduction')"></h4>
                         <p class="text-xs text-app-text-muted" x-text="t('Record a new deduction')"></p>
@@ -136,3 +136,5 @@
     </div>
 </div>
 {% endblock %}
+
+

@@ -78,9 +78,9 @@
 
     <style type="text/tailwindcss">
         @theme {
-            --color-brand: #f97316;
-            --color-brand-hover: #ea580c;
-            --color-brand-light: #fed7aa;
+            --color-brand: #10b981;
+            --color-brand-hover: #059669;
+            --color-brand-light: #a7f3d0;
             
             /* Light Theme Tokens */
             --color-app-bg: #f8fafc;
@@ -175,8 +175,8 @@
         }
 
         /* Glow effects */
-        .glow-orange {
-            box-shadow: 0 0 20px rgba(249, 115, 22, 0.15);
+        .glow-green {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
         }
 
         .glow-card {
@@ -230,11 +230,11 @@
 
             0%,
             100% {
-                box-shadow: 0 0 5px rgba(249, 115, 22, 0.3);
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
             }
 
             50% {
-                box-shadow: 0 0 20px rgba(249, 115, 22, 0.6);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
             }
         }
 
@@ -261,7 +261,7 @@
             x-transition:leave-start="opacity-1" x-transition:leave-end="opacity-0 translate-x-4" class="px-5 py-3 rounded-xl shadow-2xl border backdrop-blur-sm flex items-center gap-3 cursor-pointer max-w-sm
                     {% if message.tags == 'success' %}bg-emerald-900/80 border-emerald-700 text-emerald-100
                     {% elif message.tags == 'error' %}bg-red-900/80 border-red-700 text-red-100
-                    {% elif message.tags == 'warning' %}bg-amber-900/80 border-amber-700 text-amber-100
+                    {% elif message.tags == 'warning' %}bg-emerald-900/80 border-emerald-700 text-emerald-100
                     {% else %}bg-blue-900/80 border-blue-700 text-blue-100{% endif %}" @click="show = false">
             <span class="text-lg">
                 {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning'
@@ -314,35 +314,35 @@
 
                 {% if is_admin %}
                 <a href="{% url 'admin_dashboard' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🏠</span>
                     <span x-text="t('Dashboard')"></span>
                 </a>
                 {% endif %}
                 {% if is_manager and not is_admin %}
                 <a href="{% url 'manager_dashboard' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'manager_dashboard' %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'manager_dashboard' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🏠</span>
                     <span x-text="t('Dashboard')"></span>
                 </a>
                 {% endif %}
                 {% if is_employee and not is_admin and not is_manager %}
                 <a href="{% url 'employee_dashboard' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'employee_dashboard' %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'employee_dashboard' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🏠</span>
                     <span x-text="t('Dashboard')"></span>
                 </a>
                 {% endif %}
                 {% if is_driver %}
                 <a href="{% url 'driver_dashboard' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'driver_dashboard' %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'driver_dashboard' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🏠</span>
                     <span x-text="t('Dashboard')"></span>
                 </a>
                 {% endif %}
                 {% if is_accountant and not is_admin %}
                 <a href="{% url 'accountant_dashboard' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'accountant_dashboard' %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'accountant_dashboard' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🏠</span>
                     <span x-text="t('Dashboard')"></span>
                 </a>
@@ -353,7 +353,7 @@
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Team Management')"></p>
                 <a href="{% url 'admin_team_list' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'team' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'team' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>👤</span>
                     <span x-text="t('Manage Team')"></span>
                 </a>
@@ -365,13 +365,13 @@
                     x-text="t('Driver Management')"></p>
                 {% if is_admin %}
                 <a href="{% url 'admin_driver_list' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'drivers' in request.path and 'admin-portal' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'drivers' in request.path and 'admin-portal' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🚗</span>
                     <span x-text="t('Manage Drivers')"></span>
                 </a>
                 {% elif is_manager or is_employee %}
                 <a href="{% if is_manager %}{% url 'manager_driver_list' %}{% else %}{% url 'employee_driver_list' %}{% endif %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'drivers' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'drivers' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🚗</span>
                     <span x-text="t('{% if is_manager %}Manage Drivers{% else %}View Drivers{% endif %}')"></span>
                 </a>
@@ -382,7 +382,7 @@
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('My Profile')"></p>
                 <a href="{% url 'driver_my_profile' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'my-profile' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'my-profile' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🚗</span> <span x-text="t('My Profile')"></span>
                 </a>
                 {% endif %}
@@ -392,7 +392,7 @@
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Invoices')"></p>
                 <a href="{% url 'invoice_list' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'invoices' in request.path and 'deduction' not in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'invoices' in request.path and 'deduction' not in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📄</span>
                     <span x-text="t('Driver Invoices')"></span>
                 </a>
@@ -403,15 +403,15 @@
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Archive')"></p>
                 <a href="{% url 'archive_list' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'archive_list' %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'archive_list' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🗃️</span> <span x-text="t('Invoice Archive')"></span>
                 </a>
                 <a href="{% url 'company_files' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'company-files' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'company-files' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📁</span> <span x-text="t('Company Files')"></span>
                 </a>
                 <a href="{% url 'deactivated_drivers' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deactivated-drivers' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deactivated-drivers' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🚫</span> <span x-text="t('Deactivated Drivers')"></span>
                 </a>
                 {% endif %}
@@ -420,7 +420,7 @@
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Forms')"></p>
                 <a href="{% url 'accountant_driver_add' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'driver-add' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'driver-add' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📝</span> <span x-text="t('Driver Info Form')"></span>
                 </a>
 
@@ -429,36 +429,36 @@
                     x-text="t('Accountant Department')"></p>
                 {% if is_accountant or is_superadmin %}
                 <a href="{% url 'admin_deductions' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deductions' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deductions' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🧾</span> <span x-text="t('Deduction Invoices')"></span>
                 </a>
                 <a href="{% url 'admin_pending_dues' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pending-dues' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pending-dues' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>⏳</span> <span x-text="t('Pending Dues')"></span>
                 </a>
                 {% endif %}
                 <a href="{% url 'accountant_talabat' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'talabat' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'talabat' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🍔</span> <span x-text="t('Talabat')"></span>
                 </a>
                 <a href="{% url 'accountant_pharmazone' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pharmazone' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pharmazone' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>💊</span> <span x-text="t('Pharma Zone')"></span>
                 </a>
                 <a href="{% url 'accountant_burgerking' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'burgerking' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'burgerking' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🍟</span> <span x-text="t('Burger King')"></span>
                 </a>
                 <a href="{% url 'accountant_other_contract' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'other-contract' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'other-contract' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📄</span> <span x-text="t('Other Contracts')"></span>
                 </a>
                 <a href="{% url 'accountant_monthly_details' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'monthly-details' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'monthly-details' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📊</span> <span x-text="t('Monthly Details')"></span>
                 </a>
                 <a href="{% url 'accountant_salary_slip_list' %}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'salary-slips' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'salary-slips' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>💳</span> <span x-text="t('Salary Slips')"></span>
                 </a>
                 {% endif %}
@@ -502,7 +502,7 @@
                         alt="{{ request.user.get_full_name }}">
                     {% else %}
                     <div
-                        class="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-amber-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand/20">
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand/20">
                         {{ request.user.first_name.0 }}{{ request.user.last_name.0 }}
                     </div>
                     {% endif %}
@@ -619,7 +619,7 @@
                                 alt="{{ request.user.get_full_name }}">
                             {% else %}
                             <div
-                                class="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-amber-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-brand/20">
+                                class="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-emerald-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-brand/20">
                                 {{ request.user.first_name.0 }}{{ request.user.last_name.0 }}
                             </div>
                             {% endif %}

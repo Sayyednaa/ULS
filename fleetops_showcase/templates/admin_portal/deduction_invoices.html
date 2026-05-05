@@ -11,7 +11,7 @@
         <div class="bg-app-card border border-app-border rounded-2xl p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-app-text flex items-center gap-2"><span>📝</span> <span x-text="t('Add Deduction')"></span></h3>
-                <a href="{% url 'admin_pending_dues' %}" class="text-xs text-orange-500 hover:underline" x-text="t('View Pending Dues →')"></a>
+                <a href="{% url 'admin_pending_dues' %}" class="text-xs text-emerald-500 hover:underline" x-text="t('View Pending Dues →')"></a>
             </div>
 
             <div class="p-3 bg-app-bg border border-app-border border-dashed rounded-xl mb-6 flex items-center justify-between gap-3">
@@ -133,7 +133,7 @@
                         <tr class="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                             <td class="px-4 py-3 text-sm text-app-text-muted">{{ d.deduction_date|date:"M d, Y" }}</td>
                             <td class="px-4 py-3 text-sm">
-                                {% if d.driver %}<span class="text-orange-500 font-bold">🚗 {{ d.driver.full_name }}</span>{% endif %}
+                                {% if d.driver %}<span class="text-emerald-500 font-bold">🚗 {{ d.driver.full_name }}</span>{% endif %}
                                 {% if d.employee %}<span class="text-blue-500 font-bold">👤 {{ d.employee.get_full_name }}</span>{% endif %}
                             </td>
                             <td class="px-4 py-3 text-sm text-app-text-muted max-w-[200px] truncate">{{ d.reason }}</td>
@@ -159,3 +159,5 @@
     </div>
 </div>
 {% endblock %}
+
+

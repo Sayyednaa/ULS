@@ -20,7 +20,7 @@
         box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
     }
     .hero-gradient {
-        background: radial-gradient(circle at top right, rgba(249, 115, 22, 0.1), transparent),
+        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent),
                     radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent);
     }
     .card-reveal {
@@ -65,12 +65,12 @@
                 {% csrf_token %}
                 <input name="next" type="hidden" value="{{ request.get_full_path }}">
                 <input name="language" type="hidden" :value="lang === 'en' ? 'ar' : 'en'">
-                <button type="submit" class="text-[10px] sm:text-sm font-bold text-app-text-muted hover:text-orange-500 transition-colors uppercase tracking-widest">
+                <button type="submit" class="text-[10px] sm:text-sm font-bold text-app-text-muted hover:text-emerald-500 transition-colors uppercase tracking-widest">
                     <span x-show="lang === 'en'">العربية</span>
                     <span x-show="lang === 'ar'">English</span>
                 </button>
             </form>
-            <a href="{% url 'login' %}" class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap">
+            <a href="{% url 'login' %}" class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                 Sign In
             </a>
         </div>
@@ -79,16 +79,16 @@
     <!-- Hero Section -->
     <div class="pt-32 pb-20 px-6 lg:px-12 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
         <div class="space-y-8" :class="lang === 'ar' ? 'text-right' : 'text-left'">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-bold tracking-wider uppercase">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold tracking-wider uppercase">
                 <span x-show="lang === 'en'">⚡ Trusted Delivery Partner</span>
                 <span x-show="lang === 'ar'">⚡ شريك التوصيل الموثوق</span>
             </div>
             <h1 class="text-5xl lg:text-7xl font-extrabold text-app-text leading-tight">
                 <template x-if="lang === 'en'">
-                    <span>SAYEDNA LOGISTICS <span class="text-orange-500">Delivering Excellence</span> in Gulf</span>
+                    <span>SAYEDNA LOGISTICS <span class="text-emerald-500">Delivering Excellence</span> in Gulf</span>
                 </template>
                 <template x-if="lang === 'ar'">
-                    <span>سيدنا للخدمات اللوجستية <span class="text-orange-500">نقدم التميز</span> في الخليج</span>
+                    <span>سيدنا للخدمات اللوجستية <span class="text-emerald-500">نقدم التميز</span> في الخليج</span>
                 </template>
             </h1>
             <p class="text-2xl text-app-text-muted leading-relaxed max-w-xl">
@@ -96,7 +96,7 @@
                 <span x-show="lang === 'ar'">تقديم خدمات توصيل موثوقة للمطاعم والصيدليات وشركات التجزئة في جميع محافظات الخليج.</span>
             </p>
             <div class="flex flex-wrap gap-4 pt-4">
-                <a href="#services" class="px-8 py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg transition-all shadow-xl shadow-orange-500/30 flex items-center gap-3">
+                <a href="#services" class="px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg transition-all shadow-xl shadow-emerald-500/30 flex items-center gap-3">
                     <span x-show="lang === 'en'">Our Services</span>
                     <span x-show="lang === 'ar'">خدماتنا</span>
                     <span>→</span>
@@ -110,7 +110,7 @@
 
         <!-- Hero Visual -->
         <div class="relative hidden lg:block">
-            <div class="absolute -inset-4 bg-orange-500/20 blur-3xl rounded-full"></div>
+            <div class="absolute -inset-4 bg-emerald-500/20 blur-3xl rounded-full"></div>
             <img src="{% static 'img/hero-image.png' %}" alt="SAYEDNA LOGISTICS Operations" class="relative rounded-3xl shadow-2xl floating border border-white/10">
         </div>
     </div>
@@ -121,8 +121,8 @@
             <p class="text-gray-500 uppercase tracking-widest text-xs font-bold mb-10" x-text="lang === 'en' ? 'Trusted by Industry Leaders' : 'موثوقون من قادة الصناعة'"></p>
             <div class="flex flex-wrap justify-center items-center gap-12 lg:gap-20">
                 <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-emerald-500 hover:drop-shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:scale-110">PHARMAZONE</span>
-                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-orange-500 hover:drop-shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:scale-110">BURGER KING</span>
-                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-amber-500 hover:drop-shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:scale-110">TALABAT</span>
+                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-emerald-500 hover:drop-shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:scale-110">BURGER KING</span>
+                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-emerald-500 hover:drop-shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:scale-110">TALABAT</span>
             </div>
         </div>
     </div>
@@ -136,8 +136,8 @@
         
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Service 1 -->
-            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-orange-500/30 transition-all group shadow-sm card-reveal">
-                <div class="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 text-2xl mb-6">🍔</div>
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-emerald-500/30 transition-all group shadow-sm card-reveal">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-6">🍔</div>
                 <h3 class="text-xl font-bold text-app-text mb-2" x-text="lang === 'en' ? 'Restaurants & Food' : 'المطاعم والأغذية'"></h3>
                 <p class="text-app-text-muted text-sm" x-text="lang === 'en' ? 'Hot, fresh deliveries at lightning speed.' : 'توصيل ساخن وطازج بسرعة البرق.'"></p>
             </div>
@@ -173,7 +173,7 @@
                 <div class="text-center p-10 rounded-3xl bg-app-card border border-app-border shadow-sm card-reveal"
                      x-data="{ count: 0, target: 10000 }"
                      x-intersect.once="let interval = setInterval(() => { if(count < target) { count += Math.ceil((target - count) / 10) + 1 } else { count = target; clearInterval(interval) } }, 30)">
-                    <p class="text-5xl font-black text-orange-500 mb-2"><span x-text="count.toLocaleString()">0</span>+</p>
+                    <p class="text-5xl font-black text-emerald-500 mb-2"><span x-text="count.toLocaleString()">0</span>+</p>
                     <p class="text-app-text-muted uppercase tracking-widest text-xs font-bold" x-text="lang === 'en' ? 'Daily Orders' : 'طلب يومي'"></p>
                 </div>
                 <div class="text-center p-10 rounded-3xl bg-app-card border border-app-border shadow-sm card-reveal"
@@ -196,7 +196,7 @@
 
     <!-- Testimonials -->
     <div class="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
-        <p class="text-center text-orange-500 font-bold mb-4 uppercase tracking-widest text-xs" x-text="lang === 'en' ? 'Trusted by Gulf\'s Best' : 'موثوقون من الأفضل في الخليج'"></p>
+        <p class="text-center text-emerald-500 font-bold mb-4 uppercase tracking-widest text-xs" x-text="lang === 'en' ? 'Trusted by Gulf\'s Best' : 'موثوقون من الأفضل في الخليج'"></p>
         <div class="grid md:grid-cols-2 gap-8 mt-12">
             <div class="p-10 rounded-3xl bg-app-card border border-app-border relative shadow-sm">
                 <span class="text-6xl text-app-text-muted/5 absolute top-6 right-8">"</span>
@@ -205,7 +205,7 @@
                     <span x-show="lang === 'ar'">لقد غيرت سيدنا للخدمات اللوجستية تماماً سرعة توصيل الطعام لدينا. ننصح بهم بشدة!</span>
                 </p>
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center font-bold text-orange-500">AM</div>
+                    <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center font-bold text-emerald-500">AM</div>
                     <div>
                         <p class="text-app-text font-bold">Ahmad Al-Mutairi</p>
                         <p class="text-app-text-muted text-xs" x-text="lang === 'en' ? 'Restaurant Owner' : 'صاحب مطعم'"></p>
@@ -228,13 +228,13 @@
 
     <!-- CTA Section -->
     <div class="py-24 px-6 lg:px-12 max-w-7xl mx-auto text-center">
-        <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-[3rem] p-12 lg:p-20 shadow-2xl shadow-orange-500/20">
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[3rem] p-12 lg:p-20 shadow-2xl shadow-emerald-500/20">
             <h2 class="text-4xl lg:text-6xl font-black text-white mb-6" x-text="lang === 'en' ? 'Ready to Dispatch?' : 'جاهز للإرسال؟'"></h2>
             <p class="text-white/80 text-xl mb-10 max-w-2xl mx-auto">
                 <span x-show="lang === 'en'">Join hundreds of businesses that trust SAYEDNA LOGISTICS.</span>
                 <span x-show="lang === 'ar'">انضم إلى مئات الشركات التي تثق بـ سيدنا للخدمات اللوجستية.</span>
             </p>
-            <a href="{% url 'login' %}" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-orange-600 font-black text-xl rounded-2xl hover:scale-105 transition-transform">
+            <a href="{% url 'login' %}" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-black text-xl rounded-2xl hover:scale-105 transition-transform">
                 <span x-show="lang === 'en'">Get Started</span>
                 <span x-show="lang === 'ar'">ابدأ الآن</span>
                 <span>→</span>
@@ -259,8 +259,8 @@
                 </p>
             </div>
             <div class="flex gap-6 text-app-text-muted text-sm">
-                <a href="#" class="hover:text-orange-500 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-orange-500 transition-colors">Terms of Service</a>
+                <a href="#" class="hover:text-emerald-500 transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-emerald-500 transition-colors">Terms of Service</a>
             </div>
         </div>
     </footer>
@@ -279,3 +279,4 @@
     document.querySelectorAll('.card-reveal').forEach(el => observer.observe(el));
 </script>
 {% endblock %}
+

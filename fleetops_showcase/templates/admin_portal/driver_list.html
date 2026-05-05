@@ -33,17 +33,17 @@
 
             <div class="flex items-center gap-4">
                 {% if portal == 'admin' %}
-                <a href="{% url 'admin_driver_add' %}" class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/20">
+                <a href="{% url 'admin_driver_add' %}" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Driver
                 </a>
                 {% elif portal == 'manager' %}
-                <a href="{% url 'manager_driver_add' %}" class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/20">
+                <a href="{% url 'manager_driver_add' %}" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Driver
                 </a>
                 {% elif portal == 'employee' %}
-                <a href="{% url 'employee_driver_add' %}" class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/20">
+                <a href="{% url 'employee_driver_add' %}" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Driver
                 </a>
@@ -95,7 +95,7 @@
                     <td class="px-4 py-3 text-sm text-app-text-muted">{{ forloop.counter }}</td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-amber-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden border border-app-border">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden border border-app-border">
                                 {% if driver.photo_selfie %}
                                     <img src="{{ driver.photo_selfie.url }}" class="w-full h-full object-cover">
                                 {% else %}
@@ -166,10 +166,10 @@
                     <td colspan="8" class="px-6 py-4">
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
                             {% for doc in driver.get_expiring_documents %}
-                            <div class="text-center p-2 rounded-lg {% if doc.status == 'ok' %}bg-emerald-500/5{% elif doc.status == 'warning' %}bg-amber-500/5{% elif doc.status == 'expired' %}bg-red-500/5{% else %}bg-gray-500/5{% endif %}">
+                            <div class="text-center p-2 rounded-lg {% if doc.status == 'ok' %}bg-emerald-500/5{% elif doc.status == 'warning' %}bg-emerald-500/5{% elif doc.status == 'expired' %}bg-red-500/5{% else %}bg-gray-500/5{% endif %}">
                                 <span class="text-lg block mb-1">{% if doc.status == 'ok' %}✅{% elif doc.status == 'warning' %}⚠️{% elif doc.status == 'expired' %}🔴{% else %}➖{% endif %}</span>
                                 <p class="text-[10px] font-semibold text-app-text">{{ doc.label }}</p>
-                                <p class="text-[9px] {% if doc.status == 'ok' %}text-emerald-500{% elif doc.status == 'warning' %}text-amber-500{% elif doc.status == 'expired' %}text-red-500{% else %}text-app-text-muted{% endif %}">
+                                <p class="text-[9px] {% if doc.status == 'ok' %}text-emerald-500{% elif doc.status == 'warning' %}text-emerald-500{% elif doc.status == 'expired' %}text-red-500{% else %}text-app-text-muted{% endif %}">
                                     {% if doc.status == 'ok' %}{{ doc.expiry|date:"M d" }}{% elif doc.status == 'warning' %}{{ doc.days_remaining }}d left{% elif doc.status == 'expired' %}Expired{% else %}Missing{% endif %}
                                 </p>
                             </div>
@@ -187,3 +187,5 @@
 
 {% include 'components/pagination.html' %}
 {% endblock %}
+
+

@@ -8,7 +8,7 @@
 {% block extra_css %}
 <style>
     .error-bg {
-        background: radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.05) 0%, transparent 70%);
+        background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
     }
     .glitch {
         font-size: 120px;
@@ -16,18 +16,18 @@
         line-height: 1;
         position: relative;
         color: white;
-        text-shadow: 0.05em 0 0 #f97316, -0.025em -0.05em 0 #ea580c,
-                     0.025em 0.05em 0 #fed7aa;
+        text-shadow: 0.05em 0 0 #10b981, -0.025em -0.05em 0 #059669,
+                     0.025em 0.05em 0 #a7f3d0;
         animation: glitch 500ms infinite;
     }
     @keyframes glitch {
-        0% { text-shadow: 0.05em 0 0 #f97316, -0.05em -0.025em 0 #ea580c, -0.025em 0.05em 0 #fed7aa; }
-        14% { text-shadow: 0.05em 0 0 #f97316, -0.05em -0.025em 0 #ea580c, -0.025em 0.05em 0 #fed7aa; }
-        15% { text-shadow: -0.05em -0.025em 0 #f97316, 0.025em 0.025em 0 #ea580c, -0.05em -0.05em 0 #fed7aa; }
-        49% { text-shadow: -0.05em -0.025em 0 #f97316, 0.025em 0.025em 0 #ea580c, -0.05em -0.05em 0 #fed7aa; }
-        50% { text-shadow: 0.025em 0.05em 0 #f97316, 0.05em 0 0 #ea580c, 0 -0.05em 0 #fed7aa; }
-        99% { text-shadow: 0.025em 0.05em 0 #f97316, 0.05em 0 0 #ea580c, 0 -0.05em 0 #fed7aa; }
-        100% { text-shadow: -0.025em 0 0 #f97316, -0.025em -0.025em 0 #ea580c, -0.025em -0.05em 0 #fed7aa; }
+        0% { text-shadow: 0.05em 0 0 #10b981, -0.05em -0.025em 0 #059669, -0.025em 0.05em 0 #a7f3d0; }
+        14% { text-shadow: 0.05em 0 0 #10b981, -0.05em -0.025em 0 #059669, -0.025em 0.05em 0 #a7f3d0; }
+        15% { text-shadow: -0.05em -0.025em 0 #10b981, 0.025em 0.025em 0 #059669, -0.05em -0.05em 0 #a7f3d0; }
+        49% { text-shadow: -0.05em -0.025em 0 #10b981, 0.025em 0.025em 0 #059669, -0.05em -0.05em 0 #a7f3d0; }
+        50% { text-shadow: 0.025em 0.05em 0 #10b981, 0.05em 0 0 #059669, 0 -0.05em 0 #a7f3d0; }
+        99% { text-shadow: 0.025em 0.05em 0 #10b981, 0.05em 0 0 #059669, 0 -0.05em 0 #a7f3d0; }
+        100% { text-shadow: -0.025em 0 0 #10b981, -0.025em -0.025em 0 #059669, -0.025em -0.05em 0 #a7f3d0; }
     }
     .float-truck {
         animation: floatTruck 4s ease-in-out infinite;
@@ -43,7 +43,7 @@
 <div class="min-h-[80vh] flex flex-col items-center justify-center text-center px-6 error-bg" x-init="document.title = lang === 'ar' ? '404 — طرد مفقود' : '404 — Package Lost';">
     <div class="relative mb-8">
         <div class="glitch" data-text="404">404</div>
-        <div class="absolute -top-12 -right-12 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl"></div>
+        <div class="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl"></div>
     </div>
 
     <div class="max-w-lg mb-12">
@@ -58,12 +58,12 @@
     </div>
 
     <div class="relative w-full max-w-md mb-12 group">
-        <div class="absolute inset-0 bg-orange-500/20 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-transform duration-1000"></div>
+        <div class="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-transform duration-1000"></div>
         <img src="{% static 'img/404_truck.png' %}" alt="Lost Truck" class="relative z-10 w-full h-auto rounded-3xl shadow-2xl float-truck border border-white/10">
     </div>
 
     <div class="flex flex-wrap gap-4 justify-center relative z-20">
-        <a href="/" class="px-8 py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all shadow-xl shadow-orange-500/20 flex items-center gap-3 active:scale-95">
+        <a href="/" class="px-8 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold transition-all shadow-xl shadow-emerald-500/20 flex items-center gap-3 active:scale-95">
             <span>🏠</span>
             <span x-show="lang === 'en'">Back to Dashboard</span>
             <span x-show="lang === 'ar'">العودة للوحة التحكم</span>
@@ -75,3 +75,4 @@
     </div>
 </div>
 {% endblock %}
+

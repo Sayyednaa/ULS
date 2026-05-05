@@ -8,12 +8,12 @@
     <!-- Tabs + Compose -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex gap-1 bg-app-card rounded-xl p-1 border border-app-border">
-            <button @click="tab = 'inbox'" :class="tab === 'inbox' ? 'bg-orange-500 text-white shadow-lg' : 'text-app-text-muted hover:text-app-text'"
+            <button @click="tab = 'inbox'" :class="tab === 'inbox' ? 'bg-emerald-500 text-white shadow-lg' : 'text-app-text-muted hover:text-app-text'"
                     class="px-4 py-2 rounded-lg text-sm font-semibold transition-all">
                 📥 Inbox
                 {% if unread_messages_count %}<span class="ml-1 bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ unread_messages_count }}</span>{% endif %}
             </button>
-            <button @click="tab = 'sent'" :class="tab === 'sent' ? 'bg-orange-500 text-white shadow-lg' : 'text-app-text-muted hover:text-app-text'"
+            <button @click="tab = 'sent'" :class="tab === 'sent' ? 'bg-emerald-500 text-white shadow-lg' : 'text-app-text-muted hover:text-app-text'"
                     class="px-4 py-2 rounded-lg text-sm font-semibold transition-all">
                 📤 Sent
             </button>
@@ -21,7 +21,7 @@
         {% load role_tags %}
         {% if_role 'admin' 'manager' 'employee' as can_compose %}
         {% if can_compose %}
-        <a href="{% url 'message_compose' %}" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
+        <a href="{% url 'message_compose' %}" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Compose
         </a>
@@ -32,7 +32,7 @@
     <div x-show="tab === 'inbox'" class="space-y-2">
         {% for mr in inbox %}
         <a href="{% url 'message_detail' mr.message.pk %}" class="block p-4 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5
-            {% if not mr.is_read %}bg-orange-500/5 border-l-4 border-orange-500 border-t border-r border-b border-app-border{% else %}bg-app-card border-app-border{% endif %}">
+            {% if not mr.is_read %}bg-emerald-500/5 border-l-4 border-emerald-500 border-t border-r border-b border-app-border{% else %}bg-app-card border-app-border{% endif %}">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3 min-w-0">
                     {% if mr.message.sender.avatar %}
@@ -45,7 +45,7 @@
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium {% if not mr.is_read %}text-app-text{% else %}text-app-text-muted{% endif %}">{{ mr.message.sender.get_full_name }}</span>
-                            {% if not mr.is_read %}<span class="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0"></span>{% endif %}
+                            {% if not mr.is_read %}<span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>{% endif %}
                         </div>
                         <p class="text-sm {% if not mr.is_read %}text-app-text/90{% else %}text-app-text-muted{% endif %} truncate">{{ mr.message.subject }}</p>
                     </div>
@@ -82,3 +82,5 @@
     </div>
 </div>
 {% endblock %}
+
+

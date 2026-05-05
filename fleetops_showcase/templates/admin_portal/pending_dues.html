@@ -28,26 +28,26 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </span>
                 <input type="text" name="q" value="{{ q }}" placeholder="Search driver, reason..." 
-                       class="w-full pl-10 pr-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                       class="w-full pl-10 pr-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
             </div>
             
-            <select name="status" class="px-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+            <select name="status" class="px-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                 <option value="">All Statuses</option>
                 <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Pending</option>
                 <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>✅ Paid</option>
             </select>
 
             <div class="flex items-center gap-2">
-                <input type="date" name="start_date" value="{{ start_date }}" class="px-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                <input type="date" name="start_date" value="{{ start_date }}" class="px-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                 <span class="text-app-text-muted">to</span>
-                <input type="date" name="end_date" value="{{ end_date }}" class="px-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                <input type="date" name="end_date" value="{{ end_date }}" class="px-4 py-2.5 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
             </div>
 
-            <button type="submit" class="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-xl transition-all">
+            <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all">
                 Apply Filters
             </button>
             {% if q or status_filter or start_date or end_date %}
-            <a href="{% url 'admin_pending_dues' %}" class="text-app-text-muted hover:text-orange-500 transition-colors text-sm">Clear</a>
+            <a href="{% url 'admin_pending_dues' %}" class="text-app-text-muted hover:text-emerald-500 transition-colors text-sm">Clear</a>
             {% endif %}
         </form>
     </div>
@@ -56,7 +56,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-app-card border border-app-border p-6 rounded-2xl shadow-sm">
             <p class="text-app-text-muted text-sm font-medium">Matching Installments</p>
-            <h3 class="text-3xl font-bold text-orange-500 mt-1">
+            <h3 class="text-3xl font-bold text-emerald-500 mt-1">
                 {{ installments.count }}
             </h3>
         </div>
@@ -109,7 +109,7 @@
                         <td class="px-6 py-4">
                             <p class="text-app-text-muted text-sm line-clamp-1">{{ item.deduction.reason }}</p>
                         </td>
-                        <td class="px-6 py-4 font-mono font-bold text-orange-500">
+                        <td class="px-6 py-4 font-mono font-bold text-emerald-500">
                             {{ item.amount|kwd }}
                         </td>
                         <td class="px-6 py-4 text-app-text-muted text-sm">
@@ -117,7 +117,7 @@
                         </td>
                         <td class="px-6 py-4">
                             {% if item.status == 'pending' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                                 ⏳ Pending
                             </span>
                             {% else %}
@@ -129,7 +129,7 @@
                         <td class="px-6 py-4 text-right">
                             {% if item.status == 'pending' %}
                             <button onclick="openPaymentModal('{{ item.id }}', '{{ item.amount }}')" 
-                                    class="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-orange-900/20">
+                                    class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-900/20">
                                 Deposit
                             </button>
                             {% else %}
@@ -168,12 +168,12 @@
             <input type="hidden" name="mark_paid" value="1">
             <input type="hidden" name="signature_data" id="signature_data">
             
-            <div class="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex items-center justify-between">
+            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center justify-between">
                 <div>
-                    <p class="text-orange-500 text-xs font-bold uppercase tracking-wider">Amount Due</p>
+                    <p class="text-emerald-500 text-xs font-bold uppercase tracking-wider">Amount Due</p>
                     <p class="text-2xl font-black text-white" id="modalAmount">0.000 KD</p>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-600/40">
+                <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/40">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
             </div>
@@ -194,9 +194,9 @@
                 <!-- Signature Upload -->
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-gray-300">Or Upload Signature Image</label>
-                    <div class="h-[200px] flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-xl hover:border-orange-500 transition-colors cursor-pointer group relative bg-gray-800/30">
+                    <div class="h-[200px] flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-xl hover:border-emerald-500 transition-colors cursor-pointer group relative bg-gray-800/30">
                         <input type="file" name="signature_image" class="absolute inset-0 opacity-0 cursor-pointer">
-                        <svg class="w-10 h-10 text-gray-600 group-hover:text-orange-500 mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <svg class="w-10 h-10 text-gray-600 group-hover:text-emerald-500 mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         <span class="text-xs text-gray-400">Click to upload image</span>
                     </div>
                 </div>
@@ -353,3 +353,5 @@
     }
 </script>
 {% endblock %}
+
+

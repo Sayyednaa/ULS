@@ -27,7 +27,7 @@
         <form method="post" action="{% url 'notification_read' notif.pk %}">
             {% csrf_token %}
             <button type="submit" class="w-full text-left p-4 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5
-                {% if not notif.is_read %}bg-orange-500/5 border-l-4 border-orange-500 border-t border-r border-b border-app-border{% else %}bg-app-card border-app-border{% endif %}">
+                {% if not notif.is_read %}bg-emerald-500/5 border-l-4 border-emerald-500 border-t border-r border-b border-app-border{% else %}bg-app-card border-app-border{% endif %}">
                 <div class="flex items-start gap-3">
                     <span class="text-lg mt-0.5">
                         {% if notif.type == 'document_expiry' %}🔴
@@ -43,7 +43,7 @@
                         </div>
                         <p class="text-xs text-app-text-muted mt-0.5">{{ notif.body }}</p>
                         {% if not notif.is_read %}
-                        <span class="inline-block mt-1 text-[9px] text-orange-500 font-bold uppercase">Unread</span>
+                        <span class="inline-block mt-1 text-[9px] text-emerald-500 font-bold uppercase">Unread</span>
                         {% endif %}
                     </div>
                 </div>
@@ -58,3 +58,5 @@
     </div>
 </div>
 {% endblock %}
+
+
