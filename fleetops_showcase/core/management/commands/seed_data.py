@@ -147,9 +147,7 @@ class Command(BaseCommand):
                 DriverInvoice.objects.create(
                     driver=d,
                     specified_date=idate,
-                    cash=Decimal(random.randint(5, 25)),
-                    main_orders=random.randint(10, 20),
-                    additional_orders=random.randint(0, 5),
+                    main_orders=random.randint(10, 25),
                     hours=Decimal(random.randint(8, 12)),
                     created_by=manager_user
                 )
