@@ -54,7 +54,7 @@ BANK_CHOICES = [
 ]
 
 COMPANY_CHOICES = [
-    ('najmat', 'SAYEDNA LOGISTICS'),
+    ('sayedna', 'SAYEDNA LOGISTICS'),
     ('speedy', 'Speedy'),
     ('other', 'Other'),
 ]
@@ -144,7 +144,7 @@ class Driver(models.Model):
     petrol_card_number = models.CharField(max_length=50, blank=True)
     employee_serial_number = models.CharField(max_length=50, blank=True)
     working_id = models.CharField(max_length=50, blank=True)
-    company_name = models.CharField(max_length=50, choices=COMPANY_CHOICES, default='najmat')
+    company_name = models.CharField(max_length=50, choices=COMPANY_CHOICES, default='sayedna')
     contract_type = models.CharField(max_length=20, choices=CONTRACT_CHOICES, default='talabat')
     position = models.CharField(max_length=100, default='Car Driver')
 
