@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from core.mixins import (
     AdminRequiredMixin, StaffRequiredMixin, 
     AdminManagerRequiredMixin, AccountantRequiredMixin,
-    FinancialAccessMixin
+    FinancialAccessMixin, AccountantSuperAdminMixin
 )
 from core.models import (
     Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Notification, Task,
@@ -21,7 +21,7 @@ from core.utils import notify_superadmin_action, check_and_notify_expiries
 from django.views import View
 
 
-def get_chart_data():
+def get_chart_data(company_filter=None):
     """Compute chart data for dashboard — revenue & orders by vehicle type per month."""
     current_year = date.today().year
     labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -33,27 +33,26 @@ def get_chart_data():
     orders_car = [0] * 12
 
     # One query to get all data for the year
-    yearly_data = DriverInvoice.objects.filter(
+    qs = DriverInvoice.objects.filter(
         specified_date__year=current_year
-    ).values(
+    )
+    if company_filter:
+        qs = qs.filter(driver__contract_type=company_filter)
+    
+    yearly_data = qs.values(
         'specified_date__month', 'driver__vehicle_type'
     ).annotate(
-        total_cash=Sum('cash'),
         total_main=Sum('main_orders'),
-        total_add=Sum('additional_orders')
     )
 
     for entry in yearly_data:
         m = entry['specified_date__month'] - 1
         vtype = entry['driver__vehicle_type']
-        cash = float(entry['total_cash'] or 0)
-        orders = (entry['total_main'] or 0) + (entry['total_add'] or 0)
+        orders = entry['total_main'] or 0
         
         if vtype == 'bike':
-            revenue_bike[m] = cash
             orders_bike[m] = orders
         else:
-            revenue_car[m] = cash
             orders_car[m] = orders
 
     return json.dumps({
@@ -69,39 +68,43 @@ class AdminDashboardView(StaffRequiredMixin, View):
     def get(self, request):
         check_and_notify_expiries(request.user)
         today = date.today()
-        month_invoices = DriverInvoice.objects.filter(
+        company_filter = request.GET.get('company', '')
+        
+        invoice_qs = DriverInvoice.objects.filter(
             specified_date__year=today.year,
             specified_date__month=today.month,
         )
-        totals = month_invoices.aggregate(
+        driver_qs = Driver.objects.filter(is_active=True)
+        
+        if company_filter:
+            invoice_qs = invoice_qs.filter(driver__contract_type=company_filter)
+            driver_qs = driver_qs.filter(contract_type=company_filter)
+        
+        totals = invoice_qs.aggregate(
             total_orders=Sum('main_orders'),
-            total_additional=Sum('additional_orders'),
-            total_cash=Sum('cash'),
             total_hours=Sum('hours'),
         )
-        total_orders = (totals['total_orders'] or 0) + (totals['total_additional'] or 0)
+        total_orders = totals['total_orders'] or 0
 
         tasks = Task.objects.filter(user=request.user)
         recent_notifs = Notification.objects.filter(user=request.user, is_read=False)[:5]
 
-        # Optimize: Count expiring docs without full object hydration if possible, 
-        # or at least avoid property-based recursion if it exists.
-        active_drivers = Driver.objects.filter(is_active=True)
         expiring_count = 0
-        for d in active_drivers:
+        for d in driver_qs:
             if d.has_expiry_warning():
                 expiring_count += 1
 
         return render(request, 'admin_portal/dashboard.html', {
             'total_orders': total_orders,
-            'total_cash': totals['total_cash'] or Decimal('0.000'),
             'total_hours': totals['total_hours'] or Decimal('0.00'),
-            'chart_data': get_chart_data(),
+            'chart_data': get_chart_data(company_filter=company_filter or None),
             'tasks': tasks,
             'recent_notifs': recent_notifs,
-            'active_drivers': active_drivers.count(),
+            'active_drivers': driver_qs.count(),
             'expiring_docs': expiring_count,
             'task_assign_form': TaskAssignmentForm(),
+            'contract_choices': CONTRACT_CHOICES,
+            'selected_company': company_filter,
         })
 
 
@@ -401,7 +404,7 @@ class DriverProfilePrintView(StaffRequiredMixin, View):
         })
 
 
-class DeductionListView(StaffRequiredMixin, View):
+class DeductionListView(AccountantSuperAdminMixin, View):
     def get(self, request):
         form = DeductionForm()
         form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
@@ -466,7 +469,7 @@ class DeductionListView(StaffRequiredMixin, View):
         })
 
 
-class PendingDuesView(StaffRequiredMixin, View):
+class PendingDuesView(AccountantSuperAdminMixin, View):
     def get(self, request):
         installments = DeductionInstallment.objects.select_related(
             'deduction__driver', 'deduction__employee'
@@ -500,7 +503,7 @@ class PendingDuesView(StaffRequiredMixin, View):
         })
 
 
-class MarkInstallmentPaidView(StaffRequiredMixin, View):
+class MarkInstallmentPaidView(AccountantSuperAdminMixin, View):
     def post(self, request, pk):
         installment = get_object_or_404(DeductionInstallment, pk=pk)
         

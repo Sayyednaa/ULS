@@ -27,10 +27,9 @@ class EmployeeDashboardView(StaffRequiredMixin, View):
         )
         totals = month_invoices.aggregate(
             total_orders=Sum('main_orders'),
-            total_additional=Sum('additional_orders'),
             total_hours=Sum('hours'),
         )
-        total_orders = (totals['total_orders'] or 0) + (totals['total_additional'] or 0)
+        total_orders = totals['total_orders'] or 0
         tasks = Task.objects.filter(user=request.user)
         recent_notifs = Notification.objects.filter(user=request.user, is_read=False)[:5]
 

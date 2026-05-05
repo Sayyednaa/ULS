@@ -21,13 +21,13 @@ class DriverAdmin(admin.ModelAdmin):
 
 @admin.register(DriverInvoice)
 class DriverInvoiceAdmin(admin.ModelAdmin):
-    list_display = ('driver', 'specified_date', 'cash', 'main_orders', 'additional_orders', 'hours')
+    list_display = ('driver', 'specified_date', 'main_orders', 'hours')
     list_filter = ('specified_date',)
 
 
 @admin.register(InvoiceArchive)
 class InvoiceArchiveAdmin(admin.ModelAdmin):
-    list_display = ('driver_name', 'archive_date', 'cash', 'main_orders', 'additional_orders', 'hours')
+    list_display = ('driver_name', 'archive_date', 'main_orders', 'hours')
     list_filter = ('archive_date',)
 
 

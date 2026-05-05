@@ -171,6 +171,7 @@ class DriverForm(forms.ModelForm):
             'civil_id_file', 'passport_file', 'work_permit_file', 
             'driving_license_file', 'health_card_file', 'vehicle_rc_file',
             'criminal_pcc_file', 'photo_selfie', 'other_docs_file',
+            'received_equipments_file',
         ]
         widgets = {
             'full_name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Full Name'}),
@@ -210,6 +211,7 @@ class DriverForm(forms.ModelForm):
             'criminal_pcc_file': forms.FileInput(attrs={'class': TW_FILE}),
             'photo_selfie': forms.FileInput(attrs={'class': TW_FILE}),
             'other_docs_file': forms.FileInput(attrs={'class': TW_FILE}),
+            'received_equipments_file': forms.FileInput(attrs={'class': TW_FILE}),
         }
 
     def clean(self):
@@ -282,18 +284,12 @@ class DriverForm(forms.ModelForm):
 
 
 class DriverInvoiceForm(forms.ModelForm):
-    cash = forms.DecimalField(
-        required=False,
-        widget=forms.NumberInput(attrs={'class': TW_INPUT, 'step': '0.001', 'placeholder': '0.000'})
-    )
-
     class Meta:
         model = DriverInvoice
-        fields = ['driver', 'cash', 'main_orders', 'additional_orders', 'hours', 'specified_date']
+        fields = ['driver', 'main_orders', 'hours', 'specified_date']
         widgets = {
             'driver': forms.Select(attrs={'class': TW_SELECT}),
             'main_orders': forms.NumberInput(attrs={'class': TW_INPUT, 'placeholder': '0'}),
-            'additional_orders': forms.NumberInput(attrs={'class': TW_INPUT, 'placeholder': '0'}),
             'hours': forms.NumberInput(attrs={'class': TW_INPUT, 'step': '0.01', 'placeholder': '0.00'}),
             'specified_date': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
         }

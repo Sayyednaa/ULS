@@ -22,8 +22,14 @@ DEBUG = env.bool('DEBUG', default=False)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-sayyednaa-logistics-key-change-in-production')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*', 'securityshadow.pythonanywhere.com'] if DEBUG else ['securityshadow.pythonanywhere.com'])
-
+if DEBUG:
+    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
+        'localhost', '127.0.0.1', '192.168.1.20', '0.0.0.0'
+    ])
+else:
+    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
+        'securityshadow.pythonanywhere.com'
+    ])
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

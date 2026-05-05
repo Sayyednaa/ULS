@@ -300,19 +300,13 @@
                     <span x-text="t('Driver Invoices')"></span>
                 </a>
                 {% endif %}
-                {% if is_admin or is_manager or is_employee %}
-                <a href="{% if is_admin %}{% url 'admin_deductions' %}{% elif is_manager %}{% url 'manager_deductions' %}{% else %}{% url 'employee_deductions' %}{% endif %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deductions' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                {% if is_accountant or is_superadmin %}
+                <a href="{% url 'admin_deductions' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deductions' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🧾</span> <span x-text="t('Deduction Invoices')"></span>
                 </a>
-                {% if is_admin %}
-                <a href="{% url 'admin_pending_dues' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pending-dues' in request.path and 'admin-portal' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                <a href="{% url 'admin_pending_dues' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pending-dues' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>⏳</span> <span x-text="t('Pending Dues')"></span>
                 </a>
-                {% elif is_manager or is_employee %}
-                <a href="{% if is_manager %}{% url 'manager_pending_dues' %}{% else %}{% url 'employee_pending_dues' %}{% endif %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pending-dues' in request.path %}bg-orange-500/10 text-orange-400 border-l-2 border-orange-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
-                    <span>⏳</span> <span x-text="t('Pending Dues')"></span>
-                </a>
-                {% endif %}
                 {% endif %}
 
                 <!-- ARCHIVE -->

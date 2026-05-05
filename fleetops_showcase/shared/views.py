@@ -57,7 +57,10 @@ class InvoiceListView(StaffRequiredMixin, View):
         except ValueError:
             target_date = date.today()
 
+        company_filter = request.GET.get('company', '')
         drivers = Driver.objects.filter(is_active=True).order_by('full_name')
+        if company_filter:
+            drivers = drivers.filter(contract_type=company_filter)
         
         # Prefetch invoices for this date
         invoices = DriverInvoice.objects.filter(specified_date=target_date)
@@ -70,7 +73,9 @@ class InvoiceListView(StaffRequiredMixin, View):
             'drivers': drivers,
             'target_date': target_date,
             'target_date_iso': target_date.isoformat(),
-            'portal': 'admin' if request.user.role == 'admin' else 'manager',
+            'portal': 'admin' if request.user.role in ('admin', 'superadmin') else ('manager' if request.user.role == 'manager' else 'employee'),
+            'contract_choices': CONTRACT_CHOICES,
+            'selected_company': company_filter,
         })
 
 
@@ -89,9 +94,7 @@ class InvoiceBulkSaveView(FinancialAccessMixin, View):
             try: return int(float(val.strip()))
             except: return 0
 
-        cash_delta = safe_decimal(request.POST.get('cash'))
         main_delta = safe_int(request.POST.get('main_orders'))
-        additional_delta = safe_int(request.POST.get('additional_orders'))
         hours_delta = safe_decimal(request.POST.get('hours'))
 
         driver = get_object_or_404(Driver, id=driver_id)
@@ -103,9 +106,7 @@ class InvoiceBulkSaveView(FinancialAccessMixin, View):
                 defaults={'created_by': request.user}
             )
             
-            invoice.cash = cash_delta
             invoice.main_orders = main_delta
-            invoice.additional_orders = additional_delta
             invoice.hours = hours_delta
             invoice.save()
 
@@ -121,13 +122,13 @@ class InvoiceResetView(StaffRequiredMixin, View):
 
         if all_reset:
             DriverInvoice.objects.filter(specified_date=target_date_str).update(
-                cash=0, main_orders=0, additional_orders=0, hours=0
+                main_orders=0, hours=0
             )
             django_messages.success(request, f'Reset all totals for {target_date_str}.')
         else:
             driver = get_object_or_404(Driver, id=driver_id)
             DriverInvoice.objects.filter(driver=driver, specified_date=target_date_str).update(
-                cash=0, main_orders=0, additional_orders=0, hours=0
+                main_orders=0, hours=0
             )
             django_messages.success(request, f'Reset totals for {driver.full_name}.')
 
@@ -210,9 +211,7 @@ class InvoiceArchiveActionView(StaffRequiredMixin, View):
                 InvoiceArchive.objects.create(
                     driver=driver,
                     driver_name=driver.full_name,
-                    cash=totals['cash'] or 0,
                     main_orders=totals['main'] or 0,
-                    additional_orders=totals['additional'] or 0,
                     hours=totals['hours'] or 0,
                     archive_date=date(year, month, 1),
                     archived_by=request.user,

@@ -164,6 +164,7 @@ class Driver(models.Model):
     vehicle_rc_file = models.FileField(upload_to='driver_docs/vehicle_rc/', null=True, blank=True, validators=[validate_file_extension])
     photo_selfie = models.ImageField(upload_to='driver_docs/photo/', null=True, blank=True)
     other_docs_file = models.FileField(upload_to='driver_docs/other/', null=True, blank=True, validators=[validate_file_extension])
+    received_equipments_file = models.FileField(upload_to='driver_docs/received_equipments/', null=True, blank=True, validators=[validate_file_extension])
 
     # Meta
     is_active = models.BooleanField(default=True)
@@ -242,9 +243,7 @@ class Driver(models.Model):
 class DriverInvoice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='invoices')
-    cash = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     main_orders = models.IntegerField(default=0)
-    additional_orders = models.IntegerField(default=0)
     hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     specified_date = models.DateField()
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -261,7 +260,7 @@ class DriverInvoice(models.Model):
 
     @property
     def total_orders(self):
-        return self.main_orders + self.additional_orders
+        return self.main_orders
 
 
 # ─── InvoiceArchive ─────────────────────────────────────────────────────────
@@ -270,9 +269,7 @@ class InvoiceArchive(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     driver = models.ForeignKey(Driver, on_delete=models.PROTECT, related_name='archives')
     driver_name = models.CharField(max_length=200)
-    cash = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     main_orders = models.IntegerField(default=0)
-    additional_orders = models.IntegerField(default=0)
     hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     archive_date = models.DateField()
     archived_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -288,7 +285,7 @@ class InvoiceArchive(models.Model):
 
     @property
     def total_orders(self):
-        return self.main_orders + self.additional_orders
+        return self.main_orders
 
 
 # ─── Deduction ──────────────────────────────────────────────────────────────

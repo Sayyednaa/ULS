@@ -5,6 +5,23 @@
 {% block breadcrumb %}Welcome back, {{ request.user.first_name }}{% endblock %}
 
 {% block content %}
+<!-- Company Filter Pills -->
+<div class="bg-app-card border border-app-border rounded-2xl p-4 mb-6 shadow-sm">
+    <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-app-text-muted uppercase tracking-wider mr-2">🏢 Filter by Company:</span>
+        <a href="{% url 'admin_dashboard' %}" 
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border {% if not selected_company %}bg-brand text-white border-brand shadow-lg shadow-brand/20{% else %}bg-app-bg text-app-text-muted border-app-border hover:border-brand/50 hover:text-brand{% endif %}">
+            All Companies
+        </a>
+        {% for key, label in contract_choices %}
+        <a href="{% url 'admin_dashboard' %}?company={{ key }}" 
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border {% if selected_company == key %}bg-brand text-white border-brand shadow-lg shadow-brand/20{% else %}bg-app-bg text-app-text-muted border-app-border hover:border-brand/50 hover:text-brand{% endif %}">
+            {{ label }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
     <!-- Total Orders -->

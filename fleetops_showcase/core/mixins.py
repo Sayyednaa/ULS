@@ -28,6 +28,11 @@ class AccountantRequiredMixin(RoleRequiredMixin):
     allowed_roles = ['superadmin', 'admin', 'accountant']
 
 
+class AccountantSuperAdminMixin(RoleRequiredMixin):
+    """Only accountant and superadmin can access (deductions, pending dues)."""
+    allowed_roles = ['superadmin', 'accountant']
+
+
 class AdminManagerRequiredMixin(RoleRequiredMixin):
     allowed_roles = ['superadmin', 'admin', 'manager']
 

@@ -175,6 +175,7 @@
                 {% if driver.vehicle_rc_file %}this.stagedFiles.push({id: 'vehicle_rc_file', label: t('Vehicle RC File'), filename: t('Current File'), url: '{{ driver.vehicle_rc_file.url }}'});{% endif %}
                 {% if driver.criminal_pcc_file %}this.stagedFiles.push({id: 'criminal_pcc_file', label: t('PCC (Criminal) File'), filename: t('Current File'), url: '{{ driver.criminal_pcc_file.url }}'});{% endif %}
                 {% if driver.other_docs_file %}this.stagedFiles.push({id: 'other_docs_file', label: t('Other Supporting Docs'), filename: t('Current File'), url: '{{ driver.other_docs_file.url }}'});{% endif %}
+                {% if driver.received_equipments_file %}this.stagedFiles.push({id: 'received_equipments_file', label: t('Received Equipments'), filename: t('Current File'), url: '{{ driver.received_equipments_file.url }}'});{% endif %}
             {% endif %}
         },
         onFileChange(id, label, e) {
@@ -208,6 +209,7 @@
                         <option value="vehicle_rc_file" :disabled="stagedFiles.some(f => f.id === 'vehicle_rc_file')" x-text="t('Vehicle RC File')"></option>
                         <option value="criminal_pcc_file" :disabled="stagedFiles.some(f => f.id === 'criminal_pcc_file')" x-text="t('PCC (Criminal) File')"></option>
                         <option value="other_docs_file" :disabled="stagedFiles.some(f => f.id === 'other_docs_file')" x-text="t('Other Supporting Docs')"></option>
+                        <option value="received_equipments_file" :disabled="stagedFiles.some(f => f.id === 'received_equipments_file')" x-text="t('Received Equipments')"></option>
                     </select>
                 </div>
                 <div class="flex-1 w-full space-y-2" x-show="activeDoc">
@@ -224,6 +226,7 @@
                                 <input type="file" name="vehicle_rc_file" id="id_vehicle_rc_file" @change="onFileChange('vehicle_rc_file', 'Vehicle RC', $event)">
                                 <input type="file" name="criminal_pcc_file" id="id_criminal_pcc_file" @change="onFileChange('criminal_pcc_file', 'PCC (Criminal)', $event)">
                                 <input type="file" name="other_docs_file" id="id_other_docs_file" @change="onFileChange('other_docs_file', 'Other Docs', $event)">
+                                <input type="file" name="received_equipments_file" id="id_received_equipments_file" @change="onFileChange('received_equipments_file', 'Received Equipments', $event)">
                             </div>
                         </div>
                         <button type="button" @click="document.getElementById('id_' + activeDoc).click()" class="w-full py-3 px-4 bg-brand/10 hover:bg-brand text-brand hover:text-white border border-brand/30 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2">

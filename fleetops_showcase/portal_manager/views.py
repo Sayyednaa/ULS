@@ -26,30 +26,37 @@ class ManagerDashboardView(AdminManagerRequiredMixin, View):
     def get(self, request):
         check_and_notify_expiries(request.user)
         today = date.today()
-        month_invoices = DriverInvoice.objects.filter(
+        company_filter = request.GET.get('company', '')
+        
+        invoice_qs = DriverInvoice.objects.filter(
             specified_date__year=today.year,
             specified_date__month=today.month,
         )
-        totals = month_invoices.aggregate(
+        driver_qs = Driver.objects.filter(is_active=True)
+        
+        if company_filter:
+            invoice_qs = invoice_qs.filter(driver__contract_type=company_filter)
+            driver_qs = driver_qs.filter(contract_type=company_filter)
+        
+        totals = invoice_qs.aggregate(
             total_orders=Sum('main_orders'),
-            total_additional=Sum('additional_orders'),
-            total_cash=Sum('cash'),
             total_hours=Sum('hours'),
         )
-        total_orders = (totals['total_orders'] or 0) + (totals['total_additional'] or 0)
+        total_orders = totals['total_orders'] or 0
         tasks = Task.objects.filter(Q(user=request.user) | Q(assigned_by=request.user)).order_by('-created_at')
         recent_notifs = Notification.objects.filter(user=request.user, is_read=False)[:5]
 
         return render(request, 'manager_portal/dashboard.html', {
             'total_orders': total_orders,
-            'total_cash': totals['total_cash'] or Decimal('0.000'),
             'total_hours': totals['total_hours'] or Decimal('0.00'),
-            'chart_data': get_chart_data(),
+            'chart_data': get_chart_data(company_filter=company_filter or None),
             'tasks': tasks,
             'recent_notifs': recent_notifs,
-            'active_drivers': Driver.objects.filter(is_active=True).count(),
-            'expiring_docs': sum(1 for d in Driver.objects.filter(is_active=True) if d.has_expiry_warning()),
+            'active_drivers': driver_qs.count(),
+            'expiring_docs': sum(1 for d in driver_qs if d.has_expiry_warning()),
             'task_assign_form': TaskAssignmentForm(),
+            'contract_choices': CONTRACT_CHOICES,
+            'selected_company': company_filter,
         })
 
 
