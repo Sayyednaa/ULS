@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="text-3xl">{{ icon|default:"⚙️" }}</span>
+            <h1 class="text-2xl font-bold text-app-text">{{ title }}</h1>
+        </div>
+        <p class="text-app-text-muted">{{ subtitle }}</p>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="bg-app-card rounded-2xl border border-app-border overflow-hidden shadow-sm">
+        <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Brand Name -->
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-app-text-muted uppercase tracking-wider">
+                            Brand Name
+                        </label>
+                        {{ form.brand_name }}
+                        {% if form.brand_name.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.brand_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- File Size Limits -->
+                    <div class="p-6 bg-black/5 dark:bg-white/5 rounded-2xl border border-app-border space-y-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">📁</span>
+                            <h3 class="font-bold text-app-text">File Size Limits</h3>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-app-text-muted uppercase">Excel Files (.xlsx, .xls, .csv) - MB</label>
+                                {{ form.max_excel_size_mb }}
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-app-text-muted uppercase">Other Documents & Images - MB</label>
+                                {{ form.max_other_size_mb }}
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-app-text-muted italic">Limits are applied both on the frontend and backend for security.</p>
+                    </div>
+                </div>
+
+                <!-- Logo -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-semibold text-app-text-muted uppercase tracking-wider">
+                        Company Logo
+                    </label>
+                    
+                    <!-- Current Logo Preview -->
+                    <div class="flex items-center gap-4 p-4 bg-black/5 dark:bg-white/5 rounded-xl border border-app-border">
+                        <div class="w-16 h-16 rounded-lg bg-white flex items-center justify-center overflow-hidden border border-app-border">
+                            <img src="{{ brand_logo }}" alt="Current Logo" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-app-text-muted mb-1">Current Branding</p>
+                            <p class="text-sm font-bold text-app-text">{{ brand_name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        {{ form.logo }}
+                        <p class="text-xs text-app-text-muted italic">Recommended size: 200x200px (PNG or JPG)</p>
+                        {% if form.logo.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.logo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-6 border-t border-app-border flex items-center justify-end gap-3">
+                <a href="{% url 'admin_dashboard' %}" 
+                   class="px-6 py-2.5 rounded-xl border border-app-border text-sm font-semibold text-app-text hover:bg-black/5 dark:hover:bg-white/5 transition-all">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-8 py-2.5 rounded-xl bg-brand text-white text-sm font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-8 p-6 bg-brand/10 rounded-2xl border border-brand/20 flex gap-4 items-start text-brand">
+        <svg class="w-6 h-6 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+            <h3 class="font-bold mb-1">Super Admin Note</h3>
+            <p class="text-sm opacity-90 leading-relaxed">
+                Changes made here will affect all users across the entire platform immediately. 
+                If no logo is uploaded, the default system logo will be used.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

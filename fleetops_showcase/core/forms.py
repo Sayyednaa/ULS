@@ -406,3 +406,16 @@ class CompanyFileForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': TW_TEXTAREA, 'placeholder': 'Optional description...'}),
             'category': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Category (e.g. Legal, HR)'}),
         }
+
+from .models import SystemSettings
+
+class SystemSettingsForm(forms.ModelForm):
+    class Meta:
+        model = SystemSettings
+        fields = ['brand_name', 'logo', 'max_excel_size_mb', 'max_other_size_mb']
+        widgets = {
+            'brand_name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Enter Brand Name'}),
+            'logo': forms.FileInput(attrs={'class': TW_FILE}),
+            'max_excel_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
+            'max_other_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
+        }

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Sign In — SAYEDNA LOGISTICS{% endblock %}
+{% block title %}Sign In — {{ brand_name }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -36,12 +36,14 @@
     <div class="fixed -bottom-24 -right-24 w-96 h-96 bg-emerald-600/10 rounded-full blur-[100px] z-0 animate-pulse"></div>
 
     <div class="w-full max-w-md relative z-10">
-        <!-- Logo -->
-        <div class="text-center mb-8 float-anim">
+        <div class="text-center mb-8 float-anim" x-data="{ 
+            currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}',
+            currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}'
+        }">
             <div class="inline-flex items-center justify-center w-28 h-28 mb-4 p-2 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
-                <img src="{% static 'img/logo.png' %}" class="w-full h-full object-cover" alt="Logo">
+                <img :src="currentLogo" class="w-full h-full object-contain" alt="Logo">
             </div>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight drop-shadow-lg" x-text="t('SAYEDNA LOGISTICS')"></h1>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight drop-shadow-lg" x-text="currentName"></h1>
             <p class="text-gray-400 text-sm mt-1 font-medium tracking-wide" x-text="t('GULF DELIVERY OPERATIONS')"></p>
         </div>
 
@@ -138,10 +140,9 @@
             </div>
         </div>
 
-        <div class="text-center mt-8">
+        <div class="text-center mt-8" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
             <p class="text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em]">
-                <span x-show="lang === 'en'">© 2026 SAYEDNA LOGISTICS — PRIVACY POLICY</span>
-                <span x-show="lang === 'ar'">© 2026 سيدنا للخدمات اللوجستية — سياسة الخصوصية</span>
+                <span x-text="'© 2026 ' + currentName + ' — ' + t('PRIVACY POLICY')"></span>
             </p>
         </div>
     </div>

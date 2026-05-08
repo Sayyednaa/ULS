@@ -37,9 +37,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SAYEDNA LOGISTICS{% endblock %}</title>
-    <meta name="description" content="SAYEDNA LOGISTICS — Gulf Delivery Operations Management">
-    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+    <title>{% block title %}{{ brand_name }}{% endblock %}</title>
+    <meta name="description" content="{{ brand_name }} — Gulf Delivery Operations Management">
+    <link rel="icon" type="image/png" href="{{ brand_logo }}">
 
     <script id="translations-data" type="application/json">
         {{ TRANSLATIONS_JSON|safe }}
@@ -60,6 +60,14 @@
             window.t = function (text) {
                 return lang === 'ar' ? (translations[text] || text) : text;
             };
+
+            // Branding Persistence Logic
+            const serverName = "{{ brand_name|escapejs }}";
+            const serverLogo = "{{ brand_logo|escapejs }}";
+            
+            // Sync to storage if server provided custom values
+            if (serverName) localStorage.setItem('fleetops_brand_name', serverName);
+            if (serverLogo) localStorage.setItem('fleetops_brand_logo', serverLogo);
 
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -114,11 +122,16 @@
         }
 
         /* Input specific overrides for light mode */
-        input:not([type="checkbox"]), select, textarea {
+        input:not([type="checkbox"]),
+        select,
+        textarea {
             background-color: white !important;
             color: black !important;
         }
-        .dark input:not([type="checkbox"]), .dark select, .dark textarea {
+
+        .dark input:not([type="checkbox"]),
+        .dark select,
+        .dark textarea {
             background-color: #111118 !important;
             color: #f1f5f9 !important;
         }
@@ -139,6 +152,7 @@
             background-color: #111118;
             color: #f1f5f9;
         }
+
         .dark select:focus option {
             background-color: #111118;
         }
@@ -261,11 +275,13 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             visibility: hidden;
         }
+
         .upload-progress-overlay.active {
             opacity: 1;
             pointer-events: auto;
             visibility: visible;
         }
+
         .progress-container {
             width: 90%;
             max-width: 400px;
@@ -276,6 +292,7 @@
             border-radius: 2rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+
         .progress-bar-bg {
             height: 8px;
             background: rgba(255, 255, 255, 0.05);
@@ -284,6 +301,7 @@
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .progress-bar-fill {
             height: 100%;
             width: 0%;
@@ -306,11 +324,11 @@
             </div>
             <h3 class="text-xl font-bold text-white mb-1">Uploading Files</h3>
             <p class="text-gray-400 text-sm">Please wait while we process your request...</p>
-            
+
             <div class="progress-bar-bg">
                 <div id="upload-progress-bar" class="progress-bar-fill"></div>
             </div>
-            
+
             <div class="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
                 <span class="text-brand" id="upload-progress-percent">0%</span>
                 <span class="text-gray-500" id="upload-progress-status">Processing...</span>
@@ -356,19 +374,20 @@
             <!-- Logo -->
             <div class="p-5 border-b border-app-border flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <img src="{% static 'img/logo.png' %}" class="w-26 h-26 object-contain" alt="Logo">
+                    <img src="{{ brand_logo }}" class="w-26 h-26 object-contain" alt="Logo">
                     <div>
-                        <h1 class="font-bold text-app-text text-xl tracking-tight" x-text="t('SAYEDNA LOGISTICS')"></h1>
+                        <h1 class="font-bold text-app-text text-xl tracking-tight">{{ brand_name }}</h1>
                         <p class="text-[10px] text-app-text-muted uppercase tracking-widest"
                             x-text="t('Gulf Operations')"></p>
                     </div>
                 </div>
-               <button @click="sidebarOpen = false" class="lg:hidden text-gray-500 hover:text-white p-1 rounded" style="
+                <button @click="sidebarOpen = false" class="lg:hidden text-gray-500 hover:text-white p-1 rounded" style="
     margin-left: 98px;
     color: red;
 ">
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
                     </svg>
                 </button>
             </div>
@@ -468,7 +487,7 @@
                 {% endif %}
 
                 <!-- ARCHIVE -->
-                {% if not is_driver and not is_accountant or is_superadmin %}
+                {% if not is_driver and not is_accountant %}
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Archive')"></p>
                 <a href="{% url 'archive_list' %}"
@@ -484,6 +503,8 @@
                     <span>🚫</span> <span x-text="t('Deactivated Drivers')"></span>
                 </a>
                 {% endif %}
+
+
                 <!-- ACCOUNTANT: Forms -->
                 {% if is_accountant or is_superadmin %}
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
@@ -540,18 +561,29 @@
                     <span class="flex items-center gap-3"><span>🔔</span> <span
                             x-text="t('Notifications')"></span></span>
                     {% if unread_notifications_count %}<span
-                        class="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ unread_notifications_count }}</span>{% endif %}
+                        class="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{
+                        unread_notifications_count }}</span>{% endif %}
                 </a>
                 <a href="{% url 'message_inbox' %}"
                     class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'messages' in request.path %}bg-brand/10 text-brand border-l-2 border-brand{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span class="flex items-center gap-3"><span>💬</span> <span x-text="t('Messages')"></span></span>
                     {% if unread_messages_count %}<span
-                        class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ unread_messages_count }}</span>{% endif %}
+                        class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{
+                        unread_messages_count }}</span>{% endif %}
                 </a>
                 {% if not is_driver %}
                 <a href="{% url 'contact' %}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'contact' in request.path %}bg-brand/10 text-brand border-l-2 border-brand{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📝</span> <span x-text="t('Contact Page')"></span>
+                </a>
+                {% endif %}
+                <!-- SYSTEM ADMIN -->
+                {% if is_superadmin %}
+                <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
+                    x-text="t('System Administration')"></p>
+                <a href="{% url 'admin_settings' %}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'admin_settings' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    <span>⚙️</span> <span x-text="t('Settings')"></span>
                 </a>
                 {% endif %}
             </nav>
@@ -669,7 +701,8 @@
                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             {% if unread_notifications_count %}<span
-                                class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-brand text-white text-[9px] font-bold rounded-full flex items-center justify-center pulse-glow">{{ unread_notifications_count }}</span>{% endif %}
+                                class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-brand text-white text-[9px] font-bold rounded-full flex items-center justify-center pulse-glow">{{
+                                unread_notifications_count }}</span>{% endif %}
                         </a>
                         <!-- User dropdown -->
                         <div class="hidden sm:flex items-center gap-2 ml-2 pl-2 border-l border-app-border relative cursor-pointer"
@@ -845,14 +878,14 @@
         });
 
         // Global File Validator Utility (1MB for docs/images, 20MB for Excel)
-        window.validateFileSize = function(input) {
+        window.validateFileSize = function (input) {
             const file = input.files[0];
             if (!file) return true;
 
             const ext = '.' + file.name.split('.').pop().toLowerCase();
             const validExtensions = ['.pdf', '.doc', '.docx', '.jpg', '.png', '.jpeg', '.xlsx', '.xls', '.csv'];
             const isExcel = ['.xlsx', '.xls', '.csv'].includes(ext);
-            
+
             // Extension Check
             if (!validExtensions.includes(ext)) {
                 const msg = window.t ? window.t('Unsupported file extension.') : 'Unsupported file extension.';
@@ -862,9 +895,12 @@
             }
 
             // Size Check
-            const limit = isExcel ? 20 * 1048576 : 1048576;
+            const maxExcel = {{ max_excel_mb|default:20 }};
+            const maxOther = {{ max_other_mb|default:1 }};
+            const limit = isExcel ? maxExcel * 1048576 : maxOther * 1048576;
+            
             if (file.size > limit) {
-                const limitMB = isExcel ? '20MB' : '1MB';
+                const limitMB = isExcel ? maxExcel + 'MB' : maxOther + 'MB';
                 const msg = window.t ? window.t('File too large.') : 'File too large.';
                 alert(`${msg} Maximum size allowed for ${ext.toUpperCase()} is ${limitMB}.`);
                 input.value = ''; // Reset the input
@@ -874,7 +910,7 @@
         };
 
         // Fallback listener for non-Alpine forms
-        document.addEventListener('change', function(e) {
+        document.addEventListener('change', function (e) {
             if (e.target.tagName === 'INPUT' && e.target.type === 'file') {
                 window.validateFileSize(e.target);
             }

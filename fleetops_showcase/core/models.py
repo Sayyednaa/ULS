@@ -4,6 +4,22 @@ from django.db import models
 from .validators import validate_file_extension
 
 
+
+class SystemSettings(models.Model):
+    brand_name = models.CharField(max_length=100, default='SAYEDNA LOGISTICS')
+    logo = models.ImageField(upload_to='system/', null=True, blank=True, validators=[validate_file_extension])
+    
+    # File Size Limits (in MB)
+    max_excel_size_mb = models.PositiveIntegerField(default=20, help_text="Maximum size for Excel files (MB)")
+    max_other_size_mb = models.PositiveIntegerField(default=1, help_text="Maximum size for other documents/images (MB)")
+    
+    def __str__(self):
+        return "System Settings"
+    
+    class Meta:
+        verbose_name_plural = "System Settings"
+
+
 # ─── Choices ─────────────────────────────────────────────────────────────────
 
 ROLE_CHOICES = [

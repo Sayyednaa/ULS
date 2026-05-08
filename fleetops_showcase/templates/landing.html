@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}SAYEDNA LOGISTICS — سيدنا للخدمات اللوجستية{% endblock %}
+{% block title %}{{ brand_name }}{% endblock %}
 
 {% block extra_css %}
 <!-- SEO Meta Tags -->
-<meta name="description" content="شركة SAYEDNA LOGISTICS - خدمة توصيل موثوقة في الخليج. نقدم خدمات توصيل الطلبات من المطاعم والمتاجر والصيدليات للأفراد والشركات في جميع أنحاء الخليج." />
-<meta name="keywords" content="توصيل, الخليج, خدمة توصيل, توصيل طلبات, توصيل طعام, SAYEDNA LOGISTICS, delivery, kuwait, food delivery" />
-<meta name="author" content="شركة SAYEDNA LOGISTICS" />
-<meta property="og:title" content="شركة SAYEDNA LOGISTICS للتوصيل" />
+<meta name="description" content="{{ brand_name }} - خدمت توصيل موثوقة في الخليج. نقدم خدمات توصيل الطلبات من المطاعم والمتاجر والصيدليات للأفراد والشركات في جميع أنحاء الخليج." />
+<meta name="keywords" content="توصيل, الخليج, خدمة توصيل, توصيل طلبات, توصيل طعام, {{ brand_name }}, delivery, kuwait, food delivery" />
+<meta name="author" content="{{ brand_name }}" />
+<meta property="og:title" content="{{ brand_name }} للتوصيل" />
 <meta property="og:description" content="خدمة توصيل موثوقة في الخليج. نقدم خدمات توصيل الطلبات من المطاعم والمتاجر والصيدليات." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://najmatalwesam.com" />
@@ -50,14 +50,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen hero-gradient" x-init="document.title = lang === 'ar' ? 'سيدنا للخدمات اللوجستية | خدمات توصيل حديثة' : 'SAYEDNA LOGISTICS | Modern Delivery Services';">
+<div class="min-h-screen hero-gradient" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }" x-init="document.title = currentName + ' | ' + (lang === 'ar' ? 'خدمات توصيل حديثة' : 'Modern Delivery Services');">
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 right-0 z-50 glass-nav h-16 flex items-center justify-between px-4 lg:px-12">
-        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-            <img src="{% static 'img/logo.png' %}" class="w-12 h-12 sm:w-16 sm:h-16 object-contain flex-shrink-0" alt="Logo">
+        <div class="flex items-center gap-3 sm:gap-4 min-w-0" x-data="{ 
+            currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}',
+            currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}'
+        }">
+            <img :src="currentLogo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain flex-shrink-0" alt="Logo">
             <h1 class="font-bold text-app-text text-sm sm:text-xl tracking-tight truncate">
-                <span x-show="lang === 'en'">SAYEDNA LOGISTICS</span>
-                <span x-show="lang === 'ar'">سيدنا للخدمات اللوجستية</span>
+                <span x-show="lang === 'en'" x-text="currentName"></span>
+                <span x-show="lang === 'ar'" x-text="currentName === 'SAYEDNA LOGISTICS' ? 'سيدنا للخدمات اللوجستية' : currentName"></span>
             </h1>
         </div>
         <div class="flex items-center gap-3 sm:gap-6 flex-shrink-0">
@@ -83,12 +86,12 @@
                 <span x-show="lang === 'en'">⚡ Trusted Delivery Partner</span>
                 <span x-show="lang === 'ar'">⚡ شريك التوصيل الموثوق</span>
             </div>
-            <h1 class="text-5xl lg:text-7xl font-extrabold text-app-text leading-tight">
+            <h1 class="text-5xl lg:text-7xl font-extrabold text-app-text leading-tight" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
                 <template x-if="lang === 'en'">
-                    <span>SAYEDNA LOGISTICS <span class="text-emerald-500">Delivering Excellence</span> in Gulf</span>
+                    <span><span x-text="currentName"></span> <span class="text-emerald-500">Delivering Excellence</span> in Gulf</span>
                 </template>
                 <template x-if="lang === 'ar'">
-                    <span>سيدنا للخدمات اللوجستية <span class="text-emerald-500">نقدم التميز</span> في الخليج</span>
+                    <span><span x-text="currentName === 'SAYEDNA LOGISTICS' ? 'سيدنا للخدمات اللوجستية' : currentName"></span> <span class="text-emerald-500">نقدم التميز</span> في الخليج</span>
                 </template>
             </h1>
             <p class="text-2xl text-app-text-muted leading-relaxed max-w-xl">
@@ -109,9 +112,9 @@
         </div>
 
         <!-- Hero Visual -->
-        <div class="relative hidden lg:block">
+        <div class="relative hidden lg:block" x-data="{ currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}' }">
             <div class="absolute -inset-4 bg-emerald-500/20 blur-3xl rounded-full"></div>
-            <img src="{% static 'img/hero-image.png' %}" alt="SAYEDNA LOGISTICS Operations" class="relative rounded-3xl shadow-2xl floating border border-white/10">
+            <img :src="currentLogo" alt="Operations" class="relative rounded-3xl shadow-2xl floating border border-white/10 max-h-[500px] object-contain">
         </div>
     </div>
 
@@ -200,9 +203,8 @@
         <div class="grid md:grid-cols-2 gap-8 mt-12">
             <div class="p-10 rounded-3xl bg-app-card border border-app-border relative shadow-sm">
                 <span class="text-6xl text-app-text-muted/5 absolute top-6 right-8">"</span>
-                <p class="text-app-text-muted italic mb-8 relative z-10">
-                    <span x-show="lang === 'en'">SAYEDNA LOGISTICS completely transformed our food delivery speed. Highly recommended!</span>
-                    <span x-show="lang === 'ar'">لقد غيرت سيدنا للخدمات اللوجستية تماماً سرعة توصيل الطعام لدينا. ننصح بهم بشدة!</span>
+                <p class="text-app-text-muted italic mb-8 relative z-10" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
+                    <span x-text="currentName + ' ' + (lang === 'en' ? 'completely transformed our food delivery speed. Highly recommended!' : 'لقد غيرت تماماً سرعة توصيل الطعام لدينا. ننصح بهم بشدة!')"></span>
                 </p>
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center font-bold text-emerald-500">AM</div>
@@ -230,9 +232,8 @@
     <div class="py-24 px-6 lg:px-12 max-w-7xl mx-auto text-center">
         <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[3rem] p-12 lg:p-20 shadow-2xl shadow-emerald-500/20">
             <h2 class="text-4xl lg:text-6xl font-black text-white mb-6" x-text="lang === 'en' ? 'Ready to Dispatch?' : 'جاهز للإرسال؟'"></h2>
-            <p class="text-white/80 text-xl mb-10 max-w-2xl mx-auto">
-                <span x-show="lang === 'en'">Join hundreds of businesses that trust SAYEDNA LOGISTICS.</span>
-                <span x-show="lang === 'ar'">انضم إلى مئات الشركات التي تثق بـ سيدنا للخدمات اللوجستية.</span>
+            <p class="text-white/80 text-xl mb-10 max-w-2xl mx-auto" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
+                <span x-text="(lang === 'en' ? 'Join hundreds of businesses that trust ' : 'انضم إلى مئات الشركات التي تثق بـ ') + currentName + '.'"></span>
             </p>
             <a href="{% url 'login' %}" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-black text-xl rounded-2xl hover:scale-105 transition-transform">
                 <span x-show="lang === 'en'">Get Started</span>
@@ -245,17 +246,19 @@
     <!-- Footer -->
     <footer class="py-12 border-t border-border-dark px-6 lg:px-12">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex items-center gap-3">
-                <img src="{% static 'img/logo.png' %}" class="w-8 h-8 object-contain" alt="Logo">
+            <div class="flex items-center gap-3" x-data="{ 
+                currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}',
+                currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}'
+            }">
+                <img :src="currentLogo" class="w-8 h-8 object-contain" alt="Logo">
                 <span class="text-app-text font-bold tracking-tight">
-                    <span x-show="lang === 'en'">SAYEDNA LOGISTICS</span>
-                    <span x-show="lang === 'ar'">سيدنا للخدمات اللوجستية</span>
+                    <span x-show="lang === 'en'" x-text="currentName"></span>
+                    <span x-show="lang === 'ar'" x-text="currentName === 'SAYEDNA LOGISTICS' ? 'سيدنا للخدمات اللوجستية' : currentName"></span>
                 </span>
             </div>
             <div class="flex flex-col items-center">
-                <p class="text-gray-500 text-sm">
-                    <span x-show="lang === 'en'">© 2026 SAYEDNA LOGISTICS Gulf. All rights reserved.</span>
-                    <span x-show="lang === 'ar'">© 2026 سيدنا للخدمات اللوجستية الخليج. جميع الحقوق محفوظة.</span>
+                <p class="text-gray-500 text-sm" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
+                    <span x-text="'© 2026 ' + currentName + ' Gulf. ' + (lang === 'en' ? 'All rights reserved.' : 'جميع الحقوق محفوظة.')"></span>
                 </p>
             </div>
             <div class="flex gap-6 text-app-text-muted text-sm">

@@ -8,15 +8,17 @@ from django.contrib import messages
 from django.db.models import Sum, Q, Count
 from django.core.paginator import Paginator
 from core.mixins import (
-    AdminRequiredMixin, StaffRequiredMixin, 
+    AdminRequiredMixin, StaffRequiredMixin,
     AdminManagerRequiredMixin, AccountantRequiredMixin,
-    FinancialAccessMixin, AccountantSuperAdminMixin
+    FinancialAccessMixin, AccountantSuperAdminMixin,
+    SuperAdminRequiredMixin
 )
 from core.models import (
     Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Notification, Task,
+    SystemSettings,
     ROLE_CHOICES, COMPANY_CHOICES, CONTRACT_CHOICES, VEHICLE_CHOICES,
 )
-from core.forms import ProfileForm, DriverForm, DeductionForm, DeductionInstallmentForm, TaskAssignmentForm
+from core.forms import ProfileForm, DriverForm, DeductionForm, DeductionInstallmentForm, TaskAssignmentForm, SystemSettingsForm
 from core.utils import notify_superadmin_action, check_and_notify_expiries
 from django.views import View
 
@@ -315,6 +317,36 @@ class DriverEditView(StaffRequiredMixin, View):
             messages.success(request, f'Driver {driver.full_name} updated.')
             return redirect('admin_driver_list')
         return render(request, 'admin_portal/driver_form.html', {'form': form, 'editing': True, 'driver': driver})
+
+class SystemSettingsView(SuperAdminRequiredMixin, View):
+    def get(self, request):
+        settings_obj = SystemSettings.objects.first()
+        if not settings_obj:
+            settings_obj = SystemSettings.objects.create(brand_name='SAYEDNA LOGISTICS')
+        
+        form = SystemSettingsForm(instance=settings_obj)
+        return render(request, 'admin_portal/settings.html', {
+            'form': form,
+            'title': 'System Settings',
+            'subtitle': 'Manage application branding and logo',
+            'breadcrumb': 'Admin → Settings',
+            'icon': '⚙️'
+        })
+
+    def post(self, request):
+        settings_obj = SystemSettings.objects.first()
+        form = SystemSettingsForm(request.POST, request.FILES, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Settings updated successfully.')
+            return redirect('admin_settings')
+        return render(request, 'admin_portal/settings.html', {
+            'form': form,
+            'title': 'System Settings',
+            'subtitle': 'Manage application branding and logo',
+            'breadcrumb': 'Admin → Settings',
+            'icon': '⚙️'
+        })
 
 
 class DriverDeleteView(AdminManagerRequiredMixin, View):
