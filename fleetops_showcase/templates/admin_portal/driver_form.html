@@ -185,6 +185,10 @@
             }
         },
         onFileChange(id, label, e) {
+            if (!window.validateFileSize(e.target)) {
+                this.stagedFiles = this.stagedFiles.filter(f => f.id !== id);
+                return;
+            }
             const file = e.target.files[0];
             if (file) {
                 this.stagedFiles = this.stagedFiles.filter(f => f.id !== id);

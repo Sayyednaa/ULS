@@ -162,7 +162,7 @@ class Driver(models.Model):
     criminal_pcc_file = models.FileField(upload_to='driver_docs/criminal_pcc/', null=True, blank=True, validators=[validate_file_extension])
     passport_file = models.FileField(upload_to='driver_docs/passport/', null=True, blank=True, validators=[validate_file_extension])
     vehicle_rc_file = models.FileField(upload_to='driver_docs/vehicle_rc/', null=True, blank=True, validators=[validate_file_extension])
-    photo_selfie = models.ImageField(upload_to='driver_docs/photo/', null=True, blank=True)
+    photo_selfie = models.ImageField(upload_to='driver_docs/photo/', null=True, blank=True, validators=[validate_file_extension])
     other_docs_file = models.FileField(upload_to='driver_docs/other/', null=True, blank=True, validators=[validate_file_extension])
     received_equipments_file = models.FileField(upload_to='driver_docs/received_equipments/', null=True, blank=True, validators=[validate_file_extension])
 
@@ -312,7 +312,7 @@ class Deduction(models.Model):
     is_installment_plan = models.BooleanField(default=False)
     total_installments = models.IntegerField(default=1)
     
-    pdf_proof = models.FileField(upload_to='deduction_pdfs/', null=True, blank=True)
+    pdf_proof = models.FileField(upload_to='deduction_pdfs/', null=True, blank=True, validators=[validate_file_extension])
     submitted_by = models.ForeignKey(
         Profile, on_delete=models.SET_NULL, null=True, related_name='submitted_deductions'
     )
@@ -355,7 +355,7 @@ class DeductionInstallment(models.Model):
     
     # Digital Signature
     signature_data = models.TextField(blank=True, null=True, help_text="Base64 signature data")
-    signature_image = models.ImageField(upload_to='signatures/', null=True, blank=True)
+    signature_image = models.ImageField(upload_to='signatures/', null=True, blank=True, validators=[validate_file_extension])
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -564,7 +564,7 @@ class MonthlyProfitLoss(models.Model):
     expense = models.DecimalField(max_digits=15, decimal_places=3, default=0)
     profit_loss = models.DecimalField(max_digits=15, decimal_places=3, default=0)
     month = models.DateField()
-    report_pdf = models.FileField(upload_to='monthly_reports/', null=True, blank=True)
+    report_pdf = models.FileField(upload_to='monthly_reports/', null=True, blank=True, validators=[validate_file_extension])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

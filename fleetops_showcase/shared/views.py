@@ -514,12 +514,18 @@ class BulkUploadView(StaffRequiredMixin, View):
             django_messages.error(request, 'No file uploaded.')
             return redirect(request.META.get('HTTP_REFERER', '/'))
         
-        count, errors = import_from_excel(file, model_type, request.user)
-        if count > 0:
-            django_messages.success(request, f'Successfully imported {count} records.')
-        if errors:
-            for err in errors:
-                django_messages.error(request, err)
+        try:
+            from core.validators import validate_file_extension
+            validate_file_extension(file)
+            
+            count, errors = import_from_excel(file, model_type, request.user)
+            if count > 0:
+                django_messages.success(request, f'Successfully imported {count} records.')
+            if errors:
+                for err in errors:
+                    django_messages.error(request, err)
+        except Exception as e:
+            django_messages.error(request, f"Upload error: {str(e)}")
         
         return redirect(request.META.get('HTTP_REFERER', '/'))
 class ProfileView(AnyAuthenticatedMixin, View):

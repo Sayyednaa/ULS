@@ -4,6 +4,8 @@ from django.views import View
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from core.models import Driver, TalabatSalaryDetail, ContractSalaryDetail, MonthlyProfitLoss
+from core.validators import validate_file_extension
+from django.core.exceptions import ValidationError
 
 class AccountantMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
@@ -94,8 +96,12 @@ class AccountantTalabatView(AccountantMixin, ListView):
         
         # Handle file attachment
         if request.FILES.get('attachment'):
-            obj.attachment = request.FILES['attachment']
-            obj.save()
+            try:
+                validate_file_extension(request.FILES['attachment'])
+                obj.attachment = request.FILES['attachment']
+                obj.save()
+            except ValidationError as e:
+                messages.error(request, f"Attachment error: {e.message}")
         
         action = 'updated' if not created else 'saved'
         messages.success(request, f'Salary record {action} for {driver.full_name}.')
@@ -183,6 +189,14 @@ def _save_contract_salary(request, contract_type, redirect_url):
         try: return int(float(str(val).strip()))
         except: return 0
 
+    attachment = request.FILES.get('attachment')
+    if attachment:
+        try:
+            validate_file_extension(attachment)
+        except ValidationError as e:
+            messages.error(request, f"Attachment error: {e.message}")
+            return redirect(redirect_url)
+
     ContractSalaryDetail.objects.update_or_create(
         contract_type=contract_type,
         name=name,
@@ -193,7 +207,7 @@ def _save_contract_salary(request, contract_type, redirect_url):
             'absent': safe_int(request.POST.get('absent')),
             'deduction': safe_decimal(request.POST.get('deduction')),
             'remark': request.POST.get('remark', ''),
-            'attachment': request.FILES.get('attachment')
+            'attachment': attachment
         }
     )
     messages.success(request, f'Salary record saved for {name}.')
@@ -216,6 +230,13 @@ class AccountantMonthlyDetailsView(AccountantMixin, ListView):
         report_pdf = request.FILES.get('report_pdf')
 
         if company_name and contract_name and expense and profit_loss and month:
+            if report_pdf:
+                try:
+                    validate_file_extension(report_pdf)
+                except ValidationError as e:
+                    messages.error(request, f"Report PDF error: {e.message}")
+                    return redirect('accountant_monthly_details')
+
             MonthlyProfitLoss.objects.create(
                 company_name=company_name,
                 contract_name=contract_name,
@@ -290,16 +311,20 @@ def accountant_upload_excel(request, model_type):
         if not file.name.endswith('.xlsx'):
             messages.error(request, 'Please upload a valid Excel (.xlsx) file.')
         else:
-            count, errors = import_from_excel(file, model_type, request.user)
-            if errors:
-                for error in errors[:5]: # Show up to 5 errors
-                    messages.error(request, error)
-                if len(errors) > 5:
-                    messages.error(request, f"...and {len(errors) - 5} more errors.")
-            if count > 0:
-                messages.success(request, f'Successfully imported {count} records.')
-            elif not errors:
-                messages.warning(request, 'No records were imported.')
+            try:
+                validate_file_extension(file)
+                count, errors = import_from_excel(file, model_type, request.user)
+                if errors:
+                    for error in errors[:5]: # Show up to 5 errors
+                        messages.error(request, error)
+                    if len(errors) > 5:
+                        messages.error(request, f"...and {len(errors) - 5} more errors.")
+                if count > 0:
+                    messages.success(request, f'Successfully imported {count} records.')
+                elif not errors:
+                    messages.warning(request, 'No records were imported.')
+            except ValidationError as e:
+                messages.error(request, f"Excel file error: {e.message}")
                 
     # redirect back to previous page
     return redirect(request.META.get('HTTP_REFERER', 'accountant_dashboard'))

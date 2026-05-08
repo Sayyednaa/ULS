@@ -44,6 +44,10 @@
                 {% endfor %}
             },
             handleFileChange(fieldName, event) {
+                if (!window.validateFileSize(event.target)) {
+                    delete this.selectedFiles[fieldName];
+                    return;
+                }
                 const file = event.target.files[0];
                 if (file) {
                     this.selectedFiles[fieldName] = {

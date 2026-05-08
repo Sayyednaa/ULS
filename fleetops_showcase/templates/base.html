@@ -844,14 +844,39 @@
             });
         });
 
-        // Global File Size Validator (1MB)
+        // Global File Validator Utility (1MB for docs/images, 20MB for Excel)
+        window.validateFileSize = function(input) {
+            const file = input.files[0];
+            if (!file) return true;
+
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            const validExtensions = ['.pdf', '.doc', '.docx', '.jpg', '.png', '.jpeg', '.xlsx', '.xls', '.csv'];
+            const isExcel = ['.xlsx', '.xls', '.csv'].includes(ext);
+            
+            // Extension Check
+            if (!validExtensions.includes(ext)) {
+                const msg = window.t ? window.t('Unsupported file extension.') : 'Unsupported file extension.';
+                alert(msg + ' Allowed: PDF, DOC, DOCX, JPG, PNG, XLSX, XLS, CSV');
+                input.value = '';
+                return false;
+            }
+
+            // Size Check
+            const limit = isExcel ? 20 * 1048576 : 1048576;
+            if (file.size > limit) {
+                const limitMB = isExcel ? '20MB' : '1MB';
+                const msg = window.t ? window.t('File too large.') : 'File too large.';
+                alert(`${msg} Maximum size allowed for ${ext.toUpperCase()} is ${limitMB}.`);
+                input.value = ''; // Reset the input
+                return false;
+            }
+            return true;
+        };
+
+        // Fallback listener for non-Alpine forms
         document.addEventListener('change', function(e) {
             if (e.target.tagName === 'INPUT' && e.target.type === 'file') {
-                const file = e.target.files[0];
-                if (file && file.size > 1048576) {
-                    alert('File too large. Maximum size allowed is 1MB.');
-                    e.target.value = ''; // Reset the input
-                }
+                window.validateFileSize(e.target);
             }
         });
     </script>
