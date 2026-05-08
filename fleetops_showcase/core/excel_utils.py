@@ -159,25 +159,25 @@ def generate_excel_template(model_type):
     # Define headers and fetch data per model
     if model_type == 'driver':
         headers = [
-            'Full Name', 'Email', 'Phone', 'Civil ID Number', 'Civil ID Expiry',
+            'Full Name', 'Working ID', 'Email', 'Phone', 'Civil ID Number', 'Civil ID Expiry',
             'Passport Number', 'Passport Expiry', 'Work Permit Expiry', 'Driver License Expiry',
-            'Health Insurance Expiry', 'Criminal Certificate Expiry', 'Vehicle Registration',
-            'Vehicle Registration Expiry', 'Vehicle Plate Number', 'Vehicle Name', 'Vehicle Type',
-            'Zone', 'Petrol Card Number', 'Working ID', 'Company Name', 'Contract Type',
+            'Health Insurance Expiry', 'Criminal Certificate Expiry', 'VEHICLE REGISTRATION NUMBER',
+            'VEHICLE REGISTRATION NUMBER EXPIRY', 'Vehicle Plate Number', 'Vehicle Name', 'Vehicle Type',
+            'Zone', 'Petrol Card Number', 'Company Name', 'Contract Type',
             'Position', 'IBAN Number', 'Bank Name', 'Basic Salary WP', 'File Status'
         ]
         queryset = Driver.objects.all()
         data_rows = []
         for obj in queryset:
             data_rows.append([
-                obj.full_name, obj.email, obj.phone, obj.civil_id_number, str(obj.civil_id_expiry or ''),
+                obj.full_name, obj.working_id, obj.email, obj.phone, obj.civil_id_number, str(obj.civil_id_expiry or ''),
                 obj.passport_number, str(obj.passport_expiry or ''), str(obj.working_permit_expiry or ''), 
                 str(obj.driver_license_expiry or ''), str(obj.health_insurance_expiry or ''), 
-                str(obj.criminal_certificate_expiry or ''), obj.vehicle_registration, 
-                str(obj.vehicle_registration_expiry or ''), obj.vehicle_plate_number, obj.vehicle_name, 
-                obj.vehicle_type, obj.zone, obj.petrol_card_number, obj.working_id,
-                obj.company_name, obj.contract_type, obj.position, obj.iban_number, obj.bank_name,
-                float(obj.basic_salary_wp), obj.file_status
+                str(obj.criminal_certificate_expiry or ''),
+                obj.vehicle_registration, str(obj.vehicle_registration_expiry or ''), 
+                obj.vehicle_plate_number, obj.vehicle_name, obj.vehicle_type, obj.zone, 
+                obj.petrol_card_number, obj.company_name, obj.contract_type, obj.position, 
+                obj.iban_number, obj.bank_name, float(obj.basic_salary_wp), obj.file_status
             ])
     elif model_type == 'team':
         headers = [
@@ -319,8 +319,8 @@ def import_from_excel(file, model_type, user):
                         'driver_license_expiry': safe_date(data.get('Driver License Expiry')),
                         'health_insurance_expiry': safe_date(data.get('Health Insurance Expiry')),
                         'criminal_certificate_expiry': safe_date(data.get('Criminal Certificate Expiry')),
-                        'vehicle_registration': data.get('Vehicle Registration') or '',
-                        'vehicle_registration_expiry': safe_date(data.get('Vehicle Registration Expiry')),
+                        'vehicle_registration': data.get('VEHICLE REGISTRATION NUMBER') or '',
+                        'vehicle_registration_expiry': safe_date(data.get('VEHICLE REGISTRATION NUMBER EXPIRY')),
                         'vehicle_plate_number': data.get('Vehicle Plate Number') or '',
                         'vehicle_name': data.get('Vehicle Name') or '',
                         'vehicle_type': data.get('Vehicle Type') or 'car',

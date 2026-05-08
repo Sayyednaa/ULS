@@ -133,8 +133,8 @@ class Driver(models.Model):
     criminal_certificate_expiry = models.DateField(null=True, blank=True)
 
     # Vehicle
-    vehicle_registration = models.CharField(max_length=100, blank=True)
-    vehicle_registration_expiry = models.DateField(null=True, blank=True)
+    vehicle_registration = models.CharField(max_length=100, blank=True, verbose_name="VEHICLE REGISTRATION NUMBER")
+    vehicle_registration_expiry = models.DateField(null=True, blank=True, verbose_name="VEHICLE REGISTRATION NUMBER EXPIRY")
     vehicle_plate_number = models.CharField(max_length=30, blank=True)
     vehicle_name = models.CharField(max_length=100, blank=True)
     vehicle_type = models.CharField(max_length=20, choices=VEHICLE_CHOICES, default='car')
@@ -243,7 +243,9 @@ class Driver(models.Model):
 class DriverInvoice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='invoices')
+    cash = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     main_orders = models.IntegerField(default=0)
+    additional_orders = models.IntegerField(default=0)
     hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     specified_date = models.DateField()
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -269,7 +271,9 @@ class InvoiceArchive(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     driver = models.ForeignKey(Driver, on_delete=models.PROTECT, related_name='archives')
     driver_name = models.CharField(max_length=200)
+    cash = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     main_orders = models.IntegerField(default=0)
+    additional_orders = models.IntegerField(default=0)
     hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     archive_date = models.DateField()
     archived_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)

@@ -30,6 +30,7 @@
 
         <form method="post" enctype="multipart/form-data" class="space-y-8" x-data="{ 
             selectedFiles: {},
+            isUploading: false,
             init() {
                 // Initialize with existing files from database if any
                 {% for field in form.visible_fields %}
@@ -51,8 +52,65 @@
                         url: URL.createObjectURL(file)
                     };
                 }
+            },
+            handleFormSubmit(e) {
+                const form = e.target;
+                const formData = new FormData(form);
+                const xhr = new XMLHttpRequest();
+                
+                // Only use XHR if there are files being uploaded
+                const hasFiles = Array.from(formData.values()).some(val => val instanceof File && val.name);
+                if (!hasFiles) return; // Let standard submission handle it if no files
+                
+                e.preventDefault();
+                this.isUploading = true;
+                
+                const overlay = document.getElementById('upload-progress-overlay');
+                const progressBar = document.getElementById('upload-progress-bar');
+                const progressPercent = document.getElementById('upload-progress-percent');
+                const progressStatus = document.getElementById('upload-progress-status');
+                
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.classList.add('active'), 10);
+                
+                xhr.upload.addEventListener('progress', (event) => {
+                    if (event.lengthComputable) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        progressBar.style.width = percent + '%';
+                        progressPercent.innerText = percent + '%';
+                        if (percent === 100) {
+                            progressStatus.innerText = 'Finalizing...';
+                        } else {
+                            progressStatus.innerText = 'Uploading...';
+                        }
+                    }
+                });
+                
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 400) {
+                        // Success - follow redirect if any or reload
+                        if (xhr.responseURL) {
+                            window.location.href = xhr.responseURL;
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        // Error - reload to show Django errors
+                        window.location.reload();
+                    }
+                };
+                
+                xhr.onerror = () => {
+                    overlay.classList.remove('active');
+                    setTimeout(() => overlay.style.display = 'none', 400);
+                    alert('Upload failed. Please try again.');
+                    this.isUploading = false;
+                };
+                
+                xhr.open('POST', form.action || window.location.href);
+                xhr.send(formData);
             }
-        }">
+        }" @submit="handleFormSubmit">
             {% csrf_token %}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

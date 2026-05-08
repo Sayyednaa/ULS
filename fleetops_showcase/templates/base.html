@@ -90,6 +90,28 @@
             --color-app-text: #000000;
             --color-app-text-muted: #111111;
         }
+    </style>
+
+    <style>
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        [lang="ar"],
+        [lang="ar"] * {
+            font-family: 'Tajawal', serif !important;
+        }
+
+        html {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        body {
+            overflow-x: hidden;
+            color: var(--color-app-text);
+            background-color: var(--color-app-bg);
+        }
 
         /* Input specific overrides for light mode */
         input:not([type="checkbox"]), select, textarea {
@@ -119,28 +141,6 @@
         }
         .dark select:focus option {
             background-color: #111118;
-        }
-    </style>
-
-    <style>
-        * {
-            font-family: 'Inter', system-ui, sans-serif;
-        }
-
-        [lang="ar"],
-        [lang="ar"] * {
-            font-family: 'Tajawal', serif !important;
-        }
-
-        html {
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        body {
-            overflow-x: hidden;
-            color: var(--color-app-text);
-            background-color: var(--color-app-bg);
         }
 
         /* Scrollbar */
@@ -245,11 +245,78 @@
         [x-cloak] {
             display: none !important;
         }
+
+        /* Upload Progress Styles */
+        .upload-progress-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            visibility: hidden;
+        }
+        .upload-progress-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
+        .progress-container {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            padding: 2.5rem;
+            background: #111118;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .progress-bar-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            margin: 2rem 0 1rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 100px;
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="bg-app-bg text-app-text min-h-screen transition-colors duration-300">
+
+    <!-- Global Upload Progress Overlay -->
+    <div id="upload-progress-overlay" class="upload-progress-overlay" style="display: none;">
+        <div class="progress-container">
+            <div class="w-16 h-16 bg-brand/10 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                🚀
+            </div>
+            <h3 class="text-xl font-bold text-white mb-1">Uploading Files</h3>
+            <p class="text-gray-400 text-sm">Please wait while we process your request...</p>
+            
+            <div class="progress-bar-bg">
+                <div id="upload-progress-bar" class="progress-bar-fill"></div>
+            </div>
+            
+            <div class="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
+                <span class="text-brand" id="upload-progress-percent">0%</span>
+                <span class="text-gray-500" id="upload-progress-status">Processing...</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notifications -->
     {% if messages %}

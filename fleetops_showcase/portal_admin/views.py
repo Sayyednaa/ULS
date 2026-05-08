@@ -21,7 +21,7 @@ from core.utils import notify_superadmin_action, check_and_notify_expiries
 from django.views import View
 
 
-def get_chart_data(company_filter=None):
+def get_chart_data(company_filter=None, driver_id=None):
     """Compute chart data for dashboard — revenue & orders by vehicle type per month."""
     current_year = date.today().year
     labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -38,6 +38,8 @@ def get_chart_data(company_filter=None):
     )
     if company_filter:
         qs = qs.filter(driver__contract_type=company_filter)
+    if driver_id:
+        qs = qs.filter(driver_id=driver_id)
     
     yearly_data = qs.values(
         'specified_date__month', 'driver__vehicle_type'
@@ -69,6 +71,7 @@ class AdminDashboardView(StaffRequiredMixin, View):
         check_and_notify_expiries(request.user)
         today = date.today()
         company_filter = request.GET.get('company', '')
+        driver_id = request.GET.get('driver_id', '')
         
         invoice_qs = DriverInvoice.objects.filter(
             specified_date__year=today.year,
@@ -79,6 +82,11 @@ class AdminDashboardView(StaffRequiredMixin, View):
         if company_filter:
             invoice_qs = invoice_qs.filter(driver__contract_type=company_filter)
             driver_qs = driver_qs.filter(contract_type=company_filter)
+        
+        if driver_id:
+            invoice_qs = invoice_qs.filter(driver_id=driver_id)
+            # When filtering by specific driver, we only care about that driver
+            driver_qs = driver_qs.filter(id=driver_id)
         
         totals = invoice_qs.aggregate(
             total_orders=Sum('main_orders'),
@@ -97,14 +105,17 @@ class AdminDashboardView(StaffRequiredMixin, View):
         return render(request, 'admin_portal/dashboard.html', {
             'total_orders': total_orders,
             'total_hours': totals['total_hours'] or Decimal('0.00'),
-            'chart_data': get_chart_data(company_filter=company_filter or None),
+            'chart_data': get_chart_data(company_filter=company_filter or None, driver_id=driver_id or None),
+            'companies': [c[0] for c in COMPANY_CHOICES],
+            'drivers': Driver.objects.filter(is_active=True).order_by('full_name'),
+            'selected_company': company_filter,
+            'selected_driver': driver_id,
             'tasks': tasks,
             'recent_notifs': recent_notifs,
             'active_drivers': driver_qs.count(),
             'expiring_docs': expiring_count,
             'task_assign_form': TaskAssignmentForm(),
             'contract_choices': CONTRACT_CHOICES,
-            'selected_company': company_filter,
         })
 
 

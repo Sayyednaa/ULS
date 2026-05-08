@@ -147,7 +147,7 @@ class DriverForm(forms.ModelForm):
         model = Driver
         fields = [
             # Identity & Contact
-            'full_name', 'phone', 'email',
+            'full_name', 'working_id', 'phone', 'email',
             'civil_id_number', 'civil_id_expiry',
             'passport_number', 'passport_expiry',
             
@@ -162,7 +162,7 @@ class DriverForm(forms.ModelForm):
             'vehicle_plate_number', 'vehicle_name', 'vehicle_type',
             
             # Work Info
-            'zone', 'petrol_card_number', 'working_id',
+            'zone', 'petrol_card_number',
             'company_name', 'contract_type', 'position',
             'iban_number', 'bank_name', 'basic_salary_wp',
             'file_status',
@@ -184,7 +184,7 @@ class DriverForm(forms.ModelForm):
             'working_permit_expiry': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
             'driver_license_expiry': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
             'health_insurance_expiry': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
-            'vehicle_registration': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Car Registration Number'}),
+            'vehicle_registration': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Vehicle Registration Number'}),
             'vehicle_registration_expiry': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
             'vehicle_plate_number': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Vehicle Plate Number'}),
             'vehicle_name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Vehicle Name'}),
@@ -231,8 +231,8 @@ class DriverForm(forms.ModelForm):
             ('driving_license_file', 'Driving License File'),
             ('health_insurance_expiry', 'Health Card Expiry'),
             ('health_card_file', 'Health Card File'),
-            ('vehicle_registration', 'Vehicle Registration'),
-            ('vehicle_registration_expiry', 'Vehicle Registration Expiry'),
+            ('vehicle_registration', 'VEHICLE REGISTRATION NUMBER'),
+            ('vehicle_registration_expiry', 'VEHICLE REGISTRATION NUMBER EXPIRY'),
             ('vehicle_rc_file', 'Vehicle RC File'),
             ('photo_selfie', 'Photo/Selfie'),
         ]
@@ -286,10 +286,12 @@ class DriverForm(forms.ModelForm):
 class DriverInvoiceForm(forms.ModelForm):
     class Meta:
         model = DriverInvoice
-        fields = ['driver', 'main_orders', 'hours', 'specified_date']
+        fields = ['driver', 'cash', 'main_orders', 'additional_orders', 'hours', 'specified_date']
         widgets = {
             'driver': forms.Select(attrs={'class': TW_SELECT}),
+            'cash': forms.NumberInput(attrs={'class': TW_INPUT, 'step': '0.001', 'placeholder': '0.000'}),
             'main_orders': forms.NumberInput(attrs={'class': TW_INPUT, 'placeholder': '0'}),
+            'additional_orders': forms.NumberInput(attrs={'class': TW_INPUT, 'placeholder': '0'}),
             'hours': forms.NumberInput(attrs={'class': TW_INPUT, 'step': '0.01', 'placeholder': '0.00'}),
             'specified_date': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
         }

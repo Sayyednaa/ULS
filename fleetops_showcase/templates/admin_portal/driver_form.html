@@ -24,6 +24,10 @@
                 {{ form.full_name }}
             </div>
             <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-app-text uppercase" x-text="t('Working ID*')"></label>
+                {{ form.working_id }}
+            </div>
+            <div class="space-y-1.5">
                 <label class="block text-xs font-bold text-app-text uppercase" x-text="t('Phone Number*')"></label>
                 {{ form.phone }}
             </div>
@@ -91,7 +95,7 @@
         <h3 class="text-xs font-black text-app-text-muted uppercase tracking-[0.2em] border-b border-app-border pb-2" x-text="'3. ' + t('Vehicle Information')"></h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-app-text uppercase" x-text="t('Car Registration No*')"></label>
+                <label class="block text-xs font-bold text-app-text uppercase" x-text="t('VEHICLE REGISTRATION NUMBER*')"></label>
                 {{ form.vehicle_registration }}
             </div>
             <div class="space-y-1.5">
@@ -134,10 +138,6 @@
                 {{ form.basic_salary_wp }}
             </div>
             <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-app-text uppercase" x-text="t('Working ID*')"></label>
-                {{ form.working_id }}
-            </div>
-            <div class="space-y-1.5">
                 <label class="block text-xs font-bold text-app-text uppercase" x-text="t('IBAN Number')"></label>
                 {{ form.iban_number }}
             </div>
@@ -160,10 +160,10 @@
         </div>
     </div>
 
-    <!-- Section 5: Document Upload Center -->
     <div class="space-y-6 pt-10" x-data="{ 
         activeDoc: '',
         stagedFiles: [],
+        isUploading: false,
         init() {
             // Check for existing files if editing
             {% if editing %}
@@ -177,6 +177,12 @@
                 {% if driver.other_docs_file %}this.stagedFiles.push({id: 'other_docs_file', label: t('Other Supporting Docs'), filename: t('Current File'), url: '{{ driver.other_docs_file.url }}'});{% endif %}
                 {% if driver.received_equipments_file %}this.stagedFiles.push({id: 'received_equipments_file', label: t('Received Equipments'), filename: t('Current File'), url: '{{ driver.received_equipments_file.url }}'});{% endif %}
             {% endif %}
+
+            // Attach submit handler to the parent form
+            const form = this.$el.closest('form');
+            if (form) {
+                form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+            }
         },
         onFileChange(id, label, e) {
             const file = e.target.files[0];
@@ -191,6 +197,61 @@
             this.stagedFiles = this.stagedFiles.filter(f => f.id !== id);
             const input = document.getElementById('id_' + id);
             if (input) input.value = '';
+        },
+        handleFormSubmit(e) {
+            const form = e.target;
+            const formData = new FormData(form);
+            const xhr = new XMLHttpRequest();
+            
+            // Only use XHR if there are files being uploaded
+            const hasFiles = Array.from(formData.values()).some(val => val instanceof File && val.name);
+            if (!hasFiles) return;
+            
+            e.preventDefault();
+            this.isUploading = true;
+            
+            const overlay = document.getElementById('upload-progress-overlay');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressPercent = document.getElementById('upload-progress-percent');
+            const progressStatus = document.getElementById('upload-progress-status');
+            
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+            
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressPercent.innerText = percent + '%';
+                    if (percent === 100) {
+                        progressStatus.innerText = 'Finalizing...';
+                    } else {
+                        progressStatus.innerText = 'Uploading...';
+                    }
+                }
+            });
+            
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 400) {
+                    if (xhr.responseURL) {
+                        window.location.href = xhr.responseURL;
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    window.location.reload();
+                }
+            };
+            
+            xhr.onerror = () => {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.style.display = 'none', 400);
+                alert('Upload failed. Please try again.');
+                this.isUploading = false;
+            };
+            
+            xhr.open('POST', form.action || window.location.href);
+            xhr.send(formData);
         }
     }">
         <h3 class="text-xs font-black text-app-text-muted uppercase tracking-[0.2em] border-b border-app-border pb-2" x-text="'5. ' + t('Document Upload Center')"></h3>

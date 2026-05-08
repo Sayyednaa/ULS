@@ -58,9 +58,12 @@ class InvoiceListView(StaffRequiredMixin, View):
             target_date = date.today()
 
         company_filter = request.GET.get('company', '')
+        driver_id = request.GET.get('driver_id', '')
         drivers = Driver.objects.filter(is_active=True).order_by('full_name')
         if company_filter:
             drivers = drivers.filter(contract_type=company_filter)
+        if driver_id:
+            drivers = drivers.filter(id=driver_id)
         
         # Prefetch invoices for this date
         invoices = DriverInvoice.objects.filter(specified_date=target_date)
@@ -71,11 +74,13 @@ class InvoiceListView(StaffRequiredMixin, View):
         
         return render(request, 'shared/driver_invoices.html', {
             'drivers': drivers,
+            'all_drivers': Driver.objects.filter(is_active=True).order_by('full_name'),
             'target_date': target_date,
             'target_date_iso': target_date.isoformat(),
             'portal': 'admin' if request.user.role in ('admin', 'superadmin') else ('manager' if request.user.role == 'manager' else 'employee'),
             'contract_choices': CONTRACT_CHOICES,
             'selected_company': company_filter,
+            'selected_driver': driver_id,
         })
 
 
@@ -95,6 +100,8 @@ class InvoiceBulkSaveView(FinancialAccessMixin, View):
             except: return 0
 
         main_delta = safe_int(request.POST.get('main_orders'))
+        additional_delta = safe_int(request.POST.get('additional_orders'))
+        cash_delta = safe_decimal(request.POST.get('cash'))
         hours_delta = safe_decimal(request.POST.get('hours'))
 
         driver = get_object_or_404(Driver, id=driver_id)
@@ -102,13 +109,23 @@ class InvoiceBulkSaveView(FinancialAccessMixin, View):
         with transaction.atomic():
             invoice, created = DriverInvoice.objects.get_or_create(
                 driver=driver,
-                specified_date=target_date_str,
-                defaults={'created_by': request.user}
+                specified_date=date.fromisoformat(target_date_str),
+                defaults={
+                    'main_orders': main_delta,
+                    'additional_orders': additional_delta,
+                    'cash': cash_delta,
+                    'hours': hours_delta,
+                    'created_by': request.user.profile
+                }
             )
             
-            invoice.main_orders = main_delta
-            invoice.hours = hours_delta
-            invoice.save()
+            if not created:
+                invoice.main_orders = main_delta
+                invoice.additional_orders = additional_delta
+                invoice.cash = cash_delta
+                invoice.hours = hours_delta
+                invoice.updated_at = timezone.now()
+                invoice.save()
 
         django_messages.success(request, f'Updated totals for {driver.full_name}.')
         return redirect(f'/shared/invoices/?date={target_date_str}')
