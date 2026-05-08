@@ -111,10 +111,9 @@
             </div>
         </div>
 
-        <!-- Hero Visual -->
-        <div class="relative hidden lg:block" x-data="{ currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}' }">
+        <div class="relative hidden lg:block">
             <div class="absolute -inset-4 bg-emerald-500/20 blur-3xl rounded-full"></div>
-            <img :src="currentLogo" alt="Operations" class="relative rounded-3xl shadow-2xl floating border border-white/10 max-h-[500px] object-contain">
+            <img src="{% static 'img/hero-image.png' %}" alt="Operations" class="relative rounded-3xl shadow-2xl floating border border-white/10">
         </div>
     </div>
 
