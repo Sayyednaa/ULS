@@ -560,17 +560,12 @@
                     class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'notifications' in request.path %}bg-brand/10 text-brand border-l-2 border-brand{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span class="flex items-center gap-3"><span>🔔</span> <span
                             x-text="t('Notifications')"></span></span>
-                    {% if unread_notifications_count %}<span
-                        class="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{unread_notifications_count}}
-                    </span>{% endif %}
+                    {% if unread_notifications_count %}<span class="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ unread_notifications_count }}</span>{% endif %}
                 </a>
                 <a href="{% url 'message_inbox' %}"
                     class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'messages' in request.path %}bg-brand/10 text-brand border-l-2 border-brand{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span class="flex items-center gap-3"><span>💬</span> <span x-text="t('Messages')"></span></span>
-                    {% if unread_messages_count %}
-                    <span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{
-                        unread_messages_count }}
-                    </span>{% endif %}
+                    {% if unread_messages_count %}<span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ unread_messages_count }}</span>{% endif %}
                 </a>
                 {% if not is_driver %}
                 <a href="{% url 'contact' %}"
