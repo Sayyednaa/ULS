@@ -5,29 +5,47 @@
 {% block breadcrumb %}{% if portal == 'admin' %}Admin{% elif portal == 'manager' %}Manager{% else %}Employee{% endif %} → Drivers{% endblock %}
 
 {% block content %}
+    <div x-data="{ 
+        q: '{{ q|default:'' }}', 
+        company: '{{ company|default:'' }}', 
+        contract: '{{ contract|default:'' }}',
+        matches(el) {
+            const name = el.getAttribute('data-name') || '';
+            const phone = el.getAttribute('data-phone') || '';
+            const comp = el.getAttribute('data-company') || '';
+            const cont = el.getAttribute('data-contract') || '';
+            
+            const qMatch = !this.q || name.includes(this.q.toLowerCase()) || phone.includes(this.q.toLowerCase());
+            const compMatch = !this.company || comp === this.company;
+            const contMatch = !this.contract || cont === this.contract;
+            
+            return qMatch && compMatch && contMatch;
+        }
+    }">
     <!-- Filters & Bulk Ops -->
     <div class="bg-app-card border border-app-border rounded-2xl p-4 mb-6 shadow-sm">
         <div class="flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between">
             <!-- Filter Form -->
-            <form method="get" class="flex flex-wrap items-center gap-3 flex-1">
+            <form method="get" class="flex flex-wrap items-center gap-3 flex-1" @submit.prevent>
                 <div class="relative group">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-app-text-muted group-focus-within:text-brand transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" name="q" value="{{ q }}" :placeholder="t('Search name / phone...')"
+                    <input type="text" name="q" x-model="q" :placeholder="t('Search name / phone...')"
                            class="pl-10 pr-4 py-2 bg-app-bg border border-app-border rounded-xl text-app-text placeholder-app-text-muted focus:outline-none focus:ring-2 focus:ring-brand/50 text-sm w-64 transition-all">
                 </div>
                 <div class="flex items-center gap-2">
-                    <select name="company" class="px-3 py-2 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all">
+                    <select name="company" x-model="company" class="px-3 py-2 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all">
                         <option value="">All Companies</option>
-                        {% for val, label in company_choices %}<option value="{{ val }}" {% if company == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        {% for val, label in company_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
                     </select>
-                    <select name="contract" class="px-3 py-2 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all">
+                    <select name="contract" x-model="contract" class="px-3 py-2 bg-app-bg border border-app-border rounded-xl text-app-text text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all">
                         <option value="">All Contracts</option>
-                        {% for val, label in contract_choices %}<option value="{{ val }}" {% if contract == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        {% for val, label in contract_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
                     </select>
-                    <button type="submit" class="px-5 py-2 bg-brand hover:bg-brand/90 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand/10" x-text="t('Filter')"></button>
-                    {% if q or company or contract %}
-                    <a href="{% if portal == 'admin' %}{% url 'admin_driver_list' %}{% elif portal == 'manager' %}{% url 'manager_driver_list' %}{% else %}{% url 'employee_driver_list' %}{% endif %}" class="text-xs text-app-text-muted hover:text-app-text underline px-2">Clear</a>
-                    {% endif %}
+                    <button type="button" @click="q=''; company=''; contract=''" 
+                            x-show="q || company || contract"
+                            class="text-xs text-app-text-muted hover:text-red-500 transition-colors px-2">
+                        Reset Filters
+                    </button>
                 </div>
             </form>
 
@@ -91,7 +109,12 @@
             </thead>
             <tbody class="divide-y divide-app-border">
                 {% for driver in page_obj %}
-                <tr class="hover:bg-app-border/10 transition-colors" x-data="{ expanded: false }">
+                <tr class="hover:bg-app-border/10 transition-colors" x-data="{ expanded: false }"
+                    x-show="matches($el)"
+                    data-name="{{ driver.full_name|lower }}"
+                    data-phone="{{ driver.phone|lower }}"
+                    data-company="{{ driver.company_name }}"
+                    data-contract="{{ driver.contract_type }}">
                     <td class="px-4 py-3 text-sm text-app-text-muted">{{ forloop.counter }}</td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-2">
@@ -180,12 +203,17 @@
                 {% empty %}
                 <tr><td colspan="8" class="px-4 py-12 text-center text-app-text-muted">No drivers found.</td></tr>
                 {% endfor %}
+                <!-- Client side No results found -->
+                <tr x-show="[...$el.parentElement.children].filter(c => c.tagName === 'TR' && !c.classList.contains('hidden') && c.getAttribute('data-name')).length === 0" class="hidden" :class="{ 'hidden': false }">
+                    <td colspan="8" class="px-4 py-12 text-center text-app-text-muted">No matching drivers on this page.</td>
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
 
 {% include 'components/pagination.html' %}
+</div>
 {% endblock %}
 
 

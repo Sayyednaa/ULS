@@ -327,7 +327,7 @@ def import_from_excel(file, model_type, user):
                         'zone': data.get('Zone') or '',
                         'petrol_card_number': data.get('Petrol Card Number') or '',
                         'working_id': data.get('Working ID') or '',
-                        'company_name': data.get('Company Name') or 'najmat',
+                        'company_name': data.get('Company Name') or 'sayedna',
                         'contract_type': data.get('Contract Type') or 'talabat',
                         'position': data.get('Position') or 'Car Driver',
                         'iban_number': data.get('IBAN Number') or '',
