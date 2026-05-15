@@ -24,9 +24,16 @@
                         <label class="block text-sm font-semibold text-app-text-muted uppercase tracking-wider">
                             Brand Name
                         </label>
-                        {{ form.brand_name }}
+                        {% if form.brand_name %}
+                            {{ form.brand_name }}
+                        {% else %}
+                            {{ form.name }}
+                        {% endif %}
                         {% if form.brand_name.errors %}
                             <p class="text-red-500 text-xs mt-1">{{ form.brand_name.errors.0 }}</p>
+                        {% endif %}
+                        {% if form.name.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>
                         {% endif %}
                     </div>
 

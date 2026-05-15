@@ -20,6 +20,25 @@ class SystemSettings(models.Model):
         verbose_name_plural = "System Settings"
 
 
+class Company(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200, unique=True)
+    logo = models.ImageField(upload_to='company_logos/', null=True, blank=True, validators=[validate_file_extension])
+    
+    # Per-company settings
+    max_excel_size_mb = models.PositiveIntegerField(default=20, help_text="Maximum size for Excel files (MB)")
+    max_other_size_mb = models.PositiveIntegerField(default=1, help_text="Maximum size for other documents/images (MB)")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Companies"
+
+
 # ─── Choices ─────────────────────────────────────────────────────────────────
 
 ROLE_CHOICES = [
@@ -101,6 +120,7 @@ NOTIFICATION_TYPE_CHOICES = [
 
 class Profile(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, related_name='members')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='superadmin')
     phone = models.CharField(max_length=20, blank=True)
     position = models.CharField(max_length=50, choices=POSITION_CHOICES, default='Administrative')
@@ -160,6 +180,7 @@ class Driver(models.Model):
     petrol_card_number = models.CharField(max_length=50, blank=True)
     employee_serial_number = models.CharField(max_length=50, blank=True)
     working_id = models.CharField(max_length=50, blank=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, related_name='drivers')
     company_name = models.CharField(max_length=50, choices=COMPANY_CHOICES, default='sayedna')
     contract_type = models.CharField(max_length=20, choices=CONTRACT_CHOICES, default='talabat')
     position = models.CharField(max_length=100, default='Car Driver')
@@ -190,6 +211,11 @@ class Driver(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.created_by:
+            self.company = self.created_by.company
+        super().save(*args, **kwargs)
 
     # Link to login account (optional)
     profile = models.OneToOneField(
@@ -264,9 +290,18 @@ class DriverInvoice(models.Model):
     additional_orders = models.IntegerField(default=0)
     hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     specified_date = models.DateField()
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+    contract_type = models.CharField(max_length=20, choices=CONTRACT_CHOICES, null=True, blank=True)
     created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.contract_type and self.driver:
+            self.contract_type = self.driver.contract_type
+        if not self.company and self.driver:
+            self.company = self.driver.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-specified_date']
@@ -329,10 +364,19 @@ class Deduction(models.Model):
     total_installments = models.IntegerField(default=1)
     
     pdf_proof = models.FileField(upload_to='deduction_pdfs/', null=True, blank=True, validators=[validate_file_extension])
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     submitted_by = models.ForeignKey(
         Profile, on_delete=models.SET_NULL, null=True, related_name='submitted_deductions'
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company:
+            if self.driver:
+                self.company = self.driver.company
+            elif self.employee:
+                self.company = self.employee.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-deduction_date']
@@ -391,7 +435,13 @@ class Message(models.Model):
     subject = models.CharField(max_length=200)
     body = models.TextField()
     attachment = models.FileField(upload_to='message_attachments/', null=True, blank=True, validators=[validate_file_extension])
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.sender:
+            self.company = self.sender.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-created_at']
@@ -426,7 +476,13 @@ class Notification(models.Model):
     related_driver = models.ForeignKey(
         Driver, on_delete=models.SET_NULL, null=True, blank=True
     )
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.user:
+            self.company = self.user.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-created_at']
@@ -448,8 +504,14 @@ class Task(models.Model):
         choices=[('pending', 'Pending'), ('completed', 'Completed')],
         default='pending',
     )
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.user:
+            self.company = self.user.company
+        super().save(*args, **kwargs)
 
     class Meta:
         indexes = [models.Index(fields=['user'])]
@@ -467,8 +529,14 @@ class CompanyFile(models.Model):
     description = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True)
     uploaded_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.uploaded_by:
+            self.company = self.uploaded_by.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-created_at']
@@ -512,8 +580,14 @@ class TalabatSalaryDetail(models.Model):
     
     deduction = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     attachment = models.FileField(upload_to='talabat_attachments/', null=True, blank=True, validators=[validate_file_extension])
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.driver:
+            self.company = self.driver.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-month', 'driver__full_name']
@@ -559,8 +633,14 @@ class ContractSalaryDetail(models.Model):
     attachment = models.FileField(upload_to='contract_attachments/', null=True, blank=True, validators=[validate_file_extension])
     remark = models.TextField(blank=True)
     month = models.DateField()
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.driver:
+            self.company = self.driver.company
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-month', 'name']
@@ -581,6 +661,7 @@ class MonthlyProfitLoss(models.Model):
     profit_loss = models.DecimalField(max_digits=15, decimal_places=3, default=0)
     month = models.DateField()
     report_pdf = models.FileField(upload_to='monthly_reports/', null=True, blank=True, validators=[validate_file_extension])
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

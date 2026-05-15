@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Sum, Q
 from django.core.paginator import Paginator
-from core.mixins import StaffRequiredMixin
+from core.mixins import StaffRequiredMixin, CompanyDataMixin
 from core.models import (
     Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Notification, Task,
     COMPANY_CHOICES, CONTRACT_CHOICES, VEHICLE_CHOICES,
@@ -18,10 +18,10 @@ from portal_admin.views import (
 from django.views import View
 
 
-class EmployeeDashboardView(StaffRequiredMixin, View):
+class EmployeeDashboardView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         today = date.today()
-        month_invoices = DriverInvoice.objects.filter(
+        month_invoices = self.get_queryset_by_company(DriverInvoice).filter(
             specified_date__year=today.year,
             specified_date__month=today.month,
         )
@@ -30,8 +30,8 @@ class EmployeeDashboardView(StaffRequiredMixin, View):
             total_hours=Sum('hours'),
         )
         total_orders = totals['total_orders'] or 0
-        tasks = Task.objects.filter(user=request.user)
-        recent_notifs = Notification.objects.filter(user=request.user, is_read=False)[:5]
+        tasks = self.get_queryset_by_company(Task).filter(user=request.user)
+        recent_notifs = self.get_queryset_by_company(Notification).filter(user=request.user, is_read=False)[:5]
 
         return render(request, 'employee_portal/dashboard.html', {
             'total_orders': total_orders,
@@ -41,9 +41,9 @@ class EmployeeDashboardView(StaffRequiredMixin, View):
         })
 
 
-class EmployeeDriverListView(StaffRequiredMixin, View):
+class EmployeeDriverListView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = Driver.objects.all()
+        qs = self.get_queryset_by_company(Driver)
         q = request.GET.get('q', '')
         company = request.GET.get('company', '')
         contract = request.GET.get('contract', '')
@@ -74,7 +74,7 @@ class EmployeeDriverListView(StaffRequiredMixin, View):
         })
 
 
-class EmployeeDriverAddView(StaffRequiredMixin, View):
+class EmployeeDriverAddView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         form = DriverForm()
         return render(request, 'admin_portal/driver_form.html', {
@@ -88,6 +88,7 @@ class EmployeeDriverAddView(StaffRequiredMixin, View):
         if form.is_valid():
             driver = form.save(commit=False)
             driver.created_by = request.user
+            driver.company = request.user.company
             driver.save()
             messages.success(request, f'Driver {driver.full_name} added successfully.')
             return redirect('employee_driver_list')

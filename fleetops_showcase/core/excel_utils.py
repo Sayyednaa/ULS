@@ -149,7 +149,7 @@ def export_contract_excel(queryset, label='contract'):
     wb.save(response)
     return response
 
-def generate_excel_template(model_type):
+def generate_excel_template(model_type, user):
     """Generate a template .xlsx file for bulk upload with existing data."""
     from .models import Driver, Profile, Deduction, DriverInvoice, TalabatSalaryDetail, ContractSalaryDetail
     wb = openpyxl.Workbook()
@@ -157,6 +157,8 @@ def generate_excel_template(model_type):
     ws.title = "Template"
 
     # Define headers and fetch data per model
+    company = user.company
+    
     if model_type == 'driver':
         headers = [
             'Full Name', 'Working ID', 'Email', 'Phone', 'Civil ID Number', 'Civil ID Expiry',
@@ -166,7 +168,7 @@ def generate_excel_template(model_type):
             'Zone', 'Petrol Card Number', 'Company Name', 'Contract Type',
             'Position', 'IBAN Number', 'Bank Name', 'Basic Salary WP', 'File Status'
         ]
-        queryset = Driver.objects.all()
+        queryset = Driver.objects.filter(company=company) if company else Driver.objects.all()
         data_rows = []
         for obj in queryset:
             data_rows.append([
@@ -184,7 +186,7 @@ def generate_excel_template(model_type):
             'First Name', 'Last Name', 'Email', 'Phone', 'Identification Number',
             'Passport', 'Role', 'Position', 'Base Salary KD'
         ]
-        queryset = Profile.objects.all()
+        queryset = Profile.objects.filter(company=company) if company else Profile.objects.all()
         data_rows = []
         for obj in queryset:
             data_rows.append([
@@ -197,7 +199,7 @@ def generate_excel_template(model_type):
             'Driver Email', 'Reason', 'Contracting Company', 
             'Contractor Deduction KD', 'Company Deduction KD'
         ]
-        queryset = Deduction.objects.all()
+        queryset = Deduction.objects.filter(company=company) if company else Deduction.objects.all()
         data_rows = []
         for obj in queryset:
             email = obj.driver.email if obj.driver else (obj.employee.email if obj.employee else "")
@@ -209,7 +211,7 @@ def generate_excel_template(model_type):
         headers = [
             'NO.', 'Name', 'Phone', 'Cash', 'Main Orders', 'Addl. Orders', 'Hours', 'Work Date'
         ]
-        queryset = DriverInvoice.objects.all()
+        queryset = DriverInvoice.objects.filter(company=company) if company else DriverInvoice.objects.all()
         data_rows = []
         for i, obj in enumerate(queryset, 1):
             data_rows.append([
@@ -224,7 +226,7 @@ def generate_excel_template(model_type):
             'Batch 5 Orders', 'Batch 5 Amount', 'Batch 6 Orders', 'Batch 6 Amount',
             'Batch 7 Orders', 'Batch 7 Amount', 'Deduction'
         ]
-        queryset = TalabatSalaryDetail.objects.all()
+        queryset = TalabatSalaryDetail.objects.filter(company=company) if company else TalabatSalaryDetail.objects.all()
         data_rows = []
         for obj in queryset:
             data_rows.append([
@@ -238,7 +240,7 @@ def generate_excel_template(model_type):
         headers = [
             'Name', 'Contract Type', 'Month', 'Total Salary', 'Absent Days', 'Deduction', 'Remark'
         ]
-        queryset = ContractSalaryDetail.objects.all()
+        queryset = ContractSalaryDetail.objects.filter(company=company) if company else ContractSalaryDetail.objects.all()
         data_rows = []
         for obj in queryset:
             data_rows.append([
@@ -334,7 +336,8 @@ def import_from_excel(file, model_type, user):
                         'bank_name': data.get('Bank Name') or 'nbk',
                         'basic_salary_wp': Decimal(str(data.get('Basic Salary WP', 0) or 0)),
                         'file_status': data.get('File Status') or 'Active',
-                        'created_by': user.profile if hasattr(user, 'profile') else None
+                        'created_by': user.profile if hasattr(user, 'profile') else None,
+                        'company': user.company if hasattr(user, 'company') else None
                     }
                 )
                 email = data.get('Email')
@@ -351,6 +354,7 @@ def import_from_excel(file, model_type, user):
                             'role': data.get('Role') or 'employee',
                             'position': data.get('Position') or 'Administrative',
                             'base_salary_kd': Decimal(str(data.get('Base Salary KD', 0) or 0)),
+                            'company': user.company if hasattr(user, 'company') else None,
                         }
                     )
                     if created:
@@ -376,7 +380,8 @@ def import_from_excel(file, model_type, user):
                         'main_orders': int(data.get('Main Orders', 0) or 0),
                         'additional_orders': int(data.get('Addl. Orders', 0) or 0),
                         'hours': Decimal(str(data.get('Hours', 0) or 0)),
-                        'created_by': user.profile if hasattr(user, 'profile') else None
+                        'created_by': user.profile if hasattr(user, 'profile') else None,
+                        'company': user.company if hasattr(user, 'company') else None,
                     }
                 )
             elif model_type == 'talabat_salary':
@@ -407,7 +412,8 @@ def import_from_excel(file, model_type, user):
                     batch_6_amount=Decimal(str(data.get('Batch 6 Amount', 0) or 0)),
                     batch_7_orders=int(data.get('Batch 7 Orders', 0) or 0),
                     batch_7_amount=Decimal(str(data.get('Batch 7 Amount', 0) or 0)),
-                    deduction=Decimal(str(data.get('Deduction', 0) or 0))
+                    deduction=Decimal(str(data.get('Deduction', 0) or 0)),
+                    company=user.company if hasattr(user, 'company') else None
                 )
             elif model_type == 'contract_salary':
                 from .models import ContractSalaryDetail
@@ -423,7 +429,8 @@ def import_from_excel(file, model_type, user):
                     total_salary=Decimal(str(data.get('Total Salary', 0) or 0)),
                     absent=int(data.get('Absent Days', 0) or 0),
                     deduction=Decimal(str(data.get('Deduction', 0) or 0)),
-                    remark=str(data.get('Remark', ''))
+                    remark=str(data.get('Remark', '')),
+                    company=user.company if hasattr(user, 'company') else None
                 )
             count += 1
         except Exception as e:

@@ -1,16 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{{ brand_name }}{% endblock %}
+{% block title %}FleetOps | The Ultimate Fleet & Logistics Management OS{% endblock %}
 
 {% block extra_css %}
 <!-- SEO Meta Tags -->
-<meta name="description" content="{{ brand_name }} - خدمت توصيل موثوقة في الخليج. نقدم خدمات توصيل الطلبات من المطاعم والمتاجر والصيدليات للأفراد والشركات في جميع أنحاء الخليج." />
-<meta name="keywords" content="توصيل, الخليج, خدمة توصيل, توصيل طلبات, توصيل طعام, {{ brand_name }}, delivery, kuwait, food delivery" />
-<meta name="author" content="{{ brand_name }}" />
-<meta property="og:title" content="{{ brand_name }} للتوصيل" />
-<meta property="og:description" content="خدمة توصيل موثوقة في الخليج. نقدم خدمات توصيل الطلبات من المطاعم والمتاجر والصيدليات." />
+<meta name="description" content="FleetOps - The all-in-one SaaS platform for logistics companies to manage fleets, drivers, invoices, and multi-tenant operations with ease." />
+<meta name="keywords" content="fleet management, logistics saas, driver tracking, invoice automation, multi-tenant logistics, FleetOps" />
+<meta name="author" content="FleetOps" />
+<meta property="og:title" content="FleetOps | Logistics Management OS" />
+<meta property="og:description" content="Empower your logistics business with a unified operating system for drivers, invoices, and multi-tenant operations." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://najmatalwesam.com" />
 
 <style>
     .glass-nav {
@@ -20,8 +19,8 @@
         box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
     }
     .hero-gradient {
-        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent),
-                    radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent);
+        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent),
+                    radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.08), transparent);
     }
     .card-reveal {
         opacity: 0;
@@ -39,246 +38,245 @@
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-10px); }
     }
-    .logo-cloud img {
-        filter: grayscale(100%) invert(100%) opacity(0.5);
-        transition: all 0.3s ease;
+    .feature-card {
+        background: linear-gradient(135deg, rgba(var(--bg-card-rgb), 0.8), rgba(var(--bg-card-rgb), 0.4));
+        backdrop-filter: blur(10px);
     }
-    .logo-cloud img:hover {
-        filter: grayscale(0%) invert(0%) opacity(1);
+    .glow-on-hover:hover {
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen hero-gradient" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }" x-init="document.title = currentName + ' | ' + (lang === 'ar' ? 'خدمات توصيل حديثة' : 'Modern Delivery Services');">
+<div class="min-h-screen hero-gradient" x-data="{ lang: 'en' }" x-init="lang = localStorage.getItem('fleetops_lang') || 'en'">
     <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav h-16 flex items-center justify-between px-4 lg:px-12">
-        <div class="flex items-center gap-3 sm:gap-4 min-w-0" x-data="{ 
-            currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}',
-            currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}'
-        }">
-            <img :src="currentLogo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain flex-shrink-0" alt="Logo">
-            <h1 class="font-bold text-app-text text-sm sm:text-xl tracking-tight truncate">
-                <span x-show="lang === 'en'" x-text="currentName"></span>
-                <span x-show="lang === 'ar'" x-text="currentName === 'SAYEDNA LOGISTICS' ? 'سيدنا للخدمات اللوجستية' : currentName"></span>
-            </h1>
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav h-20 flex items-center justify-between px-6 lg:px-12">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h1 class="font-black text-2xl text-app-text tracking-tighter">Fleet<span class="text-emerald-500">Ops</span></h1>
         </div>
-        <div class="flex items-center gap-3 sm:gap-6 flex-shrink-0">
-            <form action="{% url 'set_language' %}" method="post" class="m-0">
-                {% csrf_token %}
-                <input name="next" type="hidden" value="{{ request.get_full_path }}">
-                <input name="language" type="hidden" :value="lang === 'en' ? 'ar' : 'en'">
-                <button type="submit" class="text-[10px] sm:text-sm font-bold text-app-text-muted hover:text-emerald-500 transition-colors uppercase tracking-widest">
-                    <span x-show="lang === 'en'">العربية</span>
-                    <span x-show="lang === 'ar'">English</span>
-                </button>
-            </form>
-            <a href="{% url 'login' %}" class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap">
-                Sign In
+        
+        <div class="hidden md:flex items-center gap-8 text-sm font-bold text-app-text-muted">
+            <a href="#features" class="hover:text-emerald-500 transition-colors">Features</a>
+            <a href="#portals" class="hover:text-emerald-500 transition-colors">Portals</a>
+            <a href="#pricing" class="hover:text-emerald-500 transition-colors">Pricing</a>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <a href="{% url 'login' %}" class="text-sm font-bold text-app-text-muted hover:text-emerald-500 transition-colors">Sign In</a>
+            <a href="{% url 'register' %}" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-black transition-all shadow-xl shadow-emerald-500/20 glow-on-hover">
+                Register Company
             </a>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <div class="pt-32 pb-20 px-6 lg:px-12 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-        <div class="space-y-8" :class="lang === 'ar' ? 'text-right' : 'text-left'">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold tracking-wider uppercase">
-                <span x-show="lang === 'en'">⚡ Trusted Delivery Partner</span>
-                <span x-show="lang === 'ar'">⚡ شريك التوصيل الموثوق</span>
-            </div>
-            <h1 class="text-5xl lg:text-7xl font-extrabold text-app-text leading-tight" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
-                <template x-if="lang === 'en'">
-                    <span><span x-text="currentName"></span> <span class="text-emerald-500">Delivering Excellence</span> in Gulf</span>
-                </template>
-                <template x-if="lang === 'ar'">
-                    <span><span x-text="currentName === 'SAYEDNA LOGISTICS' ? 'سيدنا للخدمات اللوجستية' : currentName"></span> <span class="text-emerald-500">نقدم التميز</span> في الخليج</span>
-                </template>
-            </h1>
-            <p class="text-2xl text-app-text-muted leading-relaxed max-w-xl">
-                <span x-show="lang === 'en'">Providing reliable delivery services for restaurants, pharmacies, and retail businesses across all Gulf governorates.</span>
-                <span x-show="lang === 'ar'">تقديم خدمات توصيل موثوقة للمطاعم والصيدليات وشركات التجزئة في جميع محافظات الخليج.</span>
-            </p>
-            <div class="flex flex-wrap gap-4 pt-4">
-                <a href="#services" class="px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg transition-all shadow-xl shadow-emerald-500/30 flex items-center gap-3">
-                    <span x-show="lang === 'en'">Our Services</span>
-                    <span x-show="lang === 'ar'">خدماتنا</span>
-                    <span>→</span>
-                </a>
-                <a href="{% url 'login' %}" class="px-8 py-4 rounded-xl bg-app-card border border-app-border hover:bg-black/5 dark:hover:bg-white/5 text-app-text font-bold text-lg transition-all">
-                    <span x-show="lang === 'en'">Portal Login</span>
-                    <span x-show="lang === 'ar'">دخول البوابة</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="relative hidden lg:block">
-            <div class="absolute -inset-4 bg-emerald-500/20 blur-3xl rounded-full"></div>
-            <img src="{% static 'img/hero-image.png' %}" alt="Operations" class="relative rounded-3xl shadow-2xl floating border border-white/10">
-        </div>
-    </div>
-
-    <!-- Trusted By Section -->
-    <div class="py-16 bg-white/5 border-y border-white/5">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-gray-500 uppercase tracking-widest text-xs font-bold mb-10" x-text="lang === 'en' ? 'Trusted by Industry Leaders' : 'موثوقون من قادة الصناعة'"></p>
-            <div class="flex flex-wrap justify-center items-center gap-12 lg:gap-20">
-                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-emerald-500 hover:drop-shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:scale-110">PHARMAZONE</span>
-                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-emerald-500 hover:drop-shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:scale-110">BURGER KING</span>
-                <span class="text-2xl font-black text-app-text-muted/40 tracking-tighter cursor-default transition-all duration-300 hover:text-emerald-500 hover:drop-shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:scale-110">TALABAT</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Services Section -->
-    <div id="services" class="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
-        <div class="text-center space-y-4 mb-20">
-            <h2 class="text-4xl font-bold text-app-text" x-text="lang === 'en' ? 'Our Specialized Services' : 'خدماتنا المتخصصة'"></h2>
-            <p class="text-app-text-muted max-w-2xl mx-auto text-lg" x-text="lang === 'en' ? 'Tailored logistics solutions designed to match the rapid pace of your business.' : 'حلول لوجستية مصممة خصيصاً لتناسب الوتيرة السريعة لأعمالك.'"></p>
+    <section class="pt-40 pb-20 px-6 lg:px-12 max-w-7xl mx-auto text-center space-y-10">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black tracking-widest uppercase">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            Multi-Tenant Logistics OS
         </div>
         
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Service 1 -->
-            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-emerald-500/30 transition-all group shadow-sm card-reveal">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-6">🍔</div>
-                <h3 class="text-xl font-bold text-app-text mb-2" x-text="lang === 'en' ? 'Restaurants & Food' : 'المطاعم والأغذية'"></h3>
-                <p class="text-app-text-muted text-sm" x-text="lang === 'en' ? 'Hot, fresh deliveries at lightning speed.' : 'توصيل ساخن وطازج بسرعة البرق.'"></p>
-            </div>
-            <!-- Service 2 -->
-            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-blue-500/30 transition-all group shadow-sm card-reveal" style="transition-delay: 0.1s;">
-                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-2xl mb-6">💊</div>
-                <h3 class="text-xl font-bold text-app-text mb-2" x-text="lang === 'en' ? 'Pharmacies & Health' : 'الصيدليات والصحة'"></h3>
-                <p class="text-app-text-muted text-sm" x-text="lang === 'en' ? 'Safe handling of essential medical supplies.' : 'التعامل الآمن مع الإمدادات الطبية الأساسية.'"></p>
-            </div>
-            <!-- Service 3 -->
-            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-emerald-500/30 transition-all group shadow-sm card-reveal" style="transition-delay: 0.2s;">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-6">🛍️</div>
-                <h3 class="text-xl font-bold text-app-text mb-2" x-text="lang === 'en' ? 'Retail & Shops' : 'التجزئة والمحلات'"></h3>
-                <p class="text-app-text-muted text-sm" x-text="lang === 'en' ? 'Same-day delivery for retail businesses.' : 'التوصيل في نفس اليوم لشركات التجزئة.'"></p>
-            </div>
-            <!-- Service 4 -->
-            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-purple-500/30 transition-all group shadow-sm card-reveal" style="transition-delay: 0.3s;">
-                <div class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 text-2xl mb-6">📦</div>
-                <h3 class="text-xl font-bold text-app-text mb-2" x-text="lang === 'en' ? 'B2B Logistics' : 'لوجستيات B2B'"></h3>
-                <p class="text-app-text-muted text-sm" x-text="lang === 'en' ? 'Reliable distribution across all Gulf governorates.' : 'توزيع موثوق في جميع محافظات الخليج.'"></p>
-            </div>
-        </div>
-        </div>
-    </div>
+        <h1 class="text-6xl lg:text-8xl font-black text-app-text tracking-tight leading-[1.1]">
+            Scale Your Logistics <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">Without the Chaos</span>
+        </h1>
+        
+        <p class="text-xl lg:text-2xl text-app-text-muted max-w-3xl mx-auto leading-relaxed">
+            The all-in-one platform to manage fleets, track driver performance, 
+            and automate financial reporting across multiple companies and contracts.
+        </p>
 
-    <!-- Stats Section -->
-    <div class="py-24 px-6 lg:px-12 bg-white/[0.02]">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-app-text mb-4" x-text="lang === 'en' ? 'Delivering Excellence Daily' : 'نقدم التميز يومياً'"></h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center p-10 rounded-3xl bg-app-card border border-app-border shadow-sm card-reveal"
-                     x-data="{ count: 0, target: 10000 }"
-                     x-intersect.once="let interval = setInterval(() => { if(count < target) { count += Math.ceil((target - count) / 10) + 1 } else { count = target; clearInterval(interval) } }, 30)">
-                    <p class="text-5xl font-black text-emerald-500 mb-2"><span x-text="count.toLocaleString()">0</span>+</p>
-                    <p class="text-app-text-muted uppercase tracking-widest text-xs font-bold" x-text="lang === 'en' ? 'Daily Orders' : 'طلب يومي'"></p>
-                </div>
-                <div class="text-center p-10 rounded-3xl bg-app-card border border-app-border shadow-sm card-reveal"
-                     style="transition-delay: 0.1s;"
-                     x-data="{ count: 0, target: 500 }"
-                     x-intersect.once="let interval = setInterval(() => { if(count < target) { count += Math.ceil((target - count) / 8) + 1 } else { count = target; clearInterval(interval) } }, 40)">
-                    <p class="text-5xl font-black text-blue-500 mb-2"><span x-text="count">0</span>+</p>
-                    <p class="text-app-text-muted uppercase tracking-widest text-xs font-bold" x-text="lang === 'en' ? 'Active Fleet' : 'أسطول نشط'"></p>
-                </div>
-                <div class="text-center p-10 rounded-3xl bg-app-card border border-app-border shadow-sm card-reveal"
-                     style="transition-delay: 0.2s;"
-                     x-data="{ count: 60, target: 30 }"
-                     x-intersect.once="let interval = setInterval(() => { if(count > target) { count -= 1 } else { count = target; clearInterval(interval) } }, 60)">
-                    <p class="text-5xl font-black text-emerald-500 mb-2">&lt; <span x-text="count">60</span>m</p>
-                    <p class="text-app-text-muted uppercase tracking-widest text-xs font-bold" x-text="lang === 'en' ? 'Average Time' : 'متوسط الوقت'"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Testimonials -->
-    <div class="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
-        <p class="text-center text-emerald-500 font-bold mb-4 uppercase tracking-widest text-xs" x-text="lang === 'en' ? 'Trusted by Gulf\'s Best' : 'موثوقون من الأفضل في الخليج'"></p>
-        <div class="grid md:grid-cols-2 gap-8 mt-12">
-            <div class="p-10 rounded-3xl bg-app-card border border-app-border relative shadow-sm">
-                <span class="text-6xl text-app-text-muted/5 absolute top-6 right-8">"</span>
-                <p class="text-app-text-muted italic mb-8 relative z-10" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
-                    <span x-text="currentName + ' ' + (lang === 'en' ? 'completely transformed our food delivery speed. Highly recommended!' : 'لقد غيرت تماماً سرعة توصيل الطعام لدينا. ننصح بهم بشدة!')"></span>
-                </p>
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center font-bold text-emerald-500">AM</div>
-                    <div>
-                        <p class="text-app-text font-bold">Ahmad Al-Mutairi</p>
-                        <p class="text-app-text-muted text-xs" x-text="lang === 'en' ? 'Restaurant Owner' : 'صاحب مطعم'"></p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-10 rounded-3xl bg-app-card border border-app-border relative shadow-sm">
-                <span class="text-6xl text-app-text-muted/5 absolute top-6 right-8">"</span>
-                <p class="text-app-text-muted italic mb-8 relative z-10" x-text="lang === 'en' ? 'Their B2B service is flawless. We depend on them for our daily retail dispatching.' : 'خدمة B2B الخاصة بهم لا تشوبها شائبة. نحن نعتمد عليهم في توزيع التجزئة اليومي لدينا.'"></p>
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center font-bold text-blue-500">FS</div>
-                    <div>
-                        <p class="text-app-text font-bold">Fatima Saad</p>
-                        <p class="text-app-text-muted text-xs" x-text="lang === 'en' ? 'Boutique Manager' : 'مديرة بوتيك'"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CTA Section -->
-    <div class="py-24 px-6 lg:px-12 max-w-7xl mx-auto text-center">
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[3rem] p-12 lg:p-20 shadow-2xl shadow-emerald-500/20">
-            <h2 class="text-4xl lg:text-6xl font-black text-white mb-6" x-text="lang === 'en' ? 'Ready to Dispatch?' : 'جاهز للإرسال؟'"></h2>
-            <p class="text-white/80 text-xl mb-10 max-w-2xl mx-auto" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
-                <span x-text="(lang === 'en' ? 'Join hundreds of businesses that trust ' : 'انضم إلى مئات الشركات التي تثق بـ ') + currentName + '.'"></span>
-            </p>
-            <a href="{% url 'login' %}" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-black text-xl rounded-2xl hover:scale-105 transition-transform">
-                <span x-show="lang === 'en'">Get Started</span>
-                <span x-show="lang === 'ar'">ابدأ الآن</span>
-                <span>→</span>
+        <div class="flex flex-wrap justify-center gap-4 pt-6">
+            <a href="{% url 'register' %}" class="px-10 py-5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl transition-all shadow-2xl shadow-emerald-500/30 flex items-center gap-3 group">
+                Start Your Company Portal
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+            <a href="#features" class="px-10 py-5 rounded-2xl bg-app-card border border-app-border hover:bg-black/5 dark:hover:bg-white/5 text-app-text font-black text-xl transition-all">
+                View All Features
             </a>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer class="py-12 border-t border-border-dark px-6 lg:px-12">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex items-center gap-3" x-data="{ 
-                currentLogo: localStorage.getItem('fleetops_brand_logo') || '{{ brand_logo }}',
-                currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}'
-            }">
-                <img :src="currentLogo" class="w-8 h-8 object-contain" alt="Logo">
-                <span class="text-app-text font-bold tracking-tight">
-                    <span x-show="lang === 'en'" x-text="currentName"></span>
-                    <span x-show="lang === 'ar'" x-text="currentName === 'SAYEDNA LOGISTICS' ? 'سيدنا للخدمات اللوجستية' : currentName"></span>
-                </span>
+        <div class="pt-20 relative">
+            <div class="absolute -inset-10 bg-emerald-500/10 blur-[100px] rounded-full"></div>
+            <div class="relative rounded-[2.5rem] border border-white/10 bg-app-card shadow-2xl overflow-hidden p-2">
+                <img src="{% static 'img/dashboard-preview.png' %}" alt="FleetOps Dashboard" class="rounded-[2rem] w-full border border-white/5">
             </div>
-            <div class="flex flex-col items-center">
-                <p class="text-gray-500 text-sm" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
-                    <span x-text="'© 2026 ' + currentName + ' Gulf. ' + (lang === 'en' ? 'All rights reserved.' : 'جميع الحقوق محفوظة.')"></span>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="py-32 px-6 lg:px-12 max-w-7xl mx-auto">
+        <div class="text-center mb-20 space-y-4">
+            <h2 class="text-4xl lg:text-5xl font-black text-app-text">Built for Modern Logistics</h2>
+            <p class="text-app-text-muted text-lg">Powerful tools to automate every aspect of your fleet operations.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-emerald-500/50 transition-all group card-reveal">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-8 group-hover:scale-110 transition-transform">🏢</div>
+                <h3 class="text-2xl font-black text-app-text mb-4">Multi-Tenant Core</h3>
+                <p class="text-app-text-muted leading-relaxed">
+                    Create isolated portals for different companies. Manage independent sets of drivers, 
+                    contracts, and reports under one unified super-admin dashboard.
                 </p>
             </div>
-            <div class="flex gap-6 text-app-text-muted text-sm">
-                <a href="#" class="hover:text-emerald-500 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-emerald-500 transition-colors">Terms of Service</a>
+
+            <!-- Feature 2 -->
+            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-blue-500/50 transition-all group card-reveal" style="transition-delay: 0.1s;">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-2xl mb-8 group-hover:scale-110 transition-transform">📑</div>
+                <h3 class="text-2xl font-black text-app-text mb-4">Contract Snapshots</h3>
+                <p class="text-app-text-muted leading-relaxed">
+                    Never lose historical context. FleetOps captures contract data at the time of invoice 
+                    creation, ensuring accurate reporting even when drivers move.
+                </p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-purple-500/50 transition-all group card-reveal" style="transition-delay: 0.2s;">
+                <div class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 text-2xl mb-8 group-hover:scale-110 transition-transform">💰</div>
+                <h3 class="text-2xl font-black text-app-text mb-4">Auto-Invoicing</h3>
+                <p class="text-app-text-muted leading-relaxed">
+                    Streamline daily order tracking and automated monthly salary calculations for 
+                    Talabat, Pharmazone, and custom service contracts.
+                </p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-orange-500/50 transition-all group card-reveal" style="transition-delay: 0.3s;">
+                <div class="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 text-2xl mb-8 group-hover:scale-110 transition-transform">📈</div>
+                <h3 class="text-2xl font-black text-app-text mb-4">Real-time P&L</h3>
+                <p class="text-app-text-muted leading-relaxed">
+                    Instantly generate Profit & Loss reports for each contract. Track expenses, 
+                    deductions, and net margins with one click.
+                </p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-emerald-500/50 transition-all group card-reveal" style="transition-delay: 0.4s;">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-8 group-hover:scale-110 transition-transform">🔑</div>
+                <h3 class="text-2xl font-black text-app-text mb-4">Role Portals</h3>
+                <p class="text-app-text-muted leading-relaxed">
+                    Tailored experiences for Managers, Accountants, Employees, and Drivers. 
+                    Everyone sees exactly what they need, nothing more.
+                </p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-blue-500/50 transition-all group card-reveal" style="transition-delay: 0.5s;">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-2xl mb-8 group-hover:scale-110 transition-transform">📱</div>
+                <h3 class="text-2xl font-black text-app-text mb-4">Driver Self-Service</h3>
+                <p class="text-app-text-muted leading-relaxed">
+                    Drivers can track their own deliveries, check document expiry statuses, 
+                    and view their monthly pay slips directly from their mobile portal.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portals Section -->
+    <section id="portals" class="py-24 bg-white/[0.02] border-y border-app-border">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-20 items-center">
+            <div class="space-y-8">
+                <h2 class="text-5xl font-black text-app-text leading-tight">Five Portals. <br/>One Unified System.</h2>
+                <p class="text-xl text-app-text-muted leading-relaxed">
+                    FleetOps provides specialized environments for every role in your company, 
+                    ensuring maximum efficiency and data security.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-app-card border border-app-border">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">A</div>
+                        <div class="text-app-text font-bold text-lg">Accountant Portal</div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-app-card border border-app-border">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">M</div>
+                        <div class="text-app-text font-bold text-lg">Manager Portal</div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-app-card border border-app-border opacity-60">
+                        <div class="w-10 h-10 rounded-xl bg-gray-500/20 text-gray-400 flex items-center justify-center font-bold">...</div>
+                        <div class="text-app-text font-bold text-lg">and 3 more specialized roles</div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative">
+                <div class="absolute -inset-20 bg-blue-500/10 blur-[100px] rounded-full"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-6 rounded-[2rem] bg-emerald-500 text-white space-y-2 shadow-2xl shadow-emerald-500/20 floating">
+                        <p class="text-4xl font-black">20+</p>
+                        <p class="font-bold opacity-80 uppercase tracking-widest text-[10px]">Auto Reports</p>
+                    </div>
+                    <div class="p-6 rounded-[2rem] bg-blue-500 text-white space-y-2 shadow-2xl shadow-blue-500/20 mt-12 floating" style="animation-delay: 0.5s;">
+                        <p class="text-4xl font-black">100%</p>
+                        <p class="font-bold opacity-80 uppercase tracking-widest text-[10px]">Data Isolation</p>
+                    </div>
+                    <div class="p-6 rounded-[2rem] bg-app-card border border-app-border space-y-2 shadow-xl">
+                        <p class="text-4xl font-black text-app-text">99.9%</p>
+                        <p class="font-bold text-app-text-muted uppercase tracking-widest text-[10px]">Accuracy</p>
+                    </div>
+                    <div class="p-6 rounded-[2rem] bg-app-card border border-app-border space-y-2 shadow-xl mt-12">
+                        <p class="text-4xl font-black text-app-text">Zero</p>
+                        <p class="font-bold text-app-text-muted uppercase tracking-widest text-[10px]">Paperwork</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-32 px-6 lg:px-12 max-w-7xl mx-auto text-center">
+        <div class="bg-gradient-to-br from-app-card to-app-bg p-16 lg:p-32 rounded-[4rem] border border-app-border shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 blur-[100px] rounded-full"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 blur-[100px] rounded-full"></div>
+            
+            <div class="relative z-10 space-y-10">
+                <h2 class="text-5xl lg:text-7xl font-black text-app-text tracking-tight">Ready to Modernize?</h2>
+                <p class="text-xl text-app-text-muted max-w-2xl mx-auto">
+                    Register your company today and experience the future of fleet management. 
+                    Setup takes less than 2 minutes.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="{% url 'register' %}" class="px-12 py-5 bg-emerald-500 text-white font-black text-2xl rounded-2xl hover:scale-105 transition-transform shadow-2xl shadow-emerald-500/30">
+                        Register Your Company Portal
+                    </a>
+                </div>
+                <p class="text-app-text-muted text-sm font-bold uppercase tracking-widest">NO CREDIT CARD REQUIRED</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-app-border px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <span class="text-app-text font-black text-xl tracking-tighter">Fleet<span class="text-emerald-500">Ops</span></span>
+            </div>
+            <p class="text-app-text-muted text-sm font-medium">© 2026 FleetOps SaaS. Empowering Logistics Worldwide.</p>
+            <div class="flex gap-8 text-sm font-bold text-app-text-muted">
+                <a href="#" class="hover:text-emerald-500 transition-colors">Privacy</a>
+                <a href="#" class="hover:text-emerald-500 transition-colors">Terms</a>
+                <a href="#" class="hover:text-emerald-500 transition-colors">Support</a>
             </div>
         </div>
     </footer>
 </div>
 
 <script>
-    // Reveal Observer
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
+            if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.card-reveal').forEach(el => observer.observe(el));
 </script>
 {% endblock %}
-

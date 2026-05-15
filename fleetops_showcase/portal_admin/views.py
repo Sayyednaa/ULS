@@ -8,22 +8,21 @@ from django.contrib import messages
 from django.db.models import Sum, Q, Count
 from django.core.paginator import Paginator
 from core.mixins import (
-    AdminRequiredMixin, StaffRequiredMixin,
     AdminManagerRequiredMixin, AccountantRequiredMixin,
     FinancialAccessMixin, AccountantSuperAdminMixin,
-    SuperAdminRequiredMixin
+    SuperAdminRequiredMixin, CompanyDataMixin, StaffRequiredMixin
 )
 from core.models import (
     Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Notification, Task,
     SystemSettings,
     ROLE_CHOICES, COMPANY_CHOICES, CONTRACT_CHOICES, VEHICLE_CHOICES,
 )
-from core.forms import ProfileForm, DriverForm, DeductionForm, DeductionInstallmentForm, TaskAssignmentForm, SystemSettingsForm
+from core.forms import ProfileForm, DriverForm, DeductionForm, DeductionInstallmentForm, TaskAssignmentForm, SystemSettingsForm, CompanyForm
 from core.utils import notify_superadmin_action, check_and_notify_expiries
 from django.views import View
 
 
-def get_chart_data(company_filter=None, driver_id=None):
+def get_chart_data(company=None, contract_filter=None, driver_id=None):
     """Compute chart data for dashboard — revenue & orders by vehicle type per month."""
     current_year = date.today().year
     labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -38,8 +37,14 @@ def get_chart_data(company_filter=None, driver_id=None):
     qs = DriverInvoice.objects.filter(
         specified_date__year=current_year
     )
-    if company_filter:
-        qs = qs.filter(driver__contract_type=company_filter)
+    
+    if company:
+        qs = qs.filter(company=company)
+        
+    if contract_filter:
+        # Tie to the contract type stored in the invoice (historical)
+        qs = qs.filter(contract_type=contract_filter)
+        
     if driver_id:
         qs = qs.filter(driver_id=driver_id)
     
@@ -68,26 +73,26 @@ def get_chart_data(company_filter=None, driver_id=None):
     })
 
 
-class AdminDashboardView(StaffRequiredMixin, View):
+class AdminDashboardView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         check_and_notify_expiries(request.user)
         today = date.today()
-        company_filter = request.GET.get('company', '')
+        contract_filter = request.GET.get('company', '') # This was 'company' in params but actually meant contract type
         driver_id = request.GET.get('driver_id', '')
         
-        invoice_qs = DriverInvoice.objects.filter(
+        invoice_qs = self.get_queryset_by_company(DriverInvoice).filter(
             specified_date__year=today.year,
             specified_date__month=today.month,
         )
-        driver_qs = Driver.objects.filter(is_active=True)
+        driver_qs = self.get_queryset_by_company(Driver).filter(is_active=True)
         
-        if company_filter:
-            invoice_qs = invoice_qs.filter(driver__contract_type=company_filter)
-            driver_qs = driver_qs.filter(contract_type=company_filter)
+        if contract_filter:
+            # Use the contract_type field for historical data integrity
+            invoice_qs = invoice_qs.filter(contract_type=contract_filter)
+            driver_qs = driver_qs.filter(contract_type=contract_filter)
         
         if driver_id:
             invoice_qs = invoice_qs.filter(driver_id=driver_id)
-            # When filtering by specific driver, we only care about that driver
             driver_qs = driver_qs.filter(id=driver_id)
         
         totals = invoice_qs.aggregate(
@@ -96,8 +101,8 @@ class AdminDashboardView(StaffRequiredMixin, View):
         )
         total_orders = totals['total_orders'] or 0
 
-        tasks = Task.objects.filter(user=request.user)
-        recent_notifs = Notification.objects.filter(user=request.user, is_read=False)[:5]
+        tasks = self.get_queryset_by_company(Task).filter(user=request.user)
+        recent_notifs = self.get_queryset_by_company(Notification).filter(user=request.user, is_read=False)[:5]
 
         expiring_count = 0
         for d in driver_qs:
@@ -107,10 +112,14 @@ class AdminDashboardView(StaffRequiredMixin, View):
         return render(request, 'admin_portal/dashboard.html', {
             'total_orders': total_orders,
             'total_hours': totals['total_hours'] or Decimal('0.00'),
-            'chart_data': get_chart_data(company_filter=company_filter or None, driver_id=driver_id or None),
+            'chart_data': get_chart_data(
+                company=request.user.company, 
+                contract_filter=contract_filter or None, 
+                driver_id=driver_id or None
+            ),
             'companies': [c[0] for c in COMPANY_CHOICES],
-            'drivers': Driver.objects.filter(is_active=True).order_by('full_name'),
-            'selected_company': company_filter,
+            'drivers': self.get_queryset_by_company(Driver).filter(is_active=True).order_by('full_name'),
+            'selected_company': contract_filter,
             'selected_driver': driver_id,
             'tasks': tasks,
             'recent_notifs': recent_notifs,
@@ -121,9 +130,9 @@ class AdminDashboardView(StaffRequiredMixin, View):
         })
 
 
-class TeamListView(AdminManagerRequiredMixin, View):
+class TeamListView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = Profile.objects.exclude(role='driver')
+        qs = self.get_queryset_by_company(Profile).exclude(role='driver')
         q = request.GET.get('q', '')
         if q:
             qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(email__icontains=q))
@@ -137,7 +146,7 @@ class TeamListView(AdminManagerRequiredMixin, View):
         paginator = Paginator(qs, 20)
         page_obj = paginator.get_page(request.GET.get('page'))
 
-        team_tasks = Task.objects.exclude(user__role='driver').select_related('user', 'assigned_by')
+        team_tasks = self.get_queryset_by_company(Task).exclude(user__role='driver').select_related('user', 'assigned_by')
 
         # Detect portal if not explicitly provided (admin or manager)
         portal_type = 'admin' if request.user.role in ['admin', 'superadmin'] else 'manager'
@@ -152,7 +161,7 @@ class TeamListView(AdminManagerRequiredMixin, View):
         })
 
 
-class TeamAddView(AdminManagerRequiredMixin, View):
+class TeamAddView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         form = ProfileForm(user=request.user)
         return render(request, 'admin_portal/team_form.html', {'form': form, 'editing': False})
@@ -168,6 +177,7 @@ class TeamAddView(AdminManagerRequiredMixin, View):
             
             user = form.save(commit=False)
             user.username = form.cleaned_data['email']
+            user.company = request.user.company # Ensure company is linked
             p1 = form.cleaned_data.get('password1')
             if p1:
                 user.set_password(p1)
@@ -181,9 +191,9 @@ class TeamAddView(AdminManagerRequiredMixin, View):
         return render(request, 'admin_portal/team_form.html', {'form': form, 'editing': False})
 
 
-class TeamEditView(AdminManagerRequiredMixin, View):
+class TeamEditView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request, pk):
-        member = get_object_or_404(Profile, pk=pk)
+        member = get_object_or_404(self.get_queryset_by_company(Profile), pk=pk)
         
         # Security: Check hierarchy
         if member.role == 'superadmin' and request.user.role != 'superadmin':
@@ -197,7 +207,7 @@ class TeamEditView(AdminManagerRequiredMixin, View):
         return render(request, 'admin_portal/team_form.html', {'form': form, 'editing': True, 'member': member})
 
     def post(self, request, pk):
-        member = get_object_or_404(Profile, pk=pk)
+        member = get_object_or_404(self.get_queryset_by_company(Profile), pk=pk)
         
         # Security: Check hierarchy
         if member.role == 'superadmin' and request.user.role != 'superadmin':
@@ -223,9 +233,9 @@ class TeamEditView(AdminManagerRequiredMixin, View):
         return render(request, 'admin_portal/team_form.html', {'form': form, 'editing': True, 'member': member})
 
 
-class TeamDeleteView(AdminManagerRequiredMixin, View):
+class TeamDeleteView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def post(self, request, pk):
-        member = get_object_or_404(Profile, pk=pk)
+        member = get_object_or_404(self.get_queryset_by_company(Profile), pk=pk)
         
         # Security: Check hierarchy
         if member.role == 'superadmin':
@@ -246,9 +256,9 @@ class TeamDeleteView(AdminManagerRequiredMixin, View):
         return redirect('admin_team_list')
 
 
-class DriverListView(StaffRequiredMixin, View):
+class DriverListView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = Driver.objects.all()
+        qs = self.get_queryset_by_company(Driver)
         q = request.GET.get('q', '')
         company = request.GET.get('company', '')
         contract = request.GET.get('contract', '')
@@ -279,7 +289,7 @@ class DriverListView(StaffRequiredMixin, View):
         })
 
 
-class DriverAddView(StaffRequiredMixin, View):
+class DriverAddView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         form = DriverForm()
         return render(request, 'admin_portal/driver_form.html', {'form': form, 'editing': False})
@@ -289,6 +299,7 @@ class DriverAddView(StaffRequiredMixin, View):
         if form.is_valid():
             driver = form.save(commit=False)
             driver.created_by = request.user
+            driver.company = request.user.company # Ensure company is linked
             driver.save()
             
             if request.user.role == 'superadmin':
@@ -299,14 +310,14 @@ class DriverAddView(StaffRequiredMixin, View):
         return render(request, 'admin_portal/driver_form.html', {'form': form, 'editing': False})
 
 
-class DriverEditView(StaffRequiredMixin, View):
+class DriverEditView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request, pk):
-        driver = get_object_or_404(Driver, pk=pk)
+        driver = get_object_or_404(self.get_queryset_by_company(Driver), pk=pk)
         form = DriverForm(instance=driver)
         return render(request, 'admin_portal/driver_form.html', {'form': form, 'editing': True, 'driver': driver})
 
     def post(self, request, pk):
-        driver = get_object_or_404(Driver, pk=pk)
+        driver = get_object_or_404(self.get_queryset_by_company(Driver), pk=pk)
         form = DriverForm(request.POST, request.FILES, instance=driver)
         if form.is_valid():
             form.save()
@@ -320,30 +331,47 @@ class DriverEditView(StaffRequiredMixin, View):
 
 class SystemSettingsView(SuperAdminRequiredMixin, View):
     def get(self, request):
-        settings_obj = SystemSettings.objects.first()
-        if not settings_obj:
-            settings_obj = SystemSettings.objects.create(brand_name='SAYEDNA LOGISTICS')
+        if request.user.company:
+            settings_obj = request.user.company
+            form = CompanyForm(instance=settings_obj)
+            title = 'Company Settings'
+            subtitle = 'Manage your company branding and logo'
+        else:
+            settings_obj = SystemSettings.objects.first()
+            if not settings_obj:
+                settings_obj = SystemSettings.objects.create(brand_name='SAYEDNA LOGISTICS')
+            form = SystemSettingsForm(instance=settings_obj)
+            title = 'System Settings'
+            subtitle = 'Manage global application branding'
         
-        form = SystemSettingsForm(instance=settings_obj)
         return render(request, 'admin_portal/settings.html', {
             'form': form,
-            'title': 'System Settings',
-            'subtitle': 'Manage application branding and logo',
+            'title': title,
+            'subtitle': subtitle,
             'breadcrumb': 'Admin → Settings',
             'icon': '⚙️'
         })
 
     def post(self, request):
-        settings_obj = SystemSettings.objects.first()
-        form = SystemSettingsForm(request.POST, request.FILES, instance=settings_obj)
+        if request.user.company:
+            settings_obj = request.user.company
+            form = CompanyForm(request.POST, request.FILES, instance=settings_obj)
+        else:
+            settings_obj = SystemSettings.objects.first()
+            form = SystemSettingsForm(request.POST, request.FILES, instance=settings_obj)
+            
         if form.is_valid():
             form.save()
             messages.success(request, 'Settings updated successfully.')
             return redirect('admin_settings')
+        
+        title = 'Company Settings' if request.user.company else 'System Settings'
+        subtitle = 'Manage your company branding and logo' if request.user.company else 'Manage global application branding'
+        
         return render(request, 'admin_portal/settings.html', {
             'form': form,
-            'title': 'System Settings',
-            'subtitle': 'Manage application branding and logo',
+            'title': title,
+            'subtitle': subtitle,
             'breadcrumb': 'Admin → Settings',
             'icon': '⚙️'
         })
@@ -449,17 +477,17 @@ class DriverProfilePrintView(StaffRequiredMixin, View):
 
 import json
 
-class DeductionListView(AccountantSuperAdminMixin, View):
+class DeductionListView(AccountantSuperAdminMixin, CompanyDataMixin, View):
     def get(self, request):
         form = DeductionForm()
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
-        form.fields['employee'].queryset = Profile.objects.exclude(role='driver')
+        form.fields['driver'].queryset = self.get_queryset_by_company(Driver).filter(is_active=True)
+        form.fields['employee'].queryset = self.get_queryset_by_company(Profile).exclude(role='driver')
         
         # Prepare driver data for dynamic filtering in frontend
-        active_drivers = Driver.objects.filter(is_active=True).values('id', 'full_name', 'contract_type')
+        active_drivers = self.get_queryset_by_company(Driver).filter(is_active=True).values('id', 'full_name', 'contract_type')
         drivers_json = json.dumps(list(active_drivers), default=str)
         
-        deductions = Deduction.objects.select_related('driver', 'employee', 'submitted_by').all()
+        deductions = self.get_queryset_by_company(Deduction).select_related('driver', 'employee', 'submitted_by').all()
         return render(request, 'admin_portal/deduction_invoices.html', {
             'form': form,
             'deductions': deductions,
@@ -520,9 +548,9 @@ class DeductionListView(AccountantSuperAdminMixin, View):
         })
 
 
-class PendingDuesView(AccountantSuperAdminMixin, View):
+class PendingDuesView(AccountantSuperAdminMixin, CompanyDataMixin, View):
     def get(self, request):
-        installments = DeductionInstallment.objects.select_related(
+        installments = self.get_queryset_by_company(DeductionInstallment).select_related(
             'deduction__driver', 'deduction__employee'
         ).order_by('status', 'due_date')
         
@@ -554,9 +582,9 @@ class PendingDuesView(AccountantSuperAdminMixin, View):
         })
 
 
-class MarkInstallmentPaidView(AccountantSuperAdminMixin, View):
+class MarkInstallmentPaidView(AccountantSuperAdminMixin, CompanyDataMixin, View):
     def post(self, request, pk):
-        installment = get_object_or_404(DeductionInstallment, pk=pk)
+        installment = get_object_or_404(self.get_queryset_by_company(DeductionInstallment), pk=pk)
         
         # Check if marking as paid
         if 'mark_paid' in request.POST:

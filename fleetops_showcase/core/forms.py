@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import (
     Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Message,
     ROLE_CHOICES, POSITION_CHOICES, BANK_CHOICES, COMPANY_CHOICES,
-    CONTRACT_CHOICES, VEHICLE_CHOICES, Task, CompanyFile,
+    CONTRACT_CHOICES, VEHICLE_CHOICES, Task, CompanyFile, Company,
 )
 
 
@@ -269,11 +269,15 @@ class DriverForm(forms.ModelForm):
                     'first_name': self.cleaned_data.get('full_name', '').split(' ')[0],
                     'last_name': ' '.join(self.cleaned_data.get('full_name', '').split(' ')[1:]),
                     'role': 'driver',
+                    'company': driver.company,
                 }
             )
             
             if created:
                 profile.set_password('driver123')
+                profile.save()
+            elif not profile.company:
+                profile.company = driver.company
                 profile.save()
 
             driver.profile = profile
@@ -419,3 +423,51 @@ class SystemSettingsForm(forms.ModelForm):
             'max_excel_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
             'max_other_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
         }
+
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = ['name', 'logo', 'max_excel_size_mb', 'max_other_size_mb']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Company Name'}),
+            'logo': forms.FileInput(attrs={'class': TW_FILE}),
+            'max_excel_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
+            'max_other_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
+        }
+
+
+class CompanyRegistrationForm(forms.Form):
+    company_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Company Name'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': TW_INPUT, 'placeholder': 'Admin Email Address'})
+    )
+    password1 = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(attrs={'class': TW_INPUT, 'placeholder': 'Password'})
+    )
+    password2 = forms.CharField(
+        label='Confirm Password',
+        widget=forms.PasswordInput(attrs={'class': TW_INPUT, 'placeholder': 'Confirm Password'})
+    )
+
+    def clean_company_name(self):
+        name = self.cleaned_data.get('company_name')
+        if Company.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError("A company with this name already exists.")
+        return name
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if Profile.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('password1')
+        p2 = cleaned.get('password2')
+        if p1 and p1 != p2:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned

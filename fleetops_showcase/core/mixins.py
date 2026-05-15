@@ -54,3 +54,19 @@ class DriverRequiredMixin(RoleRequiredMixin):
 class AnyAuthenticatedMixin(LoginRequiredMixin):
     """Any logged-in user can access."""
     pass
+
+
+class CompanyDataMixin:
+    """Mixin to filter querysets by the logged-in user's company."""
+    def get_queryset_by_company(self, model_class):
+        user = self.request.user
+        # If user is a global superuser (Django superuser) and has no company, show everything
+        if user.is_superuser and not user.company:
+            return model_class.objects.all()
+        
+        # Otherwise, filter by company. If no company is assigned, return empty to be safe (or all for legacy)
+        if user.company:
+            return model_class.objects.filter(company=user.company)
+        
+        # Fallback for existing data/users without companies
+        return model_class.objects.all()

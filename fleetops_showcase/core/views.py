@@ -1,5 +1,9 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.db import transaction
+from .forms import CompanyRegistrationForm
+from .models import Company, Profile
 
 def home_view(request):
     """
@@ -24,3 +28,34 @@ def home_view(request):
 
 def access_denied(request):
     return render(request, 'auth/access_denied.html')
+
+def register_company(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = CompanyRegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Create company
+                    company = Company.objects.create(name=form.cleaned_data['company_name'])
+                    
+                    # Create superadmin user
+                    user = Profile.objects.create_user(
+                        username=form.cleaned_data['email'],
+                        email=form.cleaned_data['email'],
+                        password=form.cleaned_data['password1'],
+                        company=company,
+                        role='superadmin'
+                    )
+                    
+                    # Log the user in
+                    login(request, user, backend='core.backends.EmailBackend')
+                    return redirect('home')
+            except Exception as e:
+                form.add_error(None, f"An error occurred: {str(e)}")
+    else:
+        form = CompanyRegistrationForm()
+    
+    return render(request, 'auth/register.html', {'form': form})

@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Sum, Q
 from django.core.paginator import Paginator
-from core.mixins import AdminManagerRequiredMixin, FinancialAccessMixin
+from core.mixins import AdminManagerRequiredMixin, FinancialAccessMixin, CompanyDataMixin
 from core.models import (
     Driver, DriverInvoice, Deduction, Notification, Task,
     Profile, COMPANY_CHOICES, CONTRACT_CHOICES, VEHICLE_CHOICES,
@@ -22,47 +22,50 @@ from django.views import View
 from portal_admin.views import get_chart_data
 
 
-class ManagerDashboardView(AdminManagerRequiredMixin, View):
+class ManagerDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         check_and_notify_expiries(request.user)
         today = date.today()
-        company_filter = request.GET.get('company', '')
+        contract_filter = request.GET.get('company', '') # contract type
         
-        invoice_qs = DriverInvoice.objects.filter(
+        invoice_qs = self.get_queryset_by_company(DriverInvoice).filter(
             specified_date__year=today.year,
             specified_date__month=today.month,
         )
-        driver_qs = Driver.objects.filter(is_active=True)
+        driver_qs = self.get_queryset_by_company(Driver).filter(is_active=True)
         
-        if company_filter:
-            invoice_qs = invoice_qs.filter(driver__contract_type=company_filter)
-            driver_qs = driver_qs.filter(contract_type=company_filter)
+        if contract_filter:
+            invoice_qs = invoice_qs.filter(contract_type=contract_filter)
+            driver_qs = driver_qs.filter(contract_type=contract_filter)
         
         totals = invoice_qs.aggregate(
             total_orders=Sum('main_orders'),
             total_hours=Sum('hours'),
         )
         total_orders = totals['total_orders'] or 0
-        tasks = Task.objects.filter(Q(user=request.user) | Q(assigned_by=request.user)).order_by('-created_at')
-        recent_notifs = Notification.objects.filter(user=request.user, is_read=False)[:5]
+        tasks = self.get_queryset_by_company(Task).filter(Q(user=request.user) | Q(assigned_by=request.user)).order_by('-created_at')
+        recent_notifs = self.get_queryset_by_company(Notification).filter(user=request.user, is_read=False)[:5]
 
         return render(request, 'manager_portal/dashboard.html', {
             'total_orders': total_orders,
             'total_hours': totals['total_hours'] or Decimal('0.00'),
-            'chart_data': get_chart_data(company_filter=company_filter or None),
+            'chart_data': get_chart_data(
+                company=request.user.company, 
+                contract_filter=contract_filter or None
+            ),
             'tasks': tasks,
             'recent_notifs': recent_notifs,
             'active_drivers': driver_qs.count(),
             'expiring_docs': sum(1 for d in driver_qs if d.has_expiry_warning()),
             'task_assign_form': TaskAssignmentForm(),
             'contract_choices': CONTRACT_CHOICES,
-            'selected_company': company_filter,
+            'selected_company': contract_filter,
         })
 
 
-class ManagerDriverListView(AdminManagerRequiredMixin, View):
+class ManagerDriverListView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = Driver.objects.all()
+        qs = self.get_queryset_by_company(Driver)
         q = request.GET.get('q', '')
         company = request.GET.get('company', '')
         contract = request.GET.get('contract', '')
@@ -93,14 +96,14 @@ class ManagerDriverListView(AdminManagerRequiredMixin, View):
         })
 
 
-class ManagerDriverEditView(AdminManagerRequiredMixin, View):
+class ManagerDriverEditView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request, pk):
-        driver = get_object_or_404(Driver, pk=pk)
+        driver = get_object_or_404(self.get_queryset_by_company(Driver), pk=pk)
         form = DriverForm(instance=driver)
         return render(request, 'admin_portal/driver_form.html', {'form': form, 'editing': True, 'driver': driver, 'portal': 'manager'})
 
     def post(self, request, pk):
-        driver = get_object_or_404(Driver, pk=pk)
+        driver = get_object_or_404(self.get_queryset_by_company(Driver), pk=pk)
         form = DriverForm(request.POST, request.FILES, instance=driver)
         if form.is_valid():
             form.save()
@@ -113,9 +116,9 @@ class ManagerDriverEditView(AdminManagerRequiredMixin, View):
         return render(request, 'admin_portal/driver_form.html', {'form': form, 'editing': True, 'driver': driver, 'portal': 'manager'})
 
 
-class ManagerDriverToggleView(AdminManagerRequiredMixin, View):
+class ManagerDriverToggleView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def post(self, request, pk):
-        driver = get_object_or_404(Driver, pk=pk)
+        driver = get_object_or_404(self.get_queryset_by_company(Driver), pk=pk)
         driver.is_active = not driver.is_active
         driver.save()
         status = 'activated' if driver.is_active else 'deactivated'
@@ -152,7 +155,7 @@ class ManagerSalarySlipView(FinancialAccessMixin, View):
             is_range = False
 
         if is_range:
-            invoices = DriverInvoice.objects.filter(driver=driver, specified_date__range=[start_date, end_date])
+            invoices = self.get_queryset_by_company(DriverInvoice).filter(driver=driver, specified_date__range=[start_date, end_date])
             totals = invoices.aggregate(
                 cash=Sum('cash'),
                 main=Sum('main_orders'),
@@ -169,10 +172,10 @@ class ManagerSalarySlipView(FinancialAccessMixin, View):
                 'end_date': end_date,
             }
             # Range Deductions
-            deductions = Deduction.objects.filter(driver=driver, deduction_date__range=[start_date, end_date])
+            deductions = self.get_queryset_by_company(Deduction).filter(driver=driver, deduction_date__range=[start_date, end_date])
         else:
-            invoice = DriverInvoice.objects.filter(driver=driver, specified_date=start_date).first()
-            deductions = Deduction.objects.filter(driver=driver, deduction_date=start_date)
+            invoice = self.get_queryset_by_company(DriverInvoice).filter(driver=driver, specified_date=start_date).first()
+            deductions = self.get_queryset_by_company(Deduction).filter(driver=driver, deduction_date=start_date)
 
         total_deductions = deductions.aggregate(total=Sum('contractor_deduction_kd'))['total'] or Decimal('0.000')
 

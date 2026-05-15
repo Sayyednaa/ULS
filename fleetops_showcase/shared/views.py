@@ -7,7 +7,7 @@ from django.db.models import Sum, Q
 from django.db import transaction
 from django.core.paginator import Paginator
 from django.utils import timezone
-from core.mixins import AnyAuthenticatedMixin, StaffRequiredMixin, AdminManagerRequiredMixin, FinancialAccessMixin
+from core.mixins import AnyAuthenticatedMixin, StaffRequiredMixin, AdminManagerRequiredMixin, FinancialAccessMixin, CompanyDataMixin
 from core.models import (
     Driver, DriverInvoice, InvoiceArchive, Notification,
     Message, MessageRecipient, Profile, Task, CompanyFile,
@@ -49,7 +49,7 @@ def _next_month(year, month):
     return f"{year}-{month + 1:02d}"
 
 
-class InvoiceListView(StaffRequiredMixin, View):
+class InvoiceListView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         target_date_str = request.GET.get('date', date.today().isoformat())
         try:
@@ -57,16 +57,16 @@ class InvoiceListView(StaffRequiredMixin, View):
         except ValueError:
             target_date = date.today()
 
-        company_filter = request.GET.get('company', '')
+        company_filter = request.GET.get('company', '') # contract type
         driver_id = request.GET.get('driver_id', '')
-        drivers = Driver.objects.filter(is_active=True).order_by('full_name')
+        drivers = self.get_queryset_by_company(Driver).filter(is_active=True).order_by('full_name')
         if company_filter:
             drivers = drivers.filter(contract_type=company_filter)
         if driver_id:
             drivers = drivers.filter(id=driver_id)
         
         # Prefetch invoices for this date
-        invoices = DriverInvoice.objects.filter(specified_date=target_date)
+        invoices = self.get_queryset_by_company(DriverInvoice).filter(specified_date=target_date)
         invoice_map = {inv.driver_id: inv for inv in invoices}
         
         for driver in drivers:
@@ -74,7 +74,7 @@ class InvoiceListView(StaffRequiredMixin, View):
         
         return render(request, 'shared/driver_invoices.html', {
             'drivers': drivers,
-            'all_drivers': Driver.objects.filter(is_active=True).order_by('full_name'),
+            'all_drivers': self.get_queryset_by_company(Driver).filter(is_active=True).order_by('full_name'),
             'target_date': target_date,
             'target_date_iso': target_date.isoformat(),
             'portal': 'admin' if request.user.role in ('admin', 'superadmin') else ('manager' if request.user.role == 'manager' else 'employee'),
@@ -104,7 +104,7 @@ class InvoiceBulkSaveView(FinancialAccessMixin, View):
         cash_delta = safe_decimal(request.POST.get('cash'))
         hours_delta = safe_decimal(request.POST.get('hours'))
 
-        driver = get_object_or_404(Driver, id=driver_id)
+        driver = get_object_or_404(self.get_queryset_by_company(Driver), id=driver_id)
         
         with transaction.atomic():
             invoice, created = DriverInvoice.objects.get_or_create(
@@ -115,7 +115,8 @@ class InvoiceBulkSaveView(FinancialAccessMixin, View):
                     'additional_orders': additional_delta,
                     'cash': cash_delta,
                     'hours': hours_delta,
-                    'created_by': request.user.profile
+                    'created_by': request.user.profile,
+                    'company': request.user.company
                 }
             )
             
@@ -138,12 +139,12 @@ class InvoiceResetView(StaffRequiredMixin, View):
         all_reset = request.POST.get('all') == 'true'
 
         if all_reset:
-            DriverInvoice.objects.filter(specified_date=target_date_str).update(
+            self.get_queryset_by_company(DriverInvoice).filter(specified_date=target_date_str).update(
                 main_orders=0, hours=0
             )
             django_messages.success(request, f'Reset all totals for {target_date_str}.')
         else:
-            driver = get_object_or_404(Driver, id=driver_id)
+            driver = get_object_or_404(self.get_queryset_by_company(Driver), id=driver_id)
             DriverInvoice.objects.filter(driver=driver, specified_date=target_date_str).update(
                 main_orders=0, hours=0
             )
@@ -158,6 +159,7 @@ class InvoiceAddView(StaffRequiredMixin, View):
         if form.is_valid():
             invoice = form.save(commit=False)
             invoice.created_by = request.user
+            invoice.company = request.user.company
             invoice.save()
             django_messages.success(request, 'Invoice entry added.')
         else:
@@ -166,18 +168,18 @@ class InvoiceAddView(StaffRequiredMixin, View):
         return redirect(f'/shared/invoices/?month={month}' if month else '/shared/invoices/')
 
 
-class InvoiceEditView(StaffRequiredMixin, View):
+class InvoiceEditView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request, pk):
-        invoice = get_object_or_404(DriverInvoice, pk=pk)
+        invoice = get_object_or_404(self.get_queryset_by_company(DriverInvoice), pk=pk)
         # Employee can only edit own
         if request.user.role == 'employee' and invoice.created_by != request.user:
             return redirect('access_denied')
         form = DriverInvoiceForm(instance=invoice)
-        form.fields['driver'].queryset = Driver.objects.filter(is_active=True)
+        form.fields['driver'].queryset = self.get_queryset_by_company(Driver).filter(is_active=True)
         return render(request, 'shared/invoice_edit.html', {'form': form, 'invoice': invoice})
 
     def post(self, request, pk):
-        invoice = get_object_or_404(DriverInvoice, pk=pk)
+        invoice = get_object_or_404(self.get_queryset_by_company(DriverInvoice), pk=pk)
         if request.user.role == 'employee' and invoice.created_by != request.user:
             return redirect('access_denied')
         form = DriverInvoiceForm(request.POST, instance=invoice)
@@ -188,9 +190,9 @@ class InvoiceEditView(StaffRequiredMixin, View):
         return render(request, 'shared/invoice_edit.html', {'form': form, 'invoice': invoice})
 
 
-class InvoiceDeleteView(StaffRequiredMixin, View):
+class InvoiceDeleteView(StaffRequiredMixin, CompanyDataMixin, View):
     def post(self, request, pk):
-        invoice = get_object_or_404(DriverInvoice, pk=pk)
+        invoice = get_object_or_404(self.get_queryset_by_company(DriverInvoice), pk=pk)
         if request.user.role == 'employee' and invoice.created_by != request.user:
             return redirect('access_denied')
         invoice.delete()
@@ -208,7 +210,7 @@ class InvoiceArchiveActionView(StaffRequiredMixin, View):
             django_messages.error(request, 'Invalid month.')
             return redirect('/shared/invoices/')
 
-        invoices = DriverInvoice.objects.filter(
+        invoices = self.get_queryset_by_company(DriverInvoice).filter(
             specified_date__year=year, specified_date__month=month,
         )
         if not invoices.exists():
@@ -232,6 +234,7 @@ class InvoiceArchiveActionView(StaffRequiredMixin, View):
                     hours=totals['hours'] or 0,
                     archive_date=date(year, month, 1),
                     archived_by=request.user,
+                    company=request.user.company
                 )
             invoices.delete()
 
@@ -242,17 +245,17 @@ class InvoiceArchiveActionView(StaffRequiredMixin, View):
 class InvoiceExportView(StaffRequiredMixin, View):
     def get(self, request):
         year, month = _parse_month(request)
-        qs = DriverInvoice.objects.filter(
+        qs = self.get_queryset_by_company(DriverInvoice).filter(
             specified_date__year=year, specified_date__month=month,
         ).select_related('driver').order_by('driver__full_name', 'specified_date')
         return export_invoices_excel(qs, f"{year}-{month:02d}")
 
 
-class ArchiveListView(StaffRequiredMixin, View):
+class ArchiveListView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = InvoiceArchive.objects.select_related('driver').all()
+        qs = self.get_queryset_by_company(InvoiceArchive).select_related('driver').all()
         q = request.GET.get('q', '')
-        company = request.GET.get('company', '')
+        company = request.GET.get('company', '') # contract type
         contract = request.GET.get('contract', '')
         month_str = request.GET.get('month', '')
 
@@ -283,36 +286,36 @@ class ArchiveListView(StaffRequiredMixin, View):
         })
 
 
-class ArchiveExportView(StaffRequiredMixin, View):
+class ArchiveExportView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = InvoiceArchive.objects.all()
+        qs = self.get_queryset_by_company(InvoiceArchive).all()
         return export_archive_excel(qs, 'all')
 
 
-class NotificationListView(AnyAuthenticatedMixin, View):
+class NotificationListView(AnyAuthenticatedMixin, CompanyDataMixin, View):
     def get(self, request):
-        notifications = Notification.objects.filter(user=request.user)
+        notifications = self.get_queryset_by_company(Notification).filter(user=request.user)
         return render(request, 'shared/notifications.html', {'notifications': notifications})
 
 
-class NotificationReadView(AnyAuthenticatedMixin, View):
+class NotificationReadView(AnyAuthenticatedMixin, CompanyDataMixin, View):
     def post(self, request, pk):
-        notif = get_object_or_404(Notification, pk=pk, user=request.user)
+        notif = get_object_or_404(self.get_queryset_by_company(Notification), pk=pk, user=request.user)
         notif.is_read = True
         notif.save()
         return redirect('/shared/notifications/')
 
 
-class NotificationReadAllView(AnyAuthenticatedMixin, View):
+class NotificationReadAllView(AnyAuthenticatedMixin, CompanyDataMixin, View):
     def post(self, request):
-        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        self.get_queryset_by_company(Notification).filter(user=request.user, is_read=False).update(is_read=True)
         django_messages.success(request, 'All notifications marked as read.')
         return redirect('/shared/notifications/')
 
 
-class NotificationClearAllView(AnyAuthenticatedMixin, View):
+class NotificationClearAllView(AnyAuthenticatedMixin, CompanyDataMixin, View):
     def post(self, request):
-        Notification.objects.filter(user=request.user).delete()
+        self.get_queryset_by_company(Notification).filter(user=request.user).delete()
         django_messages.success(request, 'Notification history cleared.')
         return redirect('/shared/notifications/')
 
@@ -361,7 +364,9 @@ class MessageComposeView(StaffRequiredMixin, View):
         initial = {}
         if pre_recipient_id:
             try:
-                initial['recipient'] = Profile.objects.get(pk=pre_recipient_id)
+                # Still filter by company for security
+                qs = Profile.objects.filter(company=request.user.company) if request.user.company else Profile.objects.all()
+                initial['recipient'] = qs.get(pk=pre_recipient_id)
             except (Profile.DoesNotExist, ValueError):
                 pass
         
@@ -385,9 +390,9 @@ class MessageComposeView(StaffRequiredMixin, View):
         return render(request, 'shared/messages_compose.html', {'form': form})
 
 
-class ContactView(StaffRequiredMixin, View):
+class ContactView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = Profile.objects.all()
+        qs = self.get_queryset_by_company(Profile).all()
         q = request.GET.get('q', '')
         if q:
             qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(email__icontains=q))
@@ -400,6 +405,7 @@ class TaskAddView(AnyAuthenticatedMixin, View):
         if form.is_valid():
             task = form.save(commit=False)
             task.user = request.user
+            task.company = request.user.company
             task.save()
             django_messages.success(request, 'Task added.')
         redirect_url = request.META.get('HTTP_REFERER', '/')
@@ -412,6 +418,7 @@ class TaskAssignView(AdminManagerRequiredMixin, View):
         if form.is_valid():
             task = form.save(commit=False)
             task.assigned_by = request.user
+            task.company = request.user.company
             task.save()
             django_messages.success(request, f'Task assigned to {task.user.get_full_name()}.')
         else:
@@ -450,9 +457,9 @@ class TaskDeleteView(AnyAuthenticatedMixin, View):
 
 # ─── Company Files Archive ───────────────────────────────────────────────────
 
-class CompanyFileListView(StaffRequiredMixin, View):
+class CompanyFileListView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = CompanyFile.objects.all()
+        qs = self.get_queryset_by_company(CompanyFile).all()
         q = request.GET.get('q', '')
         if q:
             qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(category__icontains=q))
@@ -469,6 +476,7 @@ class CompanyFileListView(StaffRequiredMixin, View):
         if form.is_valid():
             cfile = form.save(commit=False)
             cfile.uploaded_by = request.user.profile if hasattr(request.user, 'profile') else None
+            cfile.company = request.user.company
             cfile.save()
             django_messages.success(request, 'Company file uploaded successfully.')
         return redirect('company_files')
@@ -494,9 +502,9 @@ class CompanyFileDeleteView(AdminManagerRequiredMixin, View):
 
 # ─── Deactivated Drivers ────────────────────────────────────────────────────
 
-class DeactivatedDriversView(StaffRequiredMixin, View):
+class DeactivatedDriversView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        drivers = Driver.objects.filter(is_active=False).order_by('full_name')
+        drivers = self.get_queryset_by_company(Driver).filter(is_active=False).order_by('full_name')
         return render(request, 'shared/deactivated_drivers.html', {'drivers': drivers})
 
 
@@ -504,7 +512,7 @@ class DeactivatedDriversView(StaffRequiredMixin, View):
 
 class TemplateDownloadView(StaffRequiredMixin, View):
     def get(self, request, model_type):
-        return generate_excel_template(model_type)
+        return generate_excel_template(model_type, request.user)
 
 
 class BulkUploadView(StaffRequiredMixin, View):

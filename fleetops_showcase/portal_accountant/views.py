@@ -7,7 +7,9 @@ from core.models import Driver, TalabatSalaryDetail, ContractSalaryDetail, Month
 from core.validators import validate_file_extension
 from django.core.exceptions import ValidationError
 
-class AccountantMixin(LoginRequiredMixin, UserPassesTestMixin):
+from core.mixins import CompanyDataMixin
+
+class AccountantMixin(LoginRequiredMixin, UserPassesTestMixin, CompanyDataMixin):
     def test_func(self):
         return getattr(self.request.user, 'role', '') in ('accountant', 'superadmin', 'admin')
 
@@ -16,11 +18,12 @@ class AccountantDashboardView(AccountantMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['talabat_count'] = Driver.objects.filter(contract_type='talabat', is_active=True).count()
-        context['pharmazone_count'] = Driver.objects.filter(contract_type='pharmazone', is_active=True).count()
-        context['burgerking_count'] = Driver.objects.filter(contract_type='burger_king', is_active=True).count()
-        context['other_count'] = Driver.objects.filter(contract_type='other', is_active=True).count()
-        context['recent_reports'] = MonthlyProfitLoss.objects.order_by('-created_at')[:5]
+        driver_qs = self.get_queryset_by_company(Driver).filter(is_active=True)
+        context['talabat_count'] = driver_qs.filter(contract_type='talabat').count()
+        context['pharmazone_count'] = driver_qs.filter(contract_type='pharmazone').count()
+        context['burgerking_count'] = driver_qs.filter(contract_type='burger_king').count()
+        context['other_count'] = driver_qs.filter(contract_type='other').count()
+        context['recent_reports'] = self.get_queryset_by_company(MonthlyProfitLoss).order_by('-created_at')[:5]
         return context
 
 class AccountantTalabatView(AccountantMixin, ListView):
@@ -29,11 +32,11 @@ class AccountantTalabatView(AccountantMixin, ListView):
     context_object_name = 'drivers'
 
     def get_queryset(self):
-        return Driver.objects.filter(is_active=True, contract_type='talabat').order_by('full_name')
+        return self.get_queryset_by_company(Driver).filter(is_active=True, contract_type='talabat').order_by('full_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['saved_records'] = TalabatSalaryDetail.objects.select_related('driver').order_by('-created_at')[:50]
+        context['saved_records'] = self.get_queryset_by_company(TalabatSalaryDetail).select_related('driver').order_by('-created_at')[:50]
         return context
 
     def post(self, request, *args, **kwargs):
@@ -116,11 +119,11 @@ class AccountantPharmazoneView(AccountantMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['contract_title'] = 'Pharma Zone'
         context['contract_type'] = 'pharmazone'
-        context['saved_records'] = ContractSalaryDetail.objects.select_related('driver').filter(contract_type='pharmazone').order_by('-created_at')[:50]
+        context['saved_records'] = self.get_queryset_by_company(ContractSalaryDetail).select_related('driver').filter(contract_type='pharmazone').order_by('-created_at')[:50]
         return context
 
     def get_queryset(self):
-        return Driver.objects.filter(is_active=True, contract_type='pharmazone').order_by('full_name')
+        return self.get_queryset_by_company(Driver).filter(is_active=True, contract_type='pharmazone').order_by('full_name')
 
     def post(self, request, *args, **kwargs):
         return _save_contract_salary(request, 'pharmazone', 'accountant_pharmazone')
@@ -134,11 +137,11 @@ class AccountantBurgerKingView(AccountantMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['contract_title'] = 'Burger King'
         context['contract_type'] = 'burger_king'
-        context['saved_records'] = ContractSalaryDetail.objects.select_related('driver').filter(contract_type='burger_king').order_by('-created_at')[:50]
+        context['saved_records'] = self.get_queryset_by_company(ContractSalaryDetail).select_related('driver').filter(contract_type='burger_king').order_by('-created_at')[:50]
         return context
 
     def get_queryset(self):
-        return Driver.objects.filter(is_active=True, contract_type='burger_king').order_by('full_name')
+        return self.get_queryset_by_company(Driver).filter(is_active=True, contract_type='burger_king').order_by('full_name')
 
     def post(self, request, *args, **kwargs):
         return _save_contract_salary(request, 'burger_king', 'accountant_burgerking')
@@ -152,11 +155,11 @@ class AccountantOtherContractView(AccountantMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['contract_title'] = 'Other Contracts'
         context['contract_type'] = 'other'
-        context['saved_records'] = ContractSalaryDetail.objects.select_related('driver').filter(contract_type='other').order_by('-created_at')[:50]
+        context['saved_records'] = self.get_queryset_by_company(ContractSalaryDetail).select_related('driver').filter(contract_type='other').order_by('-created_at')[:50]
         return context
 
     def get_queryset(self):
-        return Driver.objects.filter(is_active=True, contract_type='other').order_by('full_name')
+        return self.get_queryset_by_company(Driver).filter(is_active=True, contract_type='other').order_by('full_name')
 
     def post(self, request, *args, **kwargs):
         return _save_contract_salary(request, 'other', 'accountant_other_contract')
@@ -219,7 +222,7 @@ class AccountantMonthlyDetailsView(AccountantMixin, ListView):
     context_object_name = 'records'
     
     def get_queryset(self):
-        return MonthlyProfitLoss.objects.all().order_by('-month')
+        return self.get_queryset_by_company(MonthlyProfitLoss).all().order_by('-month')
 
     def post(self, request, *args, **kwargs):
         company_name = request.POST.get('company_name')
@@ -265,6 +268,7 @@ class AccountantDriverAddView(AccountantMixin, View):
         if form.is_valid():
             driver = form.save(commit=False)
             driver.created_by = request.user
+            driver.company = request.user.company
             driver.save()
             messages.success(request, f'Driver {driver.full_name} added successfully.')
             return redirect('accountant_talabat') # Or wherever
@@ -283,19 +287,17 @@ def is_accountant(user):
 @login_required
 @user_passes_test(is_accountant)
 def accountant_download_template(request, model_type):
-    return generate_excel_template(model_type)
+    return generate_excel_template(model_type, request.user)
 
 @login_required
 @user_passes_test(is_accountant)
 def accountant_export_excel(request, model_type):
     if model_type == 'talabat_salary':
-        queryset = TalabatSalaryDetail.objects.all()
+        queryset = TalabatSalaryDetail.objects.filter(company=request.user.company) if request.user.company else TalabatSalaryDetail.objects.all()
         return export_talabat_excel(queryset, label='talabat_salaries')
     elif model_type == 'contract_salary':
-        # the accountant views filter by contract_type but export handles all or specific? 
-        # let's export all contract salaries for simplicity, or we can filter by request.GET.get('type')
         contract_type = request.GET.get('type', '')
-        queryset = ContractSalaryDetail.objects.all()
+        queryset = ContractSalaryDetail.objects.filter(company=request.user.company) if request.user.company else ContractSalaryDetail.objects.all()
         if contract_type:
             queryset = queryset.filter(contract_type=contract_type)
         return export_contract_excel(queryset, label=contract_type or 'all_contracts')
@@ -337,7 +339,7 @@ class AccountantSalarySlipListView(FinancialAccessMixin, ListView):
     context_object_name = 'drivers'
 
     def get_queryset(self):
-        qs = Driver.objects.filter(is_active=True)
+        qs = self.get_queryset_by_company(Driver).filter(is_active=True)
         q = self.request.GET.get('q', '')
         if q:
             qs = qs.filter(full_name__icontains=q) | qs.filter(working_id__icontains=q) | qs.filter(phone__icontains=q)
