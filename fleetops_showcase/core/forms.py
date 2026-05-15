@@ -9,6 +9,7 @@ from .models import (
 
 # ─── Tailwind form widget helper (Najmat Style) ──────────────────────────────
 TW_INPUT = 'block w-full rounded-md border border-app-border bg-app-bg py-2 px-3 text-app-text sm:text-sm sm:leading-6 transition-colors shadow-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand placeholder-app-text-muted disabled:opacity-60'
+TW_INPUT_AUTH = 'w-full pl-12 pr-4 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-black/60 transition-all'
 TW_SELECT = TW_INPUT + ' cursor-pointer'
 TW_TEXTAREA = TW_INPUT + ' min-h-[100px]'
 TW_FILE = 'block w-full text-sm text-app-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 border border-app-border rounded-md bg-app-bg'
@@ -19,14 +20,14 @@ TW_CHECKBOX = 'w-4 h-4 rounded border-app-border text-brand focus:ring-brand'
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(attrs={
-            'class': TW_INPUT,
+            'class': TW_INPUT_AUTH,
             'placeholder': 'Email address',
             'autofocus': True,
         })
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            'class': TW_INPUT,
+            'class': TW_INPUT_AUTH,
             'placeholder': 'Password',
             'x-bind:type': "showPass ? 'text' : 'password'",
         })
@@ -436,20 +437,21 @@ class CompanyForm(forms.ModelForm):
         }
 
 
+
 class CompanyRegistrationForm(forms.Form):
     company_name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Company Name'})
+        widget=forms.TextInput(attrs={'class': TW_INPUT_AUTH, 'placeholder': 'Company Name'})
     )
     email = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': TW_INPUT, 'placeholder': 'Admin Email Address'})
+        widget=forms.EmailInput(attrs={'class': TW_INPUT_AUTH, 'placeholder': 'Admin Email Address'})
     )
     password1 = forms.CharField(
         label='Password',
-        widget=forms.PasswordInput(attrs={'class': TW_INPUT, 'placeholder': 'Password'})
+        widget=forms.PasswordInput(attrs={'class': TW_INPUT_AUTH, 'placeholder': 'Password'})
     )
     password2 = forms.CharField(
         label='Confirm Password',
-        widget=forms.PasswordInput(attrs={'class': TW_INPUT, 'placeholder': 'Confirm Password'})
+        widget=forms.PasswordInput(attrs={'class': TW_INPUT_AUTH, 'placeholder': 'Confirm Password'})
     )
 
     def clean_company_name(self):
