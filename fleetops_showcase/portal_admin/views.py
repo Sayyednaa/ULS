@@ -339,7 +339,7 @@ class SystemSettingsView(SuperAdminRequiredMixin, View):
         else:
             settings_obj = SystemSettings.objects.first()
             if not settings_obj:
-                settings_obj = SystemSettings.objects.create(brand_name='SAYEDNA LOGISTICS')
+                settings_obj = SystemSettings.objects.create(brand_name='UNPREDICTABLE LOGISTICS SOLUTIONS')
             form = SystemSettingsForm(instance=settings_obj)
             title = 'System Settings'
             subtitle = 'Manage global application branding'

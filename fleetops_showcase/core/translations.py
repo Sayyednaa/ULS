@@ -4,9 +4,12 @@
 
 TRANSLATIONS = {
     # Navigation & Sidebar
-    "SAYEDNA LOGISTICS": "سيدنا للخدمات اللوجستية",
+    "SAYEDNA LOGISTICS": "حلول لوجستية غير متوقعة",
     "Gulf Operations": "عمليات الخليج",
     "Dashboard": "لوحة التحكم",
+    "Already have an account?": "هل لديك حساب بالفعل؟",
+    "Back to Sign In": "العودة لتسجيل الدخول",
+    "Register Company": "تسجيل شركة",
     "Team Management": "إدارة الفريق",
     "Manage Team": "إدارة الفريق",
     "Driver Management": "إدارة السائقين",
@@ -124,6 +127,18 @@ TRANSLATIONS = {
     "Secure Password": "كلمة المرور",
     "Sign into Dashboard": "تسجيل الدخول",
     "Invalid email or password": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "New company?": "هل أنت شركة جديدة؟",
+    "Register your organization": "سجل شركتك الآن",
+    "COMPANY REGISTRATION": "تسجيل الشركات",
+    "Create Company": "إنشاء شركة جديدة",
+    "Start managing your fleet today": "ابدأ بإدارة أسطولك اليوم",
+    "Admin Email": "البريد الإلكتروني للمسؤول",
+    "Admin Email Address": "عنوان البريد الإلكتروني للمسؤول",
+    "Password": "كلمة المرور",
+    "Confirm Password": "تأكيد كلمة المرور",
+    "A company with this name already exists.": "هناك شركة مسجلة بهذا الاسم بالفعل.",
+    "A user with this email already exists.": "هناك مستخدم مسجل بهذا البريد الإلكتروني بالفعل.",
+    "Passwords do not match.": "كلمات المرور غير متطابقة.",
     
     # Roles
     "superadmin": "مسؤول عام",
@@ -291,7 +306,7 @@ TRANSLATIONS = {
     "Talabat": "طلبات",
     "Burger King": "برجر كنج",
     "Pharmazone": "فارمازون",
-    "SAYEDNA LOGISTICS": "سيدنا للخدمات اللوجستية",
+    "SAYEDNA LOGISTICS": "حلول لوجستية غير متوقعة",
     "Active": "نشط",
     "Car": "سيارة",
     "Bike": "دراجة",

@@ -6,7 +6,7 @@ from .validators import validate_file_extension
 
 
 class SystemSettings(models.Model):
-    brand_name = models.CharField(max_length=100, default='SAYEDNA LOGISTICS')
+    brand_name = models.CharField(max_length=100, default='UNPREDICTABLE LOGISTICS SOLUTIONS')
     logo = models.ImageField(upload_to='system/', null=True, blank=True, validators=[validate_file_extension])
     
     # File Size Limits (in MB)
@@ -89,7 +89,7 @@ BANK_CHOICES = [
 ]
 
 COMPANY_CHOICES = [
-    ('sayedna', 'SAYEDNA LOGISTICS'),
+    ('sayedna', 'UNPREDICTABLE LOGISTICS SOLUTIONS'),
     ('speedy', 'Speedy'),
     ('other', 'Other'),
 ]

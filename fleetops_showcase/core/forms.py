@@ -447,11 +447,19 @@ class CompanyRegistrationForm(forms.Form):
     )
     password1 = forms.CharField(
         label='Password',
-        widget=forms.PasswordInput(attrs={'class': TW_INPUT_AUTH, 'placeholder': 'Password'})
+        widget=forms.PasswordInput(attrs={
+            'class': TW_INPUT_AUTH, 
+            'placeholder': 'Password',
+            'x-bind:type': "showPass ? 'text' : 'password'",
+        })
     )
     password2 = forms.CharField(
         label='Confirm Password',
-        widget=forms.PasswordInput(attrs={'class': TW_INPUT_AUTH, 'placeholder': 'Confirm Password'})
+        widget=forms.PasswordInput(attrs={
+            'class': TW_INPUT_AUTH, 
+            'placeholder': 'Confirm Password',
+            'x-bind:type': "showPass ? 'text' : 'password'",
+        })
     )
 
     def clean_company_name(self):

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load translation_tags %}
-{% block title %}{{ "Talabat Salary Details"|t:lang }} — SAYEDNA LOGISTICS{% endblock %}
+{% block title %}{{ "Talabat Salary Details"|t:lang }} — UNPREDICTABLE LOGISTICS SOLUTIONS{% endblock %}
 {% block page_title %}{{ "Talabat Salary Details"|t:lang }}{% endblock %}
-{% block breadcrumb %}SAYEDNA LOGISTICS / <span x-text="t('Accountant')"></span> / <span x-text="t('Talabat')"></span>{% endblock %}
+{% block breadcrumb %}UNPREDICTABLE LOGISTICS SOLUTIONS / <span x-text="t('Accountant')"></span> / <span x-text="t('Talabat')"></span>{% endblock %}
 
 {% block content %}
 <div class="space-y-6" x-data="talabatSalary()">
     <div class="flex items-center justify-between mb-2">
-        <h3 class="text-xl font-bold text-app-text" x-text="t('SAYEDNA LOGISTICS') + ' — ' + t('Talabat Salary Entry')"></h3>
+        <h3 class="text-xl font-bold text-app-text" x-text="t('UNPREDICTABLE LOGISTICS SOLUTIONS') + ' — ' + t('Talabat Salary Entry')"></h3>
         <div class="flex gap-2">
             <a href="{% url 'accountant_download_template' 'talabat_salary' %}" class="px-3 py-1.5 text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg flex items-center gap-1 transition-colors">
                 <span>📄</span> <span x-text="t('Template')"></span>

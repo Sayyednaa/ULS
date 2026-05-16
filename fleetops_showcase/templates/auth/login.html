@@ -37,12 +37,10 @@
 
     <div class="w-full max-w-md relative z-10">
         <div class="text-center mb-8 float-anim">
-            <div class="inline-flex items-center justify-center w-20 h-20 mb-4 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/20">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+            <div class="inline-flex items-center justify-center mb-4">
+                <img src="{% static 'img/logo.png' %}" alt="ULS Logo" class="h-24 w-24 object-cover rounded-full border-2 border-emerald-500/20 shadow-2xl drop-shadow-2xl">
             </div>
-            <h1 class="text-4xl font-black text-white tracking-tighter drop-shadow-lg">Fleet<span class="text-emerald-500">Ops</span></h1>
+            <h1 class="text-4xl font-black text-white tracking-tighter drop-shadow-lg">ULS</h1>
             <p class="text-gray-400 text-sm mt-1 font-medium tracking-wide uppercase">LOGISTICS MANAGEMENT OS</p>
         </div>
 
@@ -111,6 +109,15 @@
                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
             </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm">
+                    <span x-text="t('New company?')"></span>
+                    <a href="{% url 'register' %}" class="text-emerald-500 hover:text-emerald-400 font-bold ml-1 transition-colors">
+                        <span x-text="t('Register your organization')"></span>
+                    </a>
+                </p>
+            </div>
         </div>
 
         <!-- Demo Credentials -->

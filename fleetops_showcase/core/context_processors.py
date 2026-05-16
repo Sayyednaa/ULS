@@ -7,7 +7,7 @@ def system_settings(request):
     Prioritizes the logged-in user's company settings.
     """
     data = {
-        'brand_name': 'FleetOps',
+        'brand_name': 'Unpredictable Logistics Solutions',
         'brand_logo': settings.STATIC_URL + 'img/logo.png',
         'max_excel_mb': 20,
         'max_other_mb': 1,
