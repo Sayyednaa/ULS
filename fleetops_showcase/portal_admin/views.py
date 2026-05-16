@@ -118,7 +118,10 @@ class AdminDashboardView(StaffRequiredMixin, CompanyDataMixin, View):
                 driver_id=driver_id or None
             ),
             'companies': [c[0] for c in COMPANY_CHOICES],
-            'drivers': self.get_queryset_by_company(Driver).filter(is_active=True).order_by('full_name'),
+            'drivers': self.get_queryset_by_company(Driver).filter(
+                is_active=True,
+                **({'contract_type': contract_filter} if contract_filter else {})
+            ).order_by('full_name'),
             'selected_company': contract_filter,
             'selected_driver': driver_id,
             'tasks': tasks,
@@ -132,7 +135,7 @@ class AdminDashboardView(StaffRequiredMixin, CompanyDataMixin, View):
 
 class TeamListView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = self.get_queryset_by_company(Profile).exclude(role='driver')
+        qs = self.get_queryset_by_company(Profile)
         q = request.GET.get('q', '')
         if q:
             qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(email__icontains=q))

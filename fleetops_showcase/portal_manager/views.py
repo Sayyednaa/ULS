@@ -27,6 +27,7 @@ class ManagerDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
         check_and_notify_expiries(request.user)
         today = date.today()
         contract_filter = request.GET.get('company', '') # contract type
+        driver_id = request.GET.get('driver_id', '')
         
         invoice_qs = self.get_queryset_by_company(DriverInvoice).filter(
             specified_date__year=today.year,
@@ -37,6 +38,10 @@ class ManagerDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
         if contract_filter:
             invoice_qs = invoice_qs.filter(contract_type=contract_filter)
             driver_qs = driver_qs.filter(contract_type=contract_filter)
+        
+        if driver_id:
+            invoice_qs = invoice_qs.filter(driver_id=driver_id)
+            driver_qs = driver_qs.filter(id=driver_id)
         
         totals = invoice_qs.aggregate(
             total_orders=Sum('main_orders'),
@@ -51,7 +56,8 @@ class ManagerDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
             'total_hours': totals['total_hours'] or Decimal('0.00'),
             'chart_data': get_chart_data(
                 company=request.user.company, 
-                contract_filter=contract_filter or None
+                contract_filter=contract_filter or None,
+                driver_id=driver_id or None
             ),
             'tasks': tasks,
             'recent_notifs': recent_notifs,
@@ -59,7 +65,12 @@ class ManagerDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
             'expiring_docs': sum(1 for d in driver_qs if d.has_expiry_warning()),
             'task_assign_form': TaskAssignmentForm(),
             'contract_choices': CONTRACT_CHOICES,
+            'drivers': self.get_queryset_by_company(Driver).filter(
+                is_active=True,
+                **({'contract_type': contract_filter} if contract_filter else {})
+            ).order_by('full_name'),
             'selected_company': contract_filter,
+            'selected_driver': request.GET.get('driver_id', ''),
         })
 
 

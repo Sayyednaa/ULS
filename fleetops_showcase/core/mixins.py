@@ -68,5 +68,5 @@ class CompanyDataMixin:
         if user.company:
             return model_class.objects.filter(company=user.company)
         
-        # Fallback for existing data/users without companies
-        return model_class.objects.all()
+        # Fallback for security: if no company is assigned and not a global superuser, return nothing.
+        return model_class.objects.none()

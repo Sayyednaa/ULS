@@ -5,20 +5,47 @@
 {% block breadcrumb %}<span x-text="t('Welcome back')"></span>, {{ request.user.first_name }}{% endblock %}
 
 {% block content %}
-<!-- Company Filter Pills -->
-<div class="bg-app-card border border-app-border rounded-2xl p-4 mb-6 shadow-sm">
-    <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs font-bold text-app-text-muted uppercase tracking-wider mr-2">🏢 <span x-text="t('Filter by Company')"></span>:</span>
-        <a href="{% url 'manager_dashboard' %}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border {% if not selected_company %}bg-brand text-white border-brand shadow-lg shadow-brand/20{% else %}bg-app-bg text-app-text-muted border-app-border hover:border-brand/50 hover:text-brand{% endif %}">
-            <span x-text="t('All Companies')"></span>
-        </a>
-        {% for key, label in contract_choices %}
-        <a href="{% url 'manager_dashboard' %}?company={{ key }}" 
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border {% if selected_company == key %}bg-brand text-white border-brand shadow-lg shadow-brand/20{% else %}bg-app-bg text-app-text-muted border-app-border hover:border-brand/50 hover:text-brand{% endif %}">
-            {{ label }}
-        </a>
-        {% endfor %}
+<div class="bg-app-card border border-app-border rounded-2xl p-6 mb-6 shadow-sm">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Company Filter Pills -->
+        <div class="space-y-3">
+            <span class="text-[10px] font-black text-app-text-muted uppercase tracking-[0.2em] block">🏢 <span x-text="t('Filter by Company')"></span></span>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{% url 'manager_dashboard' %}{% if selected_driver %}?driver_id={{ selected_driver }}{% endif %}" 
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border {% if not selected_company %}bg-brand text-white border-brand shadow-lg shadow-brand/20{% else %}bg-app-bg text-app-text-muted border-app-border hover:border-brand/50 hover:text-brand{% endif %}">
+                    <span x-text="t('All Companies')"></span>
+                </a>
+                {% for key, label in contract_choices %}
+                <a href="{% url 'manager_dashboard' %}?company={{ key }}{% if selected_driver %}&driver_id={{ selected_driver }}{% endif %}" 
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border {% if selected_company == key %}bg-brand text-white border-brand shadow-lg shadow-brand/20{% else %}bg-app-bg text-app-text-muted border-app-border hover:border-brand/50 hover:text-brand{% endif %}">
+                    {{ label }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Driver Filter -->
+        <div class="space-y-3">
+            <span class="text-[10px] font-black text-app-text-muted uppercase tracking-[0.2em] block">🚗 <span x-text="t('Filter by Driver')"></span></span>
+            <form action="{% url 'manager_dashboard' %}" method="get" class="flex items-center gap-2 m-0" id="driverFilterForm">
+                {% if selected_company %}
+                <input type="hidden" name="company" value="{{ selected_company }}">
+                {% endif %}
+                <select name="driver_id" onchange="this.form.submit()" class="flex-1 rounded-xl border border-app-border bg-app-bg py-2.5 px-4 text-xs font-bold text-app-text focus:ring-2 focus:ring-brand/20 outline-none transition-all cursor-pointer">
+                    <option value="">-- <span x-text="t('All Drivers')"></span> --</option>
+                    {% for d in drivers %}
+                    <option value="{{ d.id }}" {% if selected_driver == d.id|stringformat:"s" %}selected{% endif %}>
+                        {{ d.full_name }} ({{ d.working_id }})
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if selected_driver %}
+                <a href="{% url 'manager_dashboard' %}{% if selected_company %}?company={{ selected_company }}{% endif %}" class="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all" title="Clear Driver Filter">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </a>
+                {% endif %}
+            </form>
+        </div>
     </div>
 </div>
 

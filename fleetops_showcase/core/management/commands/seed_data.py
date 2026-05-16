@@ -5,62 +5,73 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from core.models import (
     Profile, Driver, DriverInvoice, Deduction, Message, MessageRecipient, Task,
+    Company,
 )
 
 class Command(BaseCommand):
-    help = 'Seed the database with SAYEDNA LOGISTICS showcase data'
+    help = 'Seed the database with ULS showcase data'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING('Seeding SAYEDNA LOGISTICS data...'))
+        self.stdout.write(self.style.WARNING('Seeding ULS (Unpredictable Logistics Solutions) data...'))
 
         if Profile.objects.exists():
             self.stdout.write(self.style.SUCCESS('Data already exists. Skipping seed.'))
             return
 
+        # 0. Create Default Company
+        uls_company = Company.objects.create(
+            name="Unpredictable Logistics Solutions",
+             
+        )
+
         # 1. Create Users
         self.stdout.write('Creating users...')
 
         superadmin_user = Profile.objects.create_user(
-            username='admin@sayednalogistics.com',
-            email='admin@sayednalogistics.com',
+            username='admin@uls.com',
+            email='admin@uls.com',
             password='admin123',
             first_name='Super',
             last_name='Admin',
             role='superadmin',
-            position='HRManager'
+            position='Administrative',
+            company=uls_company
         )
 
         manager_user = Profile.objects.create_user(
-            username='manager@sayednalogistics.com',
-            email='manager@sayednalogistics.com',
+            username='manager@uls.com',
+            email='manager@uls.com',
             password='manager123',
             first_name='Sara',
             last_name='Al-Mutairi',
             role='manager',
-            position='OperationsManager'
+            position='Operations Manager',
+            company=uls_company
         )
 
         employee_user = Profile.objects.create_user(
-            username='employee@sayednalogistics.com',
-            email='employee@sayednalogistics.com',
+            username='employee@uls.com',
+            email='employee@uls.com',
             password='employee123',
             first_name='Khalid',
             last_name='Al-Enezi',
             role='employee',
-            position='Administrative'
+            position='Administrative',
+            company=uls_company
         )
 
         accountant_user = Profile.objects.create_user(
-            username='accountant@sayednalogistics.com',
-            email='accountant@sayednalogistics.com',
+            username='accountant@uls.com',
+            email='accountant@uls.com',
             password='accountant123',
             first_name='Fatima',
             last_name='Al-Sabah',
             role='accountant',
-            position='Accountant'
+            position='Accountant',
+            company=uls_company
         )
 
-        # 2. Create Drivers with proper contract_type values
+        # 2. Create Drivers with proper company link
         self.stdout.write('Creating drivers...')
         drivers = []
         today = timezone.now().date()
@@ -79,7 +90,9 @@ class Command(BaseCommand):
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'290{random.randint(100000000, 999999999)}',
                 working_id=f'WID-{random.randint(1000, 9999)}',
-                company_name='sayedna', contract_type='talabat',
+                company=uls_company,
+                company_name='sayedna', # Legacy choice field
+                contract_type='talabat',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 driver_license_expiry=today + timedelta(days=random.randint(15, 200)),
@@ -98,7 +111,9 @@ class Command(BaseCommand):
                 full_name=name,
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'280{random.randint(100000000, 999999999)}',
-                company_name='sayedna', contract_type='pharmazone',
+                company=uls_company,
+                company_name='sayedna',
+                contract_type='pharmazone',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 is_active=True
@@ -115,24 +130,9 @@ class Command(BaseCommand):
                 full_name=name,
                 phone=f'965{random.randint(10000000, 99999999)}',
                 civil_id_number=f'281{random.randint(100000000, 999999999)}',
-                company_name='sayedna', contract_type='burger_king',
-                vehicle_type=v, zone=z,
-                civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
-                is_active=True
-            )
-            drivers.append(d)
-
-        # Other contract drivers
-        other_drivers = [
-            ('Imran Sheikh', 'car', 'Gulf City'),
-            ('Naveed Akhtar', 'bike', 'Salmiya'),
-        ]
-        for name, v, z in other_drivers:
-            d = Driver.objects.create(
-                full_name=name,
-                phone=f'965{random.randint(10000000, 99999999)}',
-                civil_id_number=f'282{random.randint(100000000, 999999999)}',
-                company_name='sayedna', contract_type='other',
+                company=uls_company,
+                company_name='sayedna',
+                contract_type='burger_king',
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 is_active=True
@@ -146,6 +146,7 @@ class Command(BaseCommand):
                 idate = today - timedelta(days=i)
                 DriverInvoice.objects.create(
                     driver=d,
+                    company=uls_company,
                     specified_date=idate,
                     main_orders=random.randint(10, 25),
                     hours=Decimal(random.randint(8, 12)),
@@ -156,6 +157,7 @@ class Command(BaseCommand):
         self.stdout.write('Creating deductions...')
         Deduction.objects.create(
             driver=drivers[0],
+            company=uls_company,
             reason='Speeding Ticket #123',
             deduction_date=today - timedelta(days=5),
             contracting_company='talabat',
@@ -167,8 +169,9 @@ class Command(BaseCommand):
         self.stdout.write('Creating messages...')
         msg = Message.objects.create(
             sender=manager_user,
-            subject='Welcome to SAYEDNA LOGISTICS',
-            body='Welcome to the new system. Please ensure your documents are up to date.'
+            company=uls_company,
+            subject='Welcome to ULS',
+            body='Welcome to the Unpredictable Logistics Solutions system. Please ensure your documents are up to date.'
         )
         MessageRecipient.objects.create(message=msg, recipient=employee_user)
         MessageRecipient.objects.create(message=msg, recipient=accountant_user)
@@ -176,10 +179,10 @@ class Command(BaseCommand):
 
         # 6. Create Tasks
         self.stdout.write('Creating tasks...')
-        Task.objects.create(user=superadmin_user, title='System wide audit')
-        Task.objects.create(user=manager_user, title='Review monthly reports')
-        Task.objects.create(user=manager_user, title='Approve driver leaves')
-        Task.objects.create(user=employee_user, title='Check vehicle maintenance')
-        Task.objects.create(user=accountant_user, title='Prepare salary sheets')
+        Task.objects.create(user=superadmin_user, company=uls_company, title='System wide audit')
+        Task.objects.create(user=manager_user, company=uls_company, title='Review monthly reports')
+        Task.objects.create(user=manager_user, company=uls_company, title='Approve driver leaves')
+        Task.objects.create(user=employee_user, company=uls_company, title='Check vehicle maintenance')
+        Task.objects.create(user=accountant_user, company=uls_company, title='Prepare salary sheets')
 
-        self.stdout.write(self.style.SUCCESS('SAYEDNA LOGISTICS data seeded successfully!'))
+        self.stdout.write(self.style.SUCCESS('ULS showcase data seeded successfully!'))

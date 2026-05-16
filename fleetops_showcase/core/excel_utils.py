@@ -336,30 +336,55 @@ def import_from_excel(file, model_type, user):
                         'bank_name': data.get('Bank Name') or 'nbk',
                         'basic_salary_wp': Decimal(str(data.get('Basic Salary WP', 0) or 0)),
                         'file_status': data.get('File Status') or 'Active',
-                        'created_by': user.profile if hasattr(user, 'profile') else None,
+                        'created_by': user if hasattr(user, 'role') else None,
                         'company': user.company if hasattr(user, 'company') else None
                     }
                 )
+            elif model_type == 'team':
                 email = data.get('Email')
-                if email:
-                    profile, created = Profile.objects.update_or_create(
-                        username=email,
-                        defaults={
-                            'email': email,
-                            'first_name': data.get('First Name') or '',
-                            'last_name': data.get('Last Name') or '',
-                            'phone': data.get('Phone') or '',
-                            'identification_number': data.get('Identification Number') or '',
-                            'passport': data.get('Passport') or '',
-                            'role': data.get('Role') or 'employee',
-                            'position': data.get('Position') or 'Administrative',
-                            'base_salary_kd': Decimal(str(data.get('Base Salary KD', 0) or 0)),
-                            'company': user.company if hasattr(user, 'company') else None,
-                        }
-                    )
-                    if created:
-                        profile.set_password('Password123!')
-                        profile.save()
+                if not email:
+                    errors.append(f"Row {row_idx}: Missing Email.")
+                    continue
+                
+                profile, created = Profile.objects.update_or_create(
+                    username=email,
+                    defaults={
+                        'email': email,
+                        'first_name': data.get('First Name') or '',
+                        'last_name': data.get('Last Name') or '',
+                        'phone': data.get('Phone') or '',
+                        'identification_number': data.get('Identification Number') or '',
+                        'passport': data.get('Passport') or '',
+                        'role': data.get('Role') or 'employee',
+                        'position': data.get('Position') or 'Administrative',
+                        'base_salary_kd': Decimal(str(data.get('Base Salary KD', 0) or 0)),
+                        'company': user.company if hasattr(user, 'company') else None,
+                    }
+                )
+                if created:
+                    profile.set_password('Password123!')
+                    profile.save()
+            elif model_type == 'deduction':
+                driver_email = data.get('Driver Email')
+                if not driver_email:
+                    errors.append(f"Row {row_idx}: Missing Driver Email.")
+                    continue
+                
+                try:
+                    target_driver = Driver.objects.get(email=driver_email, company=user.company)
+                except Driver.DoesNotExist:
+                    errors.append(f"Row {row_idx}: Driver with email {driver_email} not found in your company.")
+                    continue
+
+                Deduction.objects.create(
+                    driver=target_driver,
+                    reason=data.get('Reason') or 'Imported Deduction',
+                    contracting_company=data.get('Contracting Company') or 'talabat',
+                    contractor_deduction_kd=Decimal(str(data.get('Contractor Deduction KD', 0) or 0)),
+                    company_deduction_kd=Decimal(str(data.get('Company Deduction KD', 0) or 0)),
+                    submitted_by=user if hasattr(user, 'role') else None,
+                    company=user.company if hasattr(user, 'company') else None
+                )
             elif model_type == 'invoice':
                 driver_phone = str(data.get('Phone', '')).strip()
                 if not driver_phone:
@@ -367,9 +392,9 @@ def import_from_excel(file, model_type, user):
                     continue
                 
                 try:
-                    driver = Driver.objects.get(phone=driver_phone)
+                    driver = Driver.objects.get(phone=driver_phone, company=user.company)
                 except Driver.DoesNotExist:
-                    errors.append(f"Row {row_idx}: Driver with phone {driver_phone} not found.")
+                    errors.append(f"Row {row_idx}: Driver with phone {driver_phone} not found in your company.")
                     continue
                 
                 DriverInvoice.objects.update_or_create(
@@ -380,7 +405,7 @@ def import_from_excel(file, model_type, user):
                         'main_orders': int(data.get('Main Orders', 0) or 0),
                         'additional_orders': int(data.get('Addl. Orders', 0) or 0),
                         'hours': Decimal(str(data.get('Hours', 0) or 0)),
-                        'created_by': user.profile if hasattr(user, 'profile') else None,
+                        'created_by': user if hasattr(user, 'role') else None,
                         'company': user.company if hasattr(user, 'company') else None,
                     }
                 )
@@ -391,9 +416,9 @@ def import_from_excel(file, model_type, user):
                     errors.append(f"Row {row_idx}: Missing Driver ID.")
                     continue
                 try:
-                    driver = Driver.objects.get(employee_serial_number=driver_id_val)
+                    driver = Driver.objects.get(employee_serial_number=driver_id_val, company=user.company)
                 except Driver.DoesNotExist:
-                    errors.append(f"Row {row_idx}: Driver with ID {driver_id_val} not found.")
+                    errors.append(f"Row {row_idx}: Driver with ID {driver_id_val} not found in your company.")
                     continue
                 
                 TalabatSalaryDetail.objects.create(
