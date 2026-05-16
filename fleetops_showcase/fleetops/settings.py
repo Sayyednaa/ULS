@@ -22,7 +22,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-sayyednaa-logistics-key-
 
 if DEBUG:
     ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
-        'localhost', '127.0.0.1', '192.168.1.20', '0.0.0.0'
+        'localhost', '127.0.0.1', '192.168.1.20', '0.0.0.0','securityshadow.pythonanywhere.com'
     ])
 else:
     ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
