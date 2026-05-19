@@ -464,6 +464,11 @@
                     <span x-text="t('{% if is_manager %}Manage Drivers{% else %}View Drivers{% endif %}')"></span>
                 </a>
                 {% endif %}
+                <a href="{% url 'driver_receivings' %}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'receivings' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    <span>📦</span>
+                    <span x-text="t('Drivers Receivings')"></span>
+                </a>
                 {% endif %}
 
                 {% if is_driver %}
@@ -811,7 +816,7 @@
                 let val = tr.children[idx].innerText || tr.children[idx].textContent;
                 val = val.trim();
                 // Clean currency and commas for numeric sorting
-                if (val.includes('KD')) val = val.replace('KD', '').trim();
+                if (val.includes('{{ app_currency }}')) val = val.replace('{{ app_currency }}', '').trim();
                 val = val.replace(/,/g, '');
                 return val;
             };

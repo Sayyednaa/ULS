@@ -82,8 +82,8 @@
                 <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Date *')"></label>{{ form.deduction_date }}</div>
                 
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Contractor KD')"></label>{{ form.contractor_deduction_kd }}</div>
-                    <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Company KD')"></label>{{ form.company_deduction_kd }}</div>
+                    <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Contractor {{ app_currency }}')"></label>{{ form.contractor_deduction_kd }}</div>
+                    <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Company {{ app_currency }}')"></label>{{ form.company_deduction_kd }}</div>
                 </div>
                 <!-- Installment Plan (Premium Switch) -->
                 <div class="p-5 bg-brand/5 border border-brand/20 rounded-2xl" x-data="{ isInstallment: {% if form.is_installment_plan.value %}true{% else %}false{% endif %} }">
@@ -122,8 +122,8 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold text-app-text-muted uppercase" x-text="t('Target')"></th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-app-text-muted uppercase" x-text="t('Reason')"></th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-app-text-muted uppercase" x-text="t('Company')"></th>
-                            <th class="px-4 py-3 text-right text-xs font-semibold text-app-text-muted uppercase" x-text="t('Contractor KD')"></th>
-                            <th class="px-4 py-3 text-right text-xs font-semibold text-app-text-muted uppercase" x-text="t('Company KD')"></th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold text-app-text-muted uppercase" x-text="t('Contractor {{ app_currency }}')"></th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold text-app-text-muted uppercase" x-text="t('Company {{ app_currency }}')"></th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-app-text-muted uppercase" x-text="t('By')"></th>
                             <th class="px-4 py-3 text-center text-xs font-semibold text-app-text-muted uppercase" x-text="t('PDF')"></th>
                         </tr>

@@ -104,7 +104,7 @@
     <div class="bg-app-card border border-app-border rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-app-text">Revenue Trend</h3>
-            <span class="text-xs text-app-text-muted">KWD by Vehicle Type</span>
+            <span class="text-xs text-app-text-muted">{{ app_currency }} by Vehicle Type</span>
         </div>
         <div class="relative h-[250px]">
             <canvas id="revenueChart"></canvas>
@@ -248,8 +248,8 @@ document.addEventListener('alpine:init', () => {
         data: {
             labels: chartData.labels,
             datasets: [
-                { label: 'Bike (KWD)', data: chartData.revenue_bike, borderColor: colors.bike.stroke, backgroundColor: colors.bike.fill, tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6, borderWidth: 3 },
-                { label: 'Car (KWD)', data: chartData.revenue_car, borderColor: colors.car.stroke, backgroundColor: colors.car.fill, tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6, borderWidth: 3 }
+                { label: 'Bike ({{ app_currency }})', data: chartData.revenue_bike, borderColor: colors.bike.stroke, backgroundColor: colors.bike.fill, tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6, borderWidth: 3 },
+                { label: 'Car ({{ app_currency }})', data: chartData.revenue_car, borderColor: colors.car.stroke, backgroundColor: colors.car.fill, tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6, borderWidth: 3 }
             ]
         },
         options: chartDefaults

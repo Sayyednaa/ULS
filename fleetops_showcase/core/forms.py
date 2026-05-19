@@ -4,6 +4,7 @@ from .models import (
     Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Message,
     ROLE_CHOICES, POSITION_CHOICES, BANK_CHOICES, COMPANY_CHOICES,
     CONTRACT_CHOICES, VEHICLE_CHOICES, Task, CompanyFile, Company,
+    DriverReceiving
 )
 
 
@@ -288,6 +289,20 @@ class DriverForm(forms.ModelForm):
         return driver
 
 
+class DriverReceivingForm(forms.ModelForm):
+    class Meta:
+        model = DriverReceiving
+        fields = ['driver', 'item_type', 'custom_label', 'document', 'received_date']
+        widgets = {
+            'driver': forms.Select(attrs={'class': TW_SELECT}),
+            'item_type': forms.Select(attrs={'class': TW_SELECT, 'x-model': 'itemType'}),
+            'custom_label': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Custom Item Name', 'x-show': 'itemType === "custom"'}),
+            'document': forms.FileInput(attrs={'class': TW_FILE}),
+            'received_date': forms.DateInput(attrs={'class': TW_DATE, 'type': 'date'}),
+        }
+
+
+
 class DriverInvoiceForm(forms.ModelForm):
     class Meta:
         model = DriverInvoice
@@ -417,23 +432,25 @@ from .models import SystemSettings
 class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = SystemSettings
-        fields = ['brand_name', 'logo', 'max_excel_size_mb', 'max_other_size_mb']
+        fields = ['brand_name', 'logo', 'max_excel_size_mb', 'max_other_size_mb', 'currency']
         widgets = {
             'brand_name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Enter Brand Name'}),
             'logo': forms.FileInput(attrs={'class': TW_FILE}),
             'max_excel_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
             'max_other_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
+            'currency': forms.Select(attrs={'class': TW_SELECT}),
         }
 
 class CompanyForm(forms.ModelForm):
     class Meta:
         model = Company
-        fields = ['name', 'logo', 'max_excel_size_mb', 'max_other_size_mb']
+        fields = ['name', 'logo', 'max_excel_size_mb', 'max_other_size_mb', 'currency']
         widgets = {
             'name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Company Name'}),
             'logo': forms.FileInput(attrs={'class': TW_FILE}),
             'max_excel_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
             'max_other_size_mb': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
+            'currency': forms.Select(attrs={'class': TW_SELECT}),
         }
 
 

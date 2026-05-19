@@ -14,6 +14,8 @@ urlpatterns = [
     
     path('driver-add/', views.AccountantDriverAddView.as_view(), name='accountant_driver_add'),
     
+    path('api/check-pending-deduction/', views.CheckPendingDeductionView.as_view(), name='api_check_pending_deduction'),
+    
     # Excel Operations
     path('excel/download-template/<str:model_type>/', views.accountant_download_template, name='accountant_download_template'),
     path('excel/export/<str:model_type>/', views.accountant_export_excel, name='accountant_export_excel'),

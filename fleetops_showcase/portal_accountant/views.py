@@ -105,6 +105,33 @@ class AccountantTalabatView(AccountantMixin, ListView):
                 obj.save()
             except ValidationError as e:
                 messages.error(request, f"Attachment error: {e.message}")
+                
+        # Handle signature for salary record
+        sig_data = request.POST.get('signature_data')
+        sig_image = request.FILES.get('signature_image')
+        if sig_data or sig_image:
+            if sig_data: obj.signature_data = sig_data
+            if sig_image: obj.signature_image = sig_image
+            obj.save()
+            
+        # Handle pending deduction
+        installment_id = request.POST.get('installment_id')
+        if installment_id:
+            from core.models import DeductionInstallment
+            from django.utils import timezone
+            try:
+                inst = DeductionInstallment.objects.get(id=installment_id)
+                inst.status = 'paid'
+                if not inst.paid_at:
+                    inst.paid_at = timezone.now()
+                inst.paid_by = request.user
+                if sig_data: 
+                    inst.signature_data = sig_data
+                if sig_image and obj.signature_image: 
+                    inst.signature_image = obj.signature_image
+                inst.save()
+            except DeductionInstallment.DoesNotExist:
+                pass
         
         action = 'updated' if not created else 'saved'
         messages.success(request, f'Salary record {action} for {driver.full_name}.')
@@ -200,7 +227,7 @@ def _save_contract_salary(request, contract_type, redirect_url):
             messages.error(request, f"Attachment error: {e.message}")
             return redirect(redirect_url)
 
-    ContractSalaryDetail.objects.update_or_create(
+    obj, created = ContractSalaryDetail.objects.update_or_create(
         contract_type=contract_type,
         name=name,
         month=month_date,
@@ -213,8 +240,63 @@ def _save_contract_salary(request, contract_type, redirect_url):
             'attachment': attachment
         }
     )
+    
+    sig_data = request.POST.get('signature_data')
+    sig_image = request.FILES.get('signature_image')
+    if sig_data or sig_image:
+        if sig_data: obj.signature_data = sig_data
+        if sig_image: obj.signature_image = sig_image
+        obj.save()
+        
+    installment_id = request.POST.get('installment_id')
+    if installment_id:
+        from core.models import DeductionInstallment
+        from django.utils import timezone
+        try:
+            inst = DeductionInstallment.objects.get(id=installment_id)
+            inst.status = 'paid'
+            if not inst.paid_at:
+                inst.paid_at = timezone.now()
+            inst.paid_by = request.user
+            if sig_data: 
+                inst.signature_data = sig_data
+            if sig_image and obj.signature_image: 
+                inst.signature_image = obj.signature_image
+            inst.save()
+        except DeductionInstallment.DoesNotExist:
+            pass
+
     messages.success(request, f'Salary record saved for {name}.')
     return redirect(redirect_url)
+
+from django.http import JsonResponse
+from core.models import DeductionInstallment
+
+class CheckPendingDeductionView(AccountantMixin, View):
+    def get(self, request):
+        driver_id = request.GET.get('driver_id')
+        month_str = request.GET.get('month')
+        if not driver_id or not month_str:
+            return JsonResponse({'amount': 0, 'installment_id': None})
+            
+        try:
+            year, month = map(int, month_str.split('-'))
+            from django.db.models import Q
+            installments = DeductionInstallment.objects.filter(
+                Q(deduction__driver_id=driver_id) | Q(deduction__employee_id=driver_id),
+                due_date__year=year,
+                due_date__month=month
+            )
+            if request.user.company:
+                installments = installments.filter(deduction__company=request.user.company)
+            # Find the first pending installment for this month
+            inst = installments.first()
+            if inst:
+                return JsonResponse({'amount': float(inst.amount), 'installment_id': str(inst.id)})
+            return JsonResponse({'amount': 0, 'installment_id': None})
+        except Exception as e:
+            print("CheckPendingDeductionView Error:", e)
+            return JsonResponse({'amount': 0, 'installment_id': None})
 
 class AccountantMonthlyDetailsView(AccountantMixin, ListView):
     model = MonthlyProfitLoss
@@ -332,8 +414,8 @@ def accountant_upload_excel(request, model_type):
     return redirect(request.META.get('HTTP_REFERER', 'accountant_dashboard'))
 
 
-from core.mixins import FinancialAccessMixin
-class AccountantSalarySlipListView(FinancialAccessMixin, ListView):
+from core.mixins import FinancialAccessMixin, CompanyDataMixin
+class AccountantSalarySlipListView(FinancialAccessMixin, CompanyDataMixin, ListView):
     model = Driver
     template_name = 'accountant_portal/salary_slips.html'
     context_object_name = 'drivers'
@@ -355,7 +437,7 @@ class AccountantSalarySlipListView(FinancialAccessMixin, ListView):
 from django.utils import timezone as tz
 from core.models import TalabatSalaryDetail, ContractSalaryDetail
 
-class AccountantSalarySlipView(FinancialAccessMixin, View):
+class AccountantSalarySlipView(FinancialAccessMixin, CompanyDataMixin, View):
     """Salary slip that fetches from TalabatSalaryDetail or ContractSalaryDetail,
     matching the data entered on the Talabat / Burger King / Pharmazone salary pages."""
 

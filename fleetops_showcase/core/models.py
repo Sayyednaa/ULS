@@ -1,9 +1,29 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 from .validators import validate_file_extension
 
 
+
+CURRENCY_CHOICES = [
+    ('KWD', 'Kuwaiti Dinar (KWD)'),
+    ('USD', 'US Dollar (USD)'),
+    ('EUR', 'Euro (EUR)'),
+    ('GBP', 'British Pound (GBP)'),
+    ('AED', 'UAE Dirham (AED)'),
+    ('SAR', 'Saudi Riyal (SAR)'),
+    ('QAR', 'Qatari Riyal (QAR)'),
+    ('OMR', 'Omani Rial (OMR)'),
+    ('BHD', 'Bahraini Dinar (BHD)'),
+    ('JPY', 'Japanese Yen (JPY)'),
+    ('CNY', 'Chinese Yuan (CNY)'),
+    ('INR', 'Indian Rupee (INR)'),
+    ('AUD', 'Australian Dollar (AUD)'),
+    ('CAD', 'Canadian Dollar (CAD)'),
+    ('SGD', 'Singapore Dollar (SGD)'),
+    ('CHF', 'Swiss Franc (CHF)'),
+]
 
 class SystemSettings(models.Model):
     brand_name = models.CharField(max_length=100, default='UNPREDICTABLE LOGISTICS SOLUTIONS')
@@ -12,6 +32,8 @@ class SystemSettings(models.Model):
     # File Size Limits (in MB)
     max_excel_size_mb = models.PositiveIntegerField(default=20, help_text="Maximum size for Excel files (MB)")
     max_other_size_mb = models.PositiveIntegerField(default=1, help_text="Maximum size for other documents/images (MB)")
+    
+    currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='KWD', help_text="Default currency for the system")
     
     def __str__(self):
         return "System Settings"
@@ -28,6 +50,8 @@ class Company(models.Model):
     # Per-company settings
     max_excel_size_mb = models.PositiveIntegerField(default=20, help_text="Maximum size for Excel files (MB)")
     max_other_size_mb = models.PositiveIntegerField(default=1, help_text="Maximum size for other documents/images (MB)")
+    
+    currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='KWD', help_text="Default currency for the company")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -278,6 +302,36 @@ class Driver(models.Model):
 
     class Meta:
         ordering = ['full_name']
+
+
+class DriverReceiving(models.Model):
+    ITEM_CHOICES = [
+        ('car', 'Car'),
+        ('mobile_phone', 'Mobile Phone'),
+        ('sim_card', 'SIM Card'),
+        ('custom', 'Custom Document/Item'),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='receivings')
+    item_type = models.CharField(max_length=20, choices=ITEM_CHOICES)
+    custom_label = models.CharField(max_length=100, blank=True)
+    document = models.FileField(upload_to='driver_receivings/', validators=[validate_file_extension])
+    received_date = models.DateField(default=timezone.now)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.driver:
+            self.company = self.driver.company
+        super().save(*args, **kwargs)
+
+    def get_item_name(self):
+        if self.item_type == 'custom':
+            return self.custom_label or 'Custom Item'
+        return dict(self.ITEM_CHOICES).get(self.item_type, self.item_type)
+        
+    class Meta:
+        ordering = ['-received_date']
 
 
 # ─── DriverInvoice ──────────────────────────────────────────────────────────
@@ -580,6 +634,11 @@ class TalabatSalaryDetail(models.Model):
     
     deduction = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     attachment = models.FileField(upload_to='talabat_attachments/', null=True, blank=True, validators=[validate_file_extension])
+    
+    # Digital Signature
+    signature_data = models.TextField(blank=True, null=True, help_text="Base64 signature data")
+    signature_image = models.ImageField(upload_to='signatures/', null=True, blank=True, validators=[validate_file_extension])
+    
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

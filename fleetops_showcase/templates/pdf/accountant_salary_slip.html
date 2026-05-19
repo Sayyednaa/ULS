@@ -291,8 +291,8 @@
                 <tr>
                     <th>Batch</th>
                     <th>Orders</th>
-                    <th>Amount (KD)</th>
-                    <th>Net Amount (KD)</th>
+                    <th>Amount ({{ app_currency }})</th>
+                    <th>Net Amount ({{ app_currency }})</th>
                 </tr>
             </thead>
             <tbody>
@@ -407,8 +407,22 @@
             <div class="amount-words">
                 Amount In Words: <strong>{{ salary_record.net_salary|amount_in_words }}</strong>
             </div>
-            <div class="footer-note">
-                — This document has been automatically generated; therefore, a signature is not required. —
+            <div class="footer-note" style="display:flex; justify-content:space-between; align-items:flex-end; border-top: 1px solid #f3f4f6; padding-top:20px; text-align:left;">
+                <div style="font-size: 11px; color: #9ca3af; text-align: center; width: 100%;">
+                    {% if salary_record.signature_image %}
+                        <div style="margin: 0 auto; text-align: center;">
+                            <img src="{{ salary_record.signature_image.url }}" alt="Signature" style="height: 60px; object-fit: contain;">
+                            <div style="margin-top: 4px; font-weight: bold; color: #111827;">Digital Signature</div>
+                        </div>
+                    {% elif salary_record.signature_data %}
+                        <div style="margin: 0 auto; text-align: center;">
+                            <img src="{{ salary_record.signature_data }}" alt="Signature" style="height: 60px; object-fit: contain;">
+                            <div style="margin-top: 4px; font-weight: bold; color: #111827;">Digital Signature</div>
+                        </div>
+                    {% else %}
+                        — This document has been automatically generated; therefore, a signature is not required. —
+                    {% endif %}
+                </div>
             </div>
         </div>
 

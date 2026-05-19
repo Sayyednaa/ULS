@@ -4,18 +4,43 @@ from decimal import Decimal, InvalidOperation
 register = template.Library()
 
 
+from core.middleware import get_current_request
+
 @register.filter
 def kwd(value):
-    """Format a decimal value as Gulfi Dinar with 3 decimal places.
+    """Format a decimal value as currency with 3 decimal places.
     
-    Usage: {{ invoice.cash|kwd }} → "1,234.500 KD"
+    Usage: {{ invoice.cash|kwd }} → "1,234.500 KWD"
     """
+def _get_currency():
+    req = get_current_request()
+    currency = 'KWD'
+    try:
+        settings_obj = __import__('core').models.SystemSettings.objects.first()
+        if settings_obj and settings_obj.currency:
+            currency = settings_obj.currency
+    except Exception:
+        pass
+        
+    if req and hasattr(req, 'user') and req.user.is_authenticated:
+        if hasattr(req.user, 'company') and req.user.company and getattr(req.user.company, 'currency', None):
+            currency = req.user.company.currency
+            
+    return currency
+
+@register.filter
+def kwd(value):
+    """Format a decimal value as currency with 3 decimal places.
+    
+    Usage: {{ invoice.cash|kwd }} → "1,234.500 KWD"
+    """
+    currency = _get_currency()
     try:
         d = Decimal(str(value))
         formatted = f"{d:,.3f}"
-        return f"{formatted} KD"
+        return f"{formatted} {currency}"
     except (InvalidOperation, TypeError, ValueError):
-        return "0.000 KD"
+        return f"0.000 {currency}"
 
 
 @register.filter
@@ -33,7 +58,8 @@ def format_hours(value):
         return "0h 0m"
 @register.filter
 def amount_in_words(value):
-    """Very basic number to words converter for KD."""
+    """Very basic number to words converter for currency."""
+    currency = _get_currency()
     try:
         total = float(value)
         kd = int(total)
@@ -50,14 +76,14 @@ def amount_in_words(value):
         words = []
         if kd > 0:
             words.append(n2w(kd))
-            words.append("Gulfi Dinar")
+            words.append(currency)
         
         if fils > 0:
             if kd > 0: words.append("and")
             words.append(n2w(fils))
-            words.append("Fils")
+            words.append("Cents/Fils")
         
-        if not words: return "Zero KD"
+        if not words: return f"Zero {currency}"
         return " ".join(words) + " Only"
     except (TypeError, ValueError):
         return ""

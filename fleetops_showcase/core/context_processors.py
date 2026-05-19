@@ -11,6 +11,7 @@ def system_settings(request):
         'brand_logo': settings.STATIC_URL + 'img/logo.png',
         'max_excel_mb': 20,
         'max_other_mb': 1,
+        'app_currency': 'KWD',
     }
     
     try:
@@ -21,6 +22,7 @@ def system_settings(request):
                 data['brand_logo'] = settings_obj.logo.url
             data['max_excel_mb'] = settings_obj.max_excel_size_mb
             data['max_other_mb'] = settings_obj.max_other_size_mb
+            data['app_currency'] = settings_obj.currency
     except Exception:
         pass
 
@@ -31,5 +33,7 @@ def system_settings(request):
             data['brand_name'] = company.name
             if company.logo:
                 data['brand_logo'] = company.logo.url
+            if getattr(company, 'currency', None):
+                data['app_currency'] = company.currency
             
     return data

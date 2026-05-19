@@ -117,7 +117,7 @@
                     </div>
                     <div class="text-right">
                         <p class="text-sm font-bold {% if report.profit_loss >= 0 %}text-emerald-500{% else %}text-red-500{% endif %}">
-                            {{ report.profit_loss }} KD
+                            {{ report.profit_loss }} {{ app_currency }}
                         </p>
                         {% if report.report_pdf %}
                         <a href="{{ report.report_pdf.url }}" target="_blank" class="p-1.5 text-app-text-muted hover:text-brand hover:bg-brand/10 rounded-lg transition-all inline-flex items-center justify-center" title="{{ 'View Report'|t:lang }}">

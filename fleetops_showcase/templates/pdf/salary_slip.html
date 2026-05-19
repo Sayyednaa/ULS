@@ -214,7 +214,7 @@
                     <span>Amount</span>
                 </div>
                 <div class="table-row">
-                    <span class="row-label">Base Cash / Delivery KD</span>
+                    <span class="row-label">Base Cash / Delivery {{ app_currency }}</span>
                     <span class="row-value">{{ cash|kwd }}</span>
                 </div>
                 <div class="table-row">
@@ -249,7 +249,7 @@
                 {% empty %}
                 <div class="table-row">
                     <span class="row-label">No Deductions</span>
-                    <span class="row-value">0.000 KD</span>
+                    <span class="row-value">0.000 {{ app_currency }}</span>
                 </div>
                 {% endfor %}
                 

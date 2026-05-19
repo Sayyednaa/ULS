@@ -11,9 +11,9 @@ from core.mixins import AnyAuthenticatedMixin, StaffRequiredMixin, AdminManagerR
 from core.models import (
     Driver, DriverInvoice, InvoiceArchive, Notification,
     Message, MessageRecipient, Profile, Task, CompanyFile,
-    COMPANY_CHOICES, CONTRACT_CHOICES,
+    COMPANY_CHOICES, CONTRACT_CHOICES, DriverReceiving
 )
-from core.forms import DriverInvoiceForm, MessageForm, TaskForm, CompanyFileForm, ProfileSelfUpdateForm, TaskAssignmentForm
+from core.forms import DriverInvoiceForm, MessageForm, TaskForm, CompanyFileForm, ProfileSelfUpdateForm, TaskAssignmentForm, DriverReceivingForm
 from core.excel_utils import (
     export_invoices_excel, export_archive_excel, 
     generate_excel_template, import_from_excel
@@ -233,8 +233,7 @@ class InvoiceArchiveActionView(StaffRequiredMixin, View):
                     main_orders=totals['main'] or 0,
                     hours=totals['hours'] or 0,
                     archive_date=date(year, month, 1),
-                    archived_by=request.user,
-                    company=request.user.company
+                    archived_by=request.user
                 )
             invoices.delete()
 
@@ -253,7 +252,7 @@ class InvoiceExportView(StaffRequiredMixin, View):
 
 class ArchiveListView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = self.get_queryset_by_company(InvoiceArchive).select_related('driver').all()
+        qs = self.get_queryset_by_company(InvoiceArchive, company_field='driver__company').select_related('driver').all()
         q = request.GET.get('q', '')
         company = request.GET.get('company', '') # contract type
         contract = request.GET.get('contract', '')
@@ -288,7 +287,7 @@ class ArchiveListView(StaffRequiredMixin, CompanyDataMixin, View):
 
 class ArchiveExportView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
-        qs = self.get_queryset_by_company(InvoiceArchive).all()
+        qs = self.get_queryset_by_company(InvoiceArchive, company_field='driver__company').all()
         return export_archive_excel(qs, 'all')
 
 
@@ -548,3 +547,55 @@ class ProfileView(AnyAuthenticatedMixin, View):
             django_messages.success(request, 'Profile updated successfully.')
             return redirect('profile')
         return render(request, 'shared/profile.html', {'form': form})
+
+class DriverReceivingsView(StaffRequiredMixin, CompanyDataMixin, View):
+    def get(self, request):
+        qs = self.get_queryset_by_company(DriverReceiving).select_related('driver').all()
+        q = request.GET.get('q', '')
+        if q:
+            qs = qs.filter(Q(driver__full_name__icontains=q) | Q(custom_label__icontains=q))
+            
+        paginator = Paginator(qs, 20)
+        page_obj = paginator.get_page(request.GET.get('page'))
+
+        form = DriverReceivingForm()
+        # Only active drivers
+        form.fields['driver'].queryset = self.get_queryset_by_company(Driver).filter(is_active=True).order_by('full_name')
+
+        return render(request, 'shared/driver_receivings.html', {
+            'page_obj': page_obj,
+            'q': q,
+            'form': form,
+        })
+
+    def post(self, request):
+        form = DriverReceivingForm(request.POST, request.FILES)
+        # Apply queryset filtering for driver to avoid cross-company additions
+        form.fields['driver'].queryset = self.get_queryset_by_company(Driver).filter(is_active=True)
+
+        if form.is_valid():
+            receiving = form.save(commit=False)
+            receiving.company = request.user.company
+            receiving.save()
+            django_messages.success(request, f'Receiving added for {receiving.driver.full_name}.')
+            return redirect('driver_receivings')
+
+        # Error case
+        qs = self.get_queryset_by_company(DriverReceiving).select_related('driver').all()
+        paginator = Paginator(qs, 20)
+        page_obj = paginator.get_page(request.GET.get('page'))
+        return render(request, 'shared/driver_receivings.html', {
+            'page_obj': page_obj,
+            'q': request.GET.get('q', ''),
+            'form': form,
+        })
+
+class DriverReceivingsDeleteView(StaffRequiredMixin, CompanyDataMixin, View):
+    def post(self, request, pk):
+        receiving = get_object_or_404(self.get_queryset_by_company(DriverReceiving), pk=pk)
+        name = receiving.get_item_name()
+        driver_name = receiving.driver.full_name
+        receiving.delete()
+        django_messages.success(request, f'Deleted {name} receiving for {driver_name}.')
+        return redirect('driver_receivings')
+

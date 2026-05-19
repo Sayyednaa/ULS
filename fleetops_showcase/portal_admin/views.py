@@ -553,7 +553,7 @@ class DeductionListView(AccountantSuperAdminMixin, CompanyDataMixin, View):
 
 class PendingDuesView(AccountantSuperAdminMixin, CompanyDataMixin, View):
     def get(self, request):
-        installments = self.get_queryset_by_company(DeductionInstallment).select_related(
+        installments = self.get_queryset_by_company(DeductionInstallment, company_field='deduction__company').select_related(
             'deduction__driver', 'deduction__employee'
         ).order_by('status', 'due_date')
         
@@ -587,7 +587,7 @@ class PendingDuesView(AccountantSuperAdminMixin, CompanyDataMixin, View):
 
 class MarkInstallmentPaidView(AccountantSuperAdminMixin, CompanyDataMixin, View):
     def post(self, request, pk):
-        installment = get_object_or_404(self.get_queryset_by_company(DeductionInstallment), pk=pk)
+        installment = get_object_or_404(self.get_queryset_by_company(DeductionInstallment, company_field='deduction__company'), pk=pk)
         
         # Check if marking as paid
         if 'mark_paid' in request.POST:

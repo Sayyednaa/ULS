@@ -61,7 +61,7 @@
         <h3 class="text-xs font-black text-app-text-muted uppercase tracking-[0.2em] border-b border-app-border pb-2" x-text="t('Financial & Role')"></h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-app-text uppercase" x-text="t('Base Salary (KD)')"></label>
+                <label class="block text-xs font-bold text-app-text uppercase" x-text="t('Base Salary ({{ app_currency }})')"></label>
                 {{ form.base_salary_kd }}
             </div>
             <div class="space-y-1.5">

@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from core.models import (
-    Profile, Driver, DriverInvoice, Deduction, Message, MessageRecipient, Task,
+    Profile, Driver, DriverInvoice, Deduction, DeductionInstallment, Message, MessageRecipient, Task,
     Company,
 )
 
@@ -155,7 +155,7 @@ class Command(BaseCommand):
 
         # 4. Create Deductions
         self.stdout.write('Creating deductions...')
-        Deduction.objects.create(
+        d1 = Deduction.objects.create(
             driver=drivers[0],
             company=uls_company,
             reason='Speeding Ticket #123',
@@ -163,6 +163,12 @@ class Command(BaseCommand):
             contracting_company='talabat',
             contractor_deduction_kd=Decimal('15.000'),
             submitted_by=manager_user
+        )
+        DeductionInstallment.objects.create(
+            deduction=d1,
+            amount=d1.total_amount,
+            due_date=d1.deduction_date,
+            status='pending'
         )
 
         # 5. Create Messages

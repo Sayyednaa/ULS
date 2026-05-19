@@ -58,7 +58,7 @@ class AnyAuthenticatedMixin(LoginRequiredMixin):
 
 class CompanyDataMixin:
     """Mixin to filter querysets by the logged-in user's company."""
-    def get_queryset_by_company(self, model_class):
+    def get_queryset_by_company(self, model_class, company_field='company'):
         user = self.request.user
         # If user is a global superuser (Django superuser) and has no company, show everything
         if user.is_superuser and not user.company:
@@ -66,7 +66,7 @@ class CompanyDataMixin:
         
         # Otherwise, filter by company. If no company is assigned, return empty to be safe (or all for legacy)
         if user.company:
-            return model_class.objects.filter(company=user.company)
+            return model_class.objects.filter(**{company_field: user.company})
         
         # Fallback for security: if no company is assigned and not a global superuser, return nothing.
         return model_class.objects.none()

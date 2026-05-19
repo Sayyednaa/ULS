@@ -66,9 +66,9 @@
                         <td class="px-6 py-4 font-medium">{{ record.month|date:"M Y" }}</td>
                         <td class="px-6 py-4">{{ record.company_name }}</td>
                         <td class="px-6 py-4">{{ record.contract_name }}</td>
-                        <td class="px-6 py-4 text-red-500 font-medium">{{ record.expense }} KD</td>
+                        <td class="px-6 py-4 text-red-500 font-medium">{{ record.expense }} {{ app_currency }}</td>
                         <td class="px-6 py-4 font-medium {% if record.profit_loss >= 0 %}text-emerald-500{% else %}text-red-500{% endif %}">
-                            {{ record.profit_loss }} KD
+                            {{ record.profit_loss }} {{ app_currency }}
                         </td>
                         <td class="px-6 py-4 text-right">
                             {% if record.report_pdf %}

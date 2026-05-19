@@ -43,7 +43,10 @@ urlpatterns = [
     path('archive/company-files/<uuid:pk>/delete/', views.CompanyFileDeleteView.as_view(), name='company_file_delete'),
     path('archive/deactivated-drivers/', views.DeactivatedDriversView.as_view(), name='deactivated_drivers'),
 
-    # Bulk Operations
+    # Drivers Receivings
+    path('drivers/receivings/', views.DriverReceivingsView.as_view(), name='driver_receivings'),
+    path('drivers/receivings/<uuid:pk>/delete/', views.DriverReceivingsDeleteView.as_view(), name='driver_receivings_delete'),
+
     path('bulk/template/<str:model_type>/', views.TemplateDownloadView.as_view(), name='template_download'),
     path('bulk/upload/<str:model_type>/', views.BulkUploadView.as_view(), name='bulk_upload'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
