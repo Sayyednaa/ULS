@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In — {{ brand_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&display=swap');
+
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    
+    .glass-card {
+        background: rgba(17, 17, 24, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .bg-overlay {
+        background: radial-gradient(circle at center, rgba(10, 10, 15, 0.4) 0%, rgba(10, 10, 15, 0.9) 100%);
+    }
+
+    .input-focus-glow:focus-within {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Wooden Clock Styles */
+    .clock-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        perspective: 1000px;
+    }
+    
+    .wooden-clock {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, #8b5a2b 0%, #3d2314 100%);
+        border-radius: 50%;
+        border: 14px solid #5c3a21;
+        box-shadow: 
+            0 20px 40px rgba(0,0,0,0.6),
+            inset 0 4px 10px rgba(0,0,0,0.8),
+            inset 0 -4px 10px rgba(255,255,255,0.2),
+            0 0 0 4px #8b5a2b, /* outer brass rim */
+            inset 0 0 0 3px #8b5a2b; /* inner brass rim */
+        transform: rotateX(5deg) rotateY(-5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .wooden-clock:hover {
+        transform: rotateX(0deg) rotateY(0deg) scale(1.03);
+    }
+    
+    .clock-face {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, #fcfcfc 40%, #f4e4d4 100%);
+        border-radius: 50%;
+        box-shadow: inset 0 3px 8px rgba(0,0,0,0.35);
+        overflow: hidden;
+    }
+
+    /* Wood grain pattern overlay */
+    .clock-face::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        opacity: 0.03;
+        background: repeating-radial-gradient(circle, #000 0px, #000 2px, transparent 4px, transparent 10px);
+        pointer-events: none;
+    }
+    
+    .number {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        font-family: 'Cinzel', 'Georgia', serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #2b1d0c;
+        padding-top: 10px;
+        box-sizing: border-box;
+        transform-origin: center center;
+    }
+    
+    .number span {
+        display: inline-block;
+    }
+
+    .n1 { transform: rotate(30deg); } .n1 span { transform: rotate(-30deg); }
+    .n2 { transform: rotate(60deg); } .n2 span { transform: rotate(-60deg); }
+    .n3 { transform: rotate(90deg); } .n3 span { transform: rotate(-90deg); }
+    .n4 { transform: rotate(120deg); } .n4 span { transform: rotate(-120deg); }
+    .n5 { transform: rotate(150deg); } .n5 span { transform: rotate(-150deg); }
+    .n6 { transform: rotate(180deg); } .n6 span { transform: rotate(-180deg); }
+    .n7 { transform: rotate(210deg); } .n7 span { transform: rotate(-210deg); }
+    .n8 { transform: rotate(240deg); } .n8 span { transform: rotate(-240deg); }
+    .n9 { transform: rotate(270deg); } .n9 span { transform: rotate(-270deg); }
+    .n10 { transform: rotate(300deg); } .n10 span { transform: rotate(-300deg); }
+    .n11 { transform: rotate(330deg); } .n11 span { transform: rotate(-330deg); }
+    .n12 { transform: rotate(0deg); } .n12 span { transform: rotate(0deg); }
+
+    .clock-brand {
+        position: absolute;
+        top: 28%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: 'Cinzel', 'Georgia', serif;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: #5c4033;
+        opacity: 0.8;
+    }
+    
+    .clock-subbrand {
+        position: absolute;
+        bottom: 28%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: 'Cinzel', 'Georgia', serif;
+        font-size: 7px;
+        letter-spacing: 1px;
+        color: #5c4033;
+        opacity: 0.7;
+    }
+    
+    .hand {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        transform-origin: bottom center;
+        background-color: #1a1105;
+        border-radius: 3px;
+        z-index: 5;
+    }
+    
+    .hour-hand {
+        width: 4px;
+        height: 44px;
+        margin-left: -2px;
+        border-radius: 4px 4px 0 0;
+    }
+    
+    .hour-hand::after {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: -3.5px;
+        width: 11px;
+        height: 11px;
+        background: #1a1105;
+        border-radius: 50% 50% 0 50%;
+        transform: rotate(-45deg);
+    }
+    
+    .minute-hand {
+        width: 2.5px;
+        height: 62px;
+        margin-left: -1.25px;
+        border-radius: 3px 3px 0 0;
+    }
+    
+    .minute-hand::after {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: -2.5px;
+        width: 7.5px;
+        height: 7.5px;
+        border: 1.5px solid #1a1105;
+        border-radius: 50%;
+    }
+    
+    .second-hand {
+        width: 1px;
+        height: 70px;
+        margin-left: -0.5px;
+        background-color: #b8860b;
+        z-index: 6;
+    }
+    
+    .clock-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, #ffd700 0%, #b8860b 100%);
+        border: 1.5px solid #1a1105;
+        border-radius: 50%;
+        z-index: 7;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fixed inset-0 z-0 no-print">
+    <img src="{% static 'img/login_bg.png' %}" class="w-full h-full object-cover opacity-60 scale-105" alt="Background">
+    <div class="absolute inset-0 bg-overlay"></div>
+</div>
+
+<div class="min-h-screen flex items-center justify-center p-4 py-12 relative z-10" x-data="{ showPass: false, showDemo: false }">
+    <!-- Decorative Glows -->
+    <div class="fixed -top-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] z-0 animate-pulse"></div>
+    <div class="fixed -bottom-24 -right-24 w-96 h-96 bg-emerald-600/10 rounded-full blur-[100px] z-0 animate-pulse"></div>
+
+    <div class="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-12 relative z-10">
+        
+        <!-- Left Side: Vintage Pocket Watch & Branding -->
+        <div class="flex flex-col items-center text-center max-w-sm">
+            <!-- Wooden Working Clock -->
+            <div class="clock-container mb-8">
+                <div class="wooden-clock">
+                    <div class="clock-face">
+                        <div class="number n12"><span>12</span></div>
+                        <div class="number n1"><span>1</span></div>
+                        <div class="number n2"><span>2</span></div>
+                        <div class="number n3"><span>3</span></div>
+                        <div class="number n4"><span>4</span></div>
+                        <div class="number n5"><span>5</span></div>
+                        <div class="number n6"><span>6</span></div>
+                        <div class="number n7"><span>7</span></div>
+                        <div class="number n8"><span>8</span></div>
+                        <div class="number n9"><span>9</span></div>
+                        <div class="number n10"><span>10</span></div>
+                        <div class="number n11"><span>11</span></div>
+                        
+                        <div class="clock-brand">ULS</div>
+                         
+                        <div class="hand hour-hand" id="hourHand"></div>
+                        <div class="hand minute-hand" id="minHand"></div>
+                        <div class="hand second-hand" id="secHand"></div>
+                        <div class="clock-center"></div>
+                    </div>
+                </div>
+            </div>
+            
+            
+
+        <!-- Right Side: Login Card -->
+        <div class="w-full max-w-md">
+            <div class="glass-card rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] p-8 md:p-10 transition-all duration-500 hover:border-white/20">
+                <div class="flex justify-end mb-6">
+                    <form action="{% url 'set_language' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                        <input name="language" type="hidden" :value="lang === 'en' ? 'ar' : 'en'">
+                        <button type="submit" class="text-[10px] font-bold text-emerald-500/80 hover:text-emerald-500 transition-colors uppercase tracking-widest px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5">
+                            <span x-show="lang === 'en'">العربية</span>
+                            <span x-show="lang === 'ar'">English</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-1" x-text="t('Welcome Back')"></h2>
+                    <p class="text-gray-400 text-sm font-medium" x-text="t('Access your operations dashboard')"></p>
+                </div>
+
+                {% if form.errors %}
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-center gap-3">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-xs">⚠️</span>
+                    <span>Invalid email or password. Please verify and try again.</span>
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Email -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Account Email')"></label>
+                        <div class="relative group input-focus-glow rounded-2xl transition-all">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-emerald-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </span>
+                            <input type="text" name="username" required autofocus
+                                   class="w-full pl-12 pr-4 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-black/60 transition-all"
+                                   placeholder="admin@uls.com"
+                                   value="{{ form.username.value|default:'' }}">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Secure Password')"></label>
+                        <div class="relative group input-focus-glow rounded-2xl transition-all">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-emerald-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </span>
+                            <input :type="showPass ? 'text' : 'password'" name="password" required
+                                   class="w-full pl-12 pr-14 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-black/60 transition-all"
+                                   placeholder="••••••••">
+                            <button type="button" @click="showPass = !showPass" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-emerald-500 transition-colors">
+                                <svg x-show="!showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    <button type="submit" class="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-[0_20px_40px_-10px_rgba(16, 185, 129, 0.4)] transition-all duration-300 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] mt-4">
+                        <span x-text="t('Sign into Dashboard')"></span>
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 text-sm">
+                        <span x-text="t('New company?')"></span>
+                        <a href="{% url 'register' %}" class="text-emerald-500 hover:text-emerald-400 font-bold ml-1 transition-colors">
+                            <span x-text="t('Register your organization')"></span>
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Demo Credentials -->
+            <div class="mt-6 glass-card rounded-2xl overflow-hidden border-white/5">
+                <button @click="showDemo = !showDemo" class="w-full px-6 py-4 text-xs font-bold text-gray-400 hover:text-white uppercase tracking-[0.2em] flex justify-between items-center transition-all">
+                    <span class="flex items-center gap-3"><span class="text-lg">🔐</span> Access Demo Credentials</span>
+                    <svg :class="showDemo ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="showDemo" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-1 translate-y-0" class="p-6 bg-black/40 text-[10px] space-y-4 border-t border-white/5" x-cloak>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                        <span class="text-emerald-400 font-bold uppercase tracking-wider" x-text="t('superadmin')"></span>
+                        <span class="text-gray-400 font-mono">admin@uls.com / admin123</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                        <span class="text-blue-400 font-bold uppercase tracking-wider" x-text="t('manager')"></span>
+                        <span class="text-gray-400 font-mono">manager@uls.com / manager123</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                        <span class="text-emerald-400 font-bold uppercase tracking-wider" x-text="t('employee')"></span>
+                        <span class="text-gray-400 font-mono">employee@uls.com / employee123</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-purple-500/5 border border-purple-500/10">
+                        <span class="text-purple-400 font-bold uppercase tracking-wider" x-text="t('accountant')"></span>
+                        <span class="text-gray-400 font-mono">accountant@uls.com / accountant123</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8" x-data="{ currentName: localStorage.getItem('fleetops_brand_name') || '{{ brand_name }}' }">
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em]">
+                    <span x-text="'© 2026 ' + currentName + ' — ' + t('PRIVACY POLICY')"></span>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const hourHand = document.getElementById("hourHand");
+        const minHand = document.getElementById("minHand");
+        const secHand = document.getElementById("secHand");
+
+        function updateClock() {
+            const now = new Date();
+            const ms = now.getMilliseconds();
+            const sec = now.getSeconds() + ms / 1000;
+            const min = now.getMinutes() + sec / 60;
+            const hour = now.getHours() + min / 60;
+
+            const secDeg = sec * 6;
+            const minDeg = min * 6;
+            const hourDeg = hour * 30;
+
+            if (secHand) secHand.style.transform = `rotate(${secDeg}deg)`;
+            if (minHand) minHand.style.transform = `rotate(${minDeg}deg)`;
+            if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
+
+            requestAnimationFrame(updateClock);
+        }
+        
+        requestAnimationFrame(updateClock);
+    });
+</script>
+{% endblock %}
+

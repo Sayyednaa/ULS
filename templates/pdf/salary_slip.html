@@ -1,0 +1,335 @@
+{% load kwd_filters static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ brand_logo }}">
+    <title>Payslip — {{ driver.full_name }} — {{ month_label }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f3f4f6; color: #1f2937; padding: 40px 20px; line-height: 1.5; }
+        
+        .slip-container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 40px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* Header */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .brand { display: flex; align-items: center; gap: 15px; }
+        .brand-logo { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 1px solid #e5e7eb; }
+        .brand-info h2 { font-size: 24px; font-weight: 800; color: #111827; }
+        .brand-info p { font-size: 12px; color: #6b7280; }
+        
+        .period-info { text-align: right; }
+        .period-info p { font-size: 12px; color: #6b7280; font-weight: 500; }
+        .period-info h3 { font-size: 18px; font-weight: 800; color: #111827; margin-top: 4px; }
+
+        /* Employee Summary Section */
+        .summary-section { display: flex; gap: 40px; margin-bottom: 30px; }
+        .employee-details { flex: 1; }
+        .section-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-bottom: 15px; }
+        
+        .details-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; }
+        .detail-label { font-size: 13px; color: #6b7280; }
+        .detail-value { font-size: 13px; font-weight: 600; color: #111827; }
+
+        .net-highlight { 
+            width: 280px; 
+            background: #f0fdf4; 
+            border: 1px solid #dcfce7; 
+            border-radius: 12px; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .net-amount-box { border-left: 4px solid #22c55e; padding-left: 15px; margin-bottom: 15px; }
+        .net-amount-box h4 { font-size: 24px; font-weight: 800; color: #111827; }
+        .net-amount-box p { font-size: 11px; color: #15803d; font-weight: 600; }
+        
+        .stat-row { display: flex; justify-content: space-between; padding: 4px 0; border-top: 1px dashed #d1d5db; }
+        .stat-label { font-size: 12px; color: #6b7280; }
+        .stat-value { font-size: 12px; font-weight: 600; color: #111827; }
+
+        /* Intermediate info bar */
+        .info-bar { 
+            background: #f9fafb; 
+            border-top: 1px solid #e5e7eb; 
+            border-bottom: 1px solid #e5e7eb; 
+            padding: 12px 20px; 
+            margin-bottom: 20px;
+            display: flex;
+            gap: 40px;
+        }
+        .info-bar-item { font-size: 12px; color: #6b7280; }
+        .info-bar-item strong { color: #111827; margin-left: 8px; }
+
+        /* Earnings & Deductions Table */
+        .table-container { 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            margin-bottom: 20px;
+            display: flex;
+        }
+        .table-half { flex: 1; border-right: 1px solid #e5e7eb; }
+        .table-half:last-child { border-right: none; }
+        
+        .table-header { background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 10px 15px; display: flex; justify-content: space-between; }
+        .table-header span { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; }
+        
+        .table-row { padding: 10px 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #f3f4f6; }
+        .table-row:last-child { border-bottom: none; }
+        .row-label { font-size: 13px; color: #4b5563; }
+        .row-value { font-size: 13px; font-weight: 600; color: #111827; }
+
+        .table-footer { background: #f9fafb; padding: 12px 15px; display: flex; justify-content: space-between; font-weight: 700; border-top: 1px solid #e5e7eb; }
+        .table-footer span { font-size: 12px; text-transform: uppercase; }
+
+        /* Total Payable Bar */
+        .payable-bar { 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .payable-label { flex: 1; padding: 15px 20px; }
+        .payable-label h4 { font-size: 14px; font-weight: 800; color: #111827; }
+        .payable-label p { font-size: 11px; color: #6b7280; }
+        .payable-value { background: #f0fdf4; padding: 15px 30px; font-size: 18px; font-weight: 800; color: #111827; border-left: 1px solid #e5e7eb; }
+
+        /* Bottom Footer */
+        .slip-footer { margin-top: 40px; }
+        .amount-words { font-size: 13px; color: #374151; margin-bottom: 30px; }
+        .amount-words strong { color: #111827; }
+        
+        .footer-note { text-align: center; font-size: 11px; color: #9ca3af; padding-top: 20px; border-top: 1px solid #f3f4f6; }
+        
+        .qr-section { position: absolute; bottom: 80px; right: 40px; text-align: center; }
+        .qr-box { width: 90px; height: 90px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 6px; margin-bottom: 8px; }
+        .qr-box canvas, .qr-box img { max-width: 100%; height: auto !important; }
+        .qr-label { font-size: 9px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .print-btn { 
+            display: block; 
+            max-width: 900px; 
+            margin: 0 auto 20px; 
+            padding: 12px; 
+            background: #111827; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            text-align: center; 
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .print-btn:hover { background: #374151; transform: translateY(-1px); }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .slip-container { box-shadow: none; border: 1px solid #e5e7eb; margin: 0; max-width: 100%; }
+            .print-btn, .no-print { display: none !important; }
+            .qr-section { right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Download / Print Payslip</button>
+
+    <div class="slip-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="brand">
+                <img src="{{ brand_logo }}" class="brand-logo" alt="Logo">
+                <div class="brand-info">
+                    <h2>{{ brand_name }}</h2>
+                    <p>Fleet Operations & Logistics — Gulf</p>
+                </div>
+            </div>
+            <div class="period-info">
+                <p>Payslip For the Month</p>
+                <h3>{{ month_label }}</h3>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-section">
+            <div class="employee-details">
+                <h4 class="section-header">Employee Summary</h4>
+                <div class="details-grid">
+                    <span class="detail-label">Employee Name</span><span class="detail-value">: {{ driver.full_name }}</span>
+                    <span class="detail-label">Designation</span><span class="detail-value">: {{ driver.position|default:"Driver" }}</span>
+                    <span class="detail-label">Employee ID</span><span class="detail-value">: {{ driver.working_id|default:"—" }}</span>
+                    <span class="detail-label">Civil ID</span><span class="detail-value">: {{ driver.civil_id_number|default:"—" }}</span>
+                    <span class="detail-label">Date of Joining</span><span class="detail-value">: {{ driver.created_at|date:"d/m/Y" }}</span>
+                    <span class="detail-label">Pay Period</span><span class="detail-value">: {{ month_label }}</span>
+                </div>
+            </div>
+            <div class="net-highlight">
+                <div class="net-amount-box">
+                    <h4>{{ net_payable|kwd }}</h4>
+                    <p>Employee Net Pay</p>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value">{{ total_orders }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Working Hours</span>
+                    <span class="stat-value">{{ hours|format_hours }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Bar -->
+        <div class="info-bar">
+            <div class="info-bar-item">IBAN Number: <strong>{{ driver.iban_number|default:"—" }}</strong></div>
+            <div class="info-bar-item">Bank Name: <strong>{{ driver.get_bank_name_display|default:"—" }}</strong></div>
+        </div>
+
+        <!-- Earnings & Deductions -->
+        <div class="table-container">
+            <!-- Earnings -->
+            <div class="table-half">
+                <div class="table-header">
+                    <span>Earnings</span>
+                    <span>Amount</span>
+                </div>
+                <div class="table-row">
+                    <span class="row-label">Base Cash / Delivery {{ app_currency }}</span>
+                    <span class="row-value">{{ cash|kwd }}</span>
+                </div>
+                <div class="table-row">
+                    <span class="row-label">Main Orders ({{ main_orders }})</span>
+                    <span class="row-value">—</span>
+                </div>
+                <div class="table-row">
+                    <span class="row-label">Additional Orders ({{ additional_orders }})</span>
+                    <span class="row-value">—</span>
+                </div>
+                <!-- Spacers to match height -->
+                <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                
+                <div class="table-footer">
+                    <span>Gross Earnings</span>
+                    <span>{{ cash|kwd }}</span>
+                </div>
+            </div>
+
+            <!-- Deductions -->
+            <div class="table-half">
+                <div class="table-header">
+                    <span>Deductions</span>
+                    <span>Amount</span>
+                </div>
+                {% for d in deductions %}
+                <div class="table-row">
+                    <span class="row-label">{{ d.reason|truncatechars:30 }}</span>
+                    <span class="row-value">{{ d.contractor_deduction_kd|kwd }}</span>
+                </div>
+                {% empty %}
+                <div class="table-row">
+                    <span class="row-label">No Deductions</span>
+                    <span class="row-value">0.000 {{ app_currency }}</span>
+                </div>
+                {% endfor %}
+                
+                <!-- Spacers to match height -->
+                {% with deductions_count=deductions.count|default:0 %}
+                {% if deductions_count < 4 %}
+                    {% if deductions_count == 0 %}
+                        <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                        <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                        <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                    {% elif deductions_count == 1 %}
+                        <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                        <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                    {% elif deductions_count == 2 %}
+                        <div class="table-row"><span class="row-label">&nbsp;</span><span class="row-value">&nbsp;</span></div>
+                    {% endif %}
+                {% endif %}
+                {% endwith %}
+
+                <div class="table-footer">
+                    <span>Total Deductions</span>
+                    <span>{{ total_deductions|kwd }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Payable Bar -->
+        <div class="payable-bar">
+            <div class="payable-label">
+                <h4>TOTAL NET PAYABLE</h4>
+                <p>Gross Earnings - Total Deductions</p>
+            </div>
+            <div class="payable-value">
+                {{ net_payable|kwd }}
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="slip-footer">
+            <div class="amount-words">
+                Amount In Words: <strong>{{ net_payable|amount_in_words }}</strong>
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-box">
+                    <div id="qrcode"></div>
+                </div>
+                <div class="qr-label">Verify Slip</div>
+            </div>
+
+            <div class="footer-note">
+                <span style="font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; display: block;">Unpredictable Logistics Solutions</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const year = "{{ target_date.year }}" || new Date().getFullYear();
+            const month = "{{ target_date.month }}" || (new Date().getMonth() + 1);
+            const verificationUrl = `${baseUrl}?year=${year}&month=${month}`;
+            
+            try {
+                new QRCode(document.getElementById("qrcode"), {
+                    text: verificationUrl,
+                    width: 80,
+                    height: 80,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.M
+                });
+            } catch (e) {
+                console.error("QR Generation failed");
+            }
+        });
+    </script>
+</body>
+</html>
+
+
