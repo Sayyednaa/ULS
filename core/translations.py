@@ -1,10 +1,10 @@
 
-# Translation mapping for Sayedna Logistics
+# Translation mapping for Unpredictable Logistics Solutions
 # This file contains the English to Arabic mappings for the entire application.
 
 TRANSLATIONS = {
     # Navigation & Sidebar
-    "SAYEDNA LOGISTICS": "حلول لوجستية غير متوقعة",
+    "UNPREDICTABLE LOGISTICS SOLUTIONS": "حلول لوجستية غير متوقعة",
     "Gulf Operations": "عمليات الخليج",
     "Dashboard": "لوحة التحكم",
     "Already have an account?": "هل لديك حساب بالفعل؟",
@@ -29,6 +29,7 @@ TRANSLATIONS = {
     "Contact Page": "صفحة الاتصال",
     "My Profile": "ملفي الشخصي",
     "Logout": "تسجيل الخروج",
+    "System Statistics": "إحصائيات النظام",
     "Forms": "النماذج",
     "Driver Info Form": "نموذج معلومات السائق",
     "Deduction Form": "نموذج الاستقطاع",
@@ -306,7 +307,7 @@ TRANSLATIONS = {
     "Talabat": "طلبات",
     "Burger King": "برجر كنج",
     "Pharmazone": "فارمازون",
-    "SAYEDNA LOGISTICS": "حلول لوجستية غير متوقعة",
+    "UNPREDICTABLE LOGISTICS SOLUTIONS": "حلول لوجستية غير متوقعة",
     "Active": "نشط",
     "Car": "سيارة",
     "Bike": "دراجة",

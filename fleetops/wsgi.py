@@ -1,5 +1,5 @@
 """
-WSGI config for SAYYEDNAA LOGISTICS project.
+WSGI config for Unpredictable Logistics Solutions project.
 """
 import os
 from django.core.wsgi import get_wsgi_application

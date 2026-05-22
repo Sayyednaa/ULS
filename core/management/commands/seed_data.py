@@ -27,6 +27,18 @@ class Command(BaseCommand):
         # 1. Create Users
         self.stdout.write('Creating users...')
 
+        # Global System Admin (No company, is_superuser=True)
+        sysadmin = Profile.objects.create_superuser(
+            username='sysadmin',
+            email='sysadmin@unpredictedcode.com',
+            password='sysadminpass',
+            first_name='System',
+            last_name='Admin',
+            role='superadmin',
+            position='Administrative',
+            company=None
+        )
+
         superadmin_user = Profile.objects.create_user(
             username='admin@unpredictedcode.com',
             email='admin@unpredictedcode.com',
@@ -205,3 +217,7 @@ class Command(BaseCommand):
         Task.objects.create(user=accountant_user, company=uls_company, title='Prepare salary sheets')
 
         self.stdout.write(self.style.SUCCESS('ULS showcase data seeded successfully!'))
+        self.stdout.write(self.style.SUCCESS('Credentials:'))
+        self.stdout.write(self.style.SUCCESS('  Global System Admin: sysadmin / sysadminpass'))
+        self.stdout.write(self.style.SUCCESS('  Showcase Company Admin: admin@unpredictedcode.com / admin123'))
+

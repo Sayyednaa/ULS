@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Statistics — {{ brand_name }}{% endblock %}
+{% block page_title %}System Statistics{% endblock %}
+{% block breadcrumb %}Platform resource occupancy, storage usage, and record metrics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .neon-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    }
+    .dark .neon-card {
+        background: rgba(30, 41, 59, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+    .neon-border-orange {
+        box-shadow: 0 0 15px rgba(249, 115, 22, 0.1);
+    }
+    .progress-bar-fill {
+        transition: width 1s ease-in-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="{
+    companySearch: '',
+    userSearch: '',
+    activeTab: 'companies'
+}" class="space-y-8">
+
+    <!-- Overview Metrics Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        <!-- Total Storage Card -->
+        <div class="neon-card neon-border-orange rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">💾</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400">Disk Total</span>
+            </div>
+            <div>
+                <p class="text-xl font-black text-app-text tracking-tight">{{ total_system_storage_formatted }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1" x-text="t('Total Storage')">Total Storage</p>
+            </div>
+        </div>
+
+        <!-- Database Size Card -->
+        <div class="neon-card rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">🗄️</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400">DB File</span>
+            </div>
+            <div>
+                <p class="text-xl font-black text-app-text tracking-tight">{{ db_size_formatted }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1">Database Size</p>
+            </div>
+        </div>
+
+        <!-- Uploaded Media Size Card -->
+        <div class="neon-card rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">📁</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Media</span>
+            </div>
+            <div>
+                <p class="text-xl font-black text-app-text tracking-tight">{{ total_media_size_formatted }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1">Uploaded Media</p>
+            </div>
+        </div>
+
+        <!-- Companies Card -->
+        <div class="neon-card rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">🏢</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400">Tenants</span>
+            </div>
+            <div>
+                <p class="text-2xl font-black text-app-text tracking-tight">{{ total_companies }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1">Companies</p>
+            </div>
+        </div>
+
+        <!-- Users Card -->
+        <div class="neon-card rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">👥</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-400">Accounts</span>
+            </div>
+            <div>
+                <p class="text-2xl font-black text-app-text tracking-tight">{{ total_users }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1">Users</p>
+            </div>
+        </div>
+
+        <!-- Drivers Card -->
+        <div class="neon-card rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">🏍️</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Drivers</span>
+            </div>
+            <div>
+                <p class="text-2xl font-black text-app-text tracking-tight">{{ total_drivers }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1">Total Drivers</p>
+            </div>
+        </div>
+
+        <!-- Invoices Card -->
+        <div class="neon-card rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl">🧾</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 text-red-400">Invoices</span>
+            </div>
+            <div>
+                <p class="text-2xl font-black text-app-text tracking-tight">{{ total_invoices }}</p>
+                <p class="text-[10px] text-app-text-muted font-bold mt-1">Invoices Recorded</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Storage breakdown doughnut -->
+        <div class="neon-card rounded-3xl p-6 border border-app-border">
+            <h4 class="text-sm font-black text-app-text uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span>📊</span> Storage Distribution by Company
+            </h4>
+            <div class="h-64 relative flex items-center justify-center">
+                {% if total_media_size > 0 %}
+                <canvas id="companyStorageChart"></canvas>
+                {% else %}
+                <div class="text-center text-app-text-muted text-xs py-12">
+                    <span class="text-3xl block mb-2">📁</span>
+                    No uploaded files detected on disk.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Resources breakdown stacked bar -->
+        <div class="neon-card rounded-3xl p-6 border border-app-border">
+            <h4 class="text-sm font-black text-app-text uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span>📈</span> Resource Metrics per Company
+            </h4>
+            <div class="h-64 relative flex items-center justify-center">
+                {% if total_companies > 0 %}
+                <canvas id="companyResourcesChart"></canvas>
+                {% else %}
+                <div class="text-center text-app-text-muted text-xs py-12">
+                    <span class="text-3xl block mb-2">🏢</span>
+                    No registered companies in the database.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs controller -->
+    <div class="flex items-center gap-2 border-b border-app-border pb-1">
+        <button @click="activeTab = 'companies'"
+            :class="activeTab === 'companies' ? 'text-brand border-b-2 border-brand font-black' : 'text-app-text-muted font-bold hover:text-app-text'"
+            class="px-4 py-2 text-sm transition-all focus:outline-none">
+            🏢 Storage by Company
+        </button>
+        <button @click="activeTab = 'users'"
+            :class="activeTab === 'users' ? 'text-brand border-b-2 border-brand font-black' : 'text-app-text-muted font-bold hover:text-app-text'"
+            class="px-4 py-2 text-sm transition-all focus:outline-none">
+            👤 Direct Storage by User Profile
+        </button>
+    </div>
+
+    <!-- Table 1: Company storage breakdown -->
+    <div x-show="activeTab === 'companies'" class="neon-card border border-app-border rounded-2xl shadow-sm overflow-hidden animate-fade-in" x-cloak>
+        <!-- Header Controls -->
+        <div class="p-6 border-b border-app-border flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="space-y-1 w-full md:w-auto">
+                <h3 class="text-base font-black text-app-text flex items-center gap-2">
+                    <span>🏢</span> Company Occupancy Table
+                </h3>
+                <p class="text-xs text-app-text-muted">Breakdown of uploaded files by registration docs, drivers, messaging, and company media files.</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="relative w-full md:w-64">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-app-text-muted text-sm">🔍</span>
+                    <input type="text" x-model="companySearch" placeholder="Search company..." 
+                        class="w-full pl-9 pr-4 py-2 rounded-xl border border-app-border bg-app-bg text-xs font-bold text-app-text focus:ring-2 focus:ring-brand/20 outline-none transition-all">
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-app-bg/50 text-[10px] font-black uppercase text-app-text-muted tracking-wider border-b border-app-border">
+                        <th class="py-4 px-6">Company</th>
+                        <th class="py-4 px-6">Reg & Logo Docs</th>
+                        <th class="py-4 px-6">Company Uploaded Files</th>
+                        <th class="py-4 px-6">Driver Dossiers</th>
+                        <th class="py-4 px-6">Messages & Deductions</th>
+                        <th class="py-4 px-6">Total Occupied Space</th>
+                        <th class="py-4 px-6 text-right">Resource Counts</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-app-border text-xs">
+                    {% for item in companies_data %}
+                    <tr x-show="companySearch === '' || '{{ item.company.name|escapejs }}'.toLowerCase().includes(companySearch.toLowerCase())"
+                        class="hover:bg-black/5 dark:hover:bg-white/5 transition-all">
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                {% if item.company.logo %}
+                                <img src="{{ item.company.logo.url }}" class="w-8 h-8 rounded-lg object-cover border border-app-border" alt="Logo">
+                                {% else %}
+                                <div class="w-8 h-8 bg-brand/10 text-brand rounded-lg flex items-center justify-center text-sm font-bold">🏢</div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-extrabold text-app-text text-sm">{{ item.company.name }}</div>
+                                    <div class="text-[9px] text-app-text-muted">Created: {{ item.company.created_at|date:"Y-m-d" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 font-bold text-app-text">{{ item.company_docs_size_formatted }}</td>
+                        <td class="py-4 px-6 font-bold text-app-text-muted">{{ item.company_files_size_formatted }}</td>
+                        <td class="py-4 px-6 font-bold text-app-text">{{ item.drivers_docs_size_formatted }}</td>
+                        <td class="py-4 px-6 font-bold text-app-text-muted">{{ item.deductions_size_formatted }} / {{ item.messages_size_formatted }}</td>
+                        <td class="py-4 px-6">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[10px] font-bold">
+                                    <span class="text-orange-400">{{ item.total_size_formatted }}</span>
+                                    <span class="text-app-text-muted">
+                                        {% if total_media_size > 0 %}
+                                            {% widthratio item.total_size total_media_size 100 %}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-black/5 dark:bg-white/5 rounded-full h-1.5 overflow-hidden border border-black/5 dark:border-white/5">
+                                    <div class="bg-gradient-to-r from-brand to-orange-400 h-full progress-bar-fill" 
+                                         style="width: {% if total_media_size > 0 %}{% widthratio item.total_size total_media_size 100 %}{% else %}0{% endif %}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-2 text-[10px] font-bold">
+                                <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded" title="Active Drivers">{{ item.drivers_count }} 🏍️</span>
+                                <span class="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded" title="System Users">{{ item.users_count }} 👥</span>
+                                <span class="bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded" title="Total Invoices">{{ item.invoices_count }} 🧾</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-app-text-muted font-bold">
+                            No company stats available.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Table 2: User profile storage breakdown -->
+    <div x-show="activeTab === 'users'" class="neon-card border border-app-border rounded-2xl shadow-sm overflow-hidden animate-fade-in" x-cloak>
+        <!-- Header Controls -->
+        <div class="p-6 border-b border-app-border flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="space-y-1 w-full md:w-auto">
+                <h3 class="text-base font-black text-app-text flex items-center gap-2">
+                    <span>👥</span> Individual Profile Storage Table
+                </h3>
+                <p class="text-xs text-app-text-muted">Occupancy metrics for individual accounts uploaded files (avatars, supporting compliance papers).</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="relative w-full md:w-64">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-app-text-muted text-sm">🔍</span>
+                    <input type="text" x-model="userSearch" placeholder="Search user by name..." 
+                        class="w-full pl-9 pr-4 py-2 rounded-xl border border-app-border bg-app-bg text-xs font-bold text-app-text focus:ring-2 focus:ring-brand/20 outline-none transition-all">
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-app-bg/50 text-[10px] font-black uppercase text-app-text-muted tracking-wider border-b border-app-border">
+                        <th class="py-4 px-6">Account User</th>
+                        <th class="py-4 px-6">Role</th>
+                        <th class="py-4 px-6">Associated Tenant Company</th>
+                        <th class="py-4 px-6">Avatar Image Size</th>
+                        <th class="py-4 px-6">Supporting Documents</th>
+                        <th class="py-4 px-6 text-right">Total Profile Files Space</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-app-border text-xs">
+                    {% for item in users_data %}
+                    <tr x-show="userSearch === '' || '{{ item.user.get_full_name|escapejs }}'.toLowerCase().includes(userSearch.toLowerCase()) || '{{ item.user.username|escapejs }}'.toLowerCase().includes(userSearch.toLowerCase())"
+                        class="hover:bg-black/5 dark:hover:bg-white/5 transition-all">
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                {% if item.user.avatar %}
+                                <img src="{{ item.user.avatar.url }}" class="w-8 h-8 rounded-full object-cover border border-app-border" alt="Avatar">
+                                {% else %}
+                                <div class="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-black text-xs uppercase shadow-sm">
+                                    {{ item.user.first_name.0 }}{{ item.user.last_name.0|default:'' }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-extrabold text-app-text text-sm">{{ item.user.get_full_name|default:item.user.username }}</div>
+                                    <div class="text-[10px] text-app-text-muted">{{ item.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider 
+                                {% if item.user.is_superuser %}bg-red-500/10 text-red-400 border border-red-500/20
+                                {% elif item.user.role == 'superadmin' %}bg-orange-500/10 text-orange-400 border border-orange-500/20
+                                {% else %}bg-black/5 dark:bg-white/5 text-app-text-muted border border-app-border{% endif %}">
+                                {{ item.user.role|default:"User" }}{% if item.user.is_superuser %} (Super Admin){% endif %}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 font-semibold text-app-text-muted">
+                            {% if item.user.company %}
+                            {{ item.user.company.name }}
+                            {% else %}
+                            <span class="text-rose-400 font-extrabold italic">Global System Operator</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 font-medium text-app-text">{{ item.avatar_size_formatted }}</td>
+                        <td class="py-4 px-6 font-medium text-app-text-muted">{{ item.doc_size_formatted }}</td>
+                        <td class="py-4 px-6 text-right font-black text-orange-400 text-sm">{{ item.total_size_formatted }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-app-text-muted font-bold">
+                            No user direct storage logs available.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Data arrays from context
+        const companyNames = [{% for item in companies_data %}"{{ item.company.name|escapejs }}",{% endfor %}];
+        const companyStorage = [{% for item in companies_data %}{{ item.total_size }},{% endfor %}];
+        const totalMediaSize = {{ total_media_size }};
+        
+        // Theme detection helper
+        const isDark = document.documentElement.classList.contains('dark');
+        const textColor = isDark ? '#94a3b8' : '#475569';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+        const borderColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+        
+        // Render Storage Chart
+        const storageCtx = document.getElementById('companyStorageChart');
+        if (storageCtx) {
+            // Check if there is data to display
+            const hasData = companyStorage.some(v => v > 0);
+            
+            const chartData = hasData ? companyStorage : [1];
+            const chartLabels = hasData ? companyNames : ['No Data'];
+            const chartColors = hasData ? [
+                '#f97316', '#38bdf8', '#34d399', '#a855f7', '#ec4899', '#f59e0b', '#e11d48'
+            ] : (isDark ? ['#334155'] : ['#e2e8f0']);
+
+            new Chart(storageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderWidth: 1,
+                        borderColor: borderColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: textColor,
+                                font: {
+                                    size: 10,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    if (!hasData) return 'No storage usage yet';
+                                    const val = context.raw;
+                                    // format byte size
+                                    if (val === 0) return '0 Bytes';
+                                    const k = 1024;
+                                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                                    const i = Math.floor(Math.log(val) / Math.log(k));
+                                    const formatted = parseFloat((val / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                                    return `${context.label}: ${formatted}`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Render Resources Chart
+        const resourcesCtx = document.getElementById('companyResourcesChart');
+        if (resourcesCtx) {
+            const driverCounts = [{% for item in companies_data %}{{ item.drivers_count }},{% endfor %}];
+            const userCounts = [{% for item in companies_data %}{{ item.users_count }},{% endfor %}];
+            const invoiceCounts = [{% for item in companies_data %}{{ item.invoices_count }},{% endfor %}];
+
+            new Chart(resourcesCtx, {
+                type: 'bar',
+                data: {
+                    labels: companyNames,
+                    datasets: [
+                        {
+                            label: 'Drivers',
+                            data: driverCounts,
+                            backgroundColor: '#34d399',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Users',
+                            data: userCounts,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Invoices',
+                            data: invoiceCounts,
+                            backgroundColor: '#f43f5e',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor, font: { size: 9, weight: 'bold' } }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { size: 9, weight: 'bold' } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

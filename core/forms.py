@@ -533,3 +533,56 @@ class CompanyRegistrationForm(forms.Form):
         if p1 and p1 != p2:
             raise forms.ValidationError("Passwords do not match.")
         return cleaned
+
+
+class CompanyVerificationForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = [
+            'owner_name',
+            'owner_mobile_number',
+            'owner_signature',
+            'registration_certificate',
+            'commercial_certificate',
+            'authorized_signature_certificate',
+            'authorized_signature_only',
+        ]
+        widgets = {
+            'owner_name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Enter Owner Name'}),
+            'owner_mobile_number': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Enter Owner Mobile Number'}),
+            'owner_signature': forms.FileInput(attrs={'class': TW_FILE}),
+            'registration_certificate': forms.FileInput(attrs={'class': TW_FILE}),
+            'commercial_certificate': forms.FileInput(attrs={'class': TW_FILE}),
+            'authorized_signature_certificate': forms.FileInput(attrs={'class': TW_FILE}),
+            'authorized_signature_only': forms.FileInput(attrs={'class': TW_FILE}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        mandatory_fields = [
+            ('owner_name', 'Owner Name'),
+            ('owner_mobile_number', 'Owner Mobile Number'),
+            ('owner_signature', 'Owner Signature'),
+            ('registration_certificate', 'Company Registration Certificate'),
+            ('commercial_certificate', 'Company Registered Commercial Certificate'),
+            ('authorized_signature_certificate', 'Authorised Signature Certificate'),
+            ('authorized_signature_only', 'Authorised Signature Only'),
+        ]
+        
+        for field_name, field_label in mandatory_fields:
+            val = cleaned_data.get(field_name)
+            if field_name.endswith('_certificate') or field_name in ['authorized_signature_only', 'owner_signature']:
+                if not val:
+                    if self.instance and self.instance.pk:
+                        existing_file = getattr(self.instance, field_name, None)
+                        if not existing_file:
+                            self.add_error(field_name, f"{field_label} is required.")
+                    else:
+                        self.add_error(field_name, f"{field_label} is required.")
+            else:
+                if not val:
+                    self.add_error(field_name, f"{field_label} is required.")
+                    
+        return cleaned_data
+

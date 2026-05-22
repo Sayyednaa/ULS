@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+{% load static kwd_filters translation_tags %}
+
+{% block title %}System Admin Dashboard — {{ brand_name }}{% endblock %}
+{% block page_title %}System Administration{% endblock %}
+{% block breadcrumb %}All registered companies and access controls{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-modal {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .dark .glass-modal {
+        background: rgba(15, 15, 25, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .neon-border-pending {
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.1);
+    }
+    .neon-border-review {
+        box-shadow: 0 0 15px rgba(14, 165, 233, 0.1);
+    }
+    .neon-border-accepted {
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+    }
+    .neon-border-rejected {
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="{
+    searchQuery: '',
+    statusFilter: 'all',
+    rejectModalOpen: false,
+    rejectCompanyId: '',
+    rejectCompanyName: '',
+    extendModalOpen: false,
+    extendCompanyId: '',
+    extendCompanyName: '',
+    extendExpiryDate: '',
+    deleteModalOpen: false,
+    deleteCompanyId: '',
+    deleteCompanyName: '',
+    docModalOpen: false,
+    docCompanyName: '',
+    documents: [],
+    
+    openRejectModal(id, name) {
+        this.rejectCompanyId = id;
+        this.rejectCompanyName = name;
+        this.rejectModalOpen = true;
+    },
+    openExtendModal(id, name, expiryDate) {
+        this.extendCompanyId = id;
+        this.extendCompanyName = name;
+        this.extendExpiryDate = expiryDate || '';
+        this.extendModalOpen = true;
+    },
+    openDeleteModal(id, name) {
+        this.deleteCompanyId = id;
+        this.deleteCompanyName = name;
+        this.deleteModalOpen = true;
+    },
+    openDocModal(name, ownerSig, reg, comm, sigCert, sigOnly) {
+        this.docCompanyName = name;
+        this.documents = [
+            { name: 'Owner Signature', url: ownerSig, icon: '✍️' },
+            { name: 'Registration Certificate', url: reg, icon: '📄' },
+            { name: 'Commercial Certificate', url: comm, icon: '📜' },
+            { name: 'Authorized Signature Certificate', url: sigCert, icon: '💼' },
+            { name: 'Authorized Signature Only', url: sigOnly, icon: '🖋️' }
+        ].filter(d => d.url);
+        this.docModalOpen = true;
+    },
+    matchesFilter(status, isPaused, isExpired) {
+        if (this.statusFilter === 'all') return true;
+        if (this.statusFilter === 'pending') return status === 'submitted';
+        if (this.statusFilter === 'review') return status === 'under_review';
+        if (this.statusFilter === 'rejected') return status === 'rejected';
+        if (this.statusFilter === 'paused') return status === 'accepted' && isPaused;
+        if (this.statusFilter === 'expired') return status === 'accepted' && isExpired && !isPaused;
+        if (this.statusFilter === 'active') return status === 'accepted' && !isPaused && !isExpired;
+        return true;
+    }
+}" class="space-y-6">
+
+    <!-- Metrics Cards Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <!-- Total -->
+        <button @click="statusFilter = 'all'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'all' ? 'border-brand ring-2 ring-brand/20' : 'border-app-border hover:border-brand/40'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">🏢</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-app-text-muted">Total</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ total_companies }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">Registered</p>
+        </button>
+
+        <!-- Active -->
+        <button @click="statusFilter = 'active'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'active' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-app-border hover:border-emerald-500/40'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">🟢</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">Active</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ active_count }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">In Trial / Extended</p>
+        </button>
+
+        <!-- Pending -->
+        <button @click="statusFilter = 'pending'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'pending' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-app-border hover:border-amber-500/40'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">⏳</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500">Pending</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ pending_count }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">Waiting Review</p>
+        </button>
+
+        <!-- Under Review -->
+        <button @click="statusFilter = 'review'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'review' ? 'border-sky-500 ring-2 ring-sky-500/20' : 'border-app-border hover:border-sky-500/40'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">🔍</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-500">Review</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ review_count }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">Under Review</p>
+        </button>
+
+        <!-- Expired -->
+        <button @click="statusFilter = 'expired'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'expired' ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-app-border hover:border-rose-500/40'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">🔒</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500">Expired</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ expired_count }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">Trial Ended</p>
+        </button>
+
+        <!-- Paused -->
+        <button @click="statusFilter = 'paused'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'paused' ? 'border-red-500 ring-2 ring-red-500/20' : 'border-app-border hover:border-red-500/40'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">⏸️</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-bold">Paused</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ paused_count }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">Manually Paused</p>
+        </button>
+
+        <!-- Rejected -->
+        <button @click="statusFilter = 'rejected'" 
+            class="bg-app-card border rounded-2xl p-4 text-left shadow-sm transition-all duration-300 hover:scale-[1.03] focus:outline-none cursor-pointer"
+            :class="statusFilter === 'rejected' ? 'border-red-500/50 ring-2 ring-red-500/10' : 'border-app-border hover:border-red-500/30'">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xl">❌</span>
+                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 text-red-500">Rejected</span>
+            </div>
+            <p class="text-2xl font-black text-app-text">{{ rejected_count }}</p>
+            <p class="text-[10px] text-app-text-muted font-bold mt-1">Declined</p>
+        </button>
+    </div>
+
+    <!-- Main List/Table Container -->
+    <div class="bg-app-card border border-app-border rounded-2xl shadow-sm overflow-hidden">
+        
+        <!-- Header Controls -->
+        <div class="p-6 border-b border-app-border flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="space-y-1 w-full md:w-auto">
+                <h3 class="text-lg font-black text-app-text flex items-center gap-2">
+                    <span>🏢</span> Registered Companies
+                </h3>
+                <p class="text-xs text-app-text-muted">Manage tenant status, trial access, verification certificates, and permissions.</p>
+            </div>
+            
+            <!-- Search & Filters -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <!-- Search input -->
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-app-text-muted text-sm">🔍</span>
+                    <input type="text" x-model="searchQuery" placeholder="Search by name or phone..." 
+                        class="w-full pl-9 pr-4 py-2 rounded-xl border border-app-border bg-app-bg text-xs font-bold text-app-text focus:ring-2 focus:ring-brand/20 outline-none transition-all">
+                </div>
+                
+                <!-- Reset Filter Button -->
+                <button x-show="statusFilter !== 'all' || searchQuery !== ''" @click="statusFilter = 'all'; searchQuery = ''"
+                    class="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-app-text rounded-xl border border-app-border transition-colors">
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-app-bg/50 text-[10px] font-black uppercase text-app-text-muted tracking-wider border-b border-app-border">
+                        <th class="py-4 px-6">Company</th>
+                        <th class="py-4 px-6">System Admin User</th>
+                        <th class="py-4 px-6">Verification Documents</th>
+                        <th class="py-4 px-6">Status</th>
+                        <th class="py-4 px-6">Trial Access Period</th>
+                        <th class="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-app-border text-xs">
+                    {% for company in companies %}
+                    {% with first_member=company.members.all.0 %}
+                    <tr x-show="matchesFilter('{{ company.status }}', {{ company.is_paused|yesno:'true,false' }}, {% if company.access_expiry_date and company.access_expiry_date < today %}true{% else %}false{% endif %}) && ('{{ company.name|escapejs }}'.toLowerCase().includes(searchQuery.toLowerCase()) || '{{ company.owner_name|escapejs }}'.toLowerCase().includes(searchQuery.toLowerCase()) || '{{ company.owner_mobile_number|escapejs }}'.includes(searchQuery))"
+                        class="hover:bg-black/2 dark:hover:bg-white/1 transition-all">
+                        
+                        <!-- Logo & Name -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                {% if company.logo %}
+                                <img src="{{ company.logo.url }}" class="w-10 h-10 rounded-xl object-cover border border-app-border" alt="Logo">
+                                {% else %}
+                                <div class="w-10 h-10 bg-brand/10 text-brand rounded-xl flex items-center justify-center text-lg font-bold">🏢</div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-extrabold text-app-text text-sm">{{ company.name }}</div>
+                                    <div class="text-[10px] text-app-text-muted">ID: {{ company.id|truncatechars:15 }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- First Member Profile -->
+                        <td class="py-4 px-6">
+                            {% if first_member %}
+                            <div>
+                                <div class="font-bold text-app-text">{{ first_member.get_full_name }}</div>
+                                <div class="text-app-text-muted text-[10px]">{{ first_member.email }}</div>
+                            </div>
+                            {% else %}
+                            <span class="text-app-text-muted italic">No users yet</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Documents List -->
+                        <td class="py-4 px-6">
+                            <div class="space-y-1">
+                                <div class="text-app-text font-bold mb-1.5 flex flex-col gap-0.5">
+                                    {% if company.owner_name %}
+                                    <div class="text-[10px] text-app-text-muted font-normal">Owner: <span class="text-app-text font-bold">{{ company.owner_name }}</span></div>
+                                    {% endif %}
+                                    {% if company.owner_mobile_number %}
+                                    <div class="text-[10px] text-app-text-muted font-normal">Phone: <span class="text-app-text font-bold">📞 {{ company.owner_mobile_number }}</span></div>
+                                    {% endif %}
+                                </div>
+
+                                {% if company.owner_signature or company.registration_certificate or company.commercial_certificate or company.authorized_signature_certificate or company.authorized_signature_only %}
+                                <button type="button" 
+                                    @click="openDocModal('{{ company.name|escapejs }}', '{{ company.owner_signature.url|default:'' }}', '{{ company.registration_certificate.url|default:'' }}', '{{ company.commercial_certificate.url|default:'' }}', '{{ company.authorized_signature_certificate.url|default:'' }}', '{{ company.authorized_signature_only.url|default:'' }}')"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand/10 hover:bg-brand/20 text-brand font-black text-[10px] uppercase tracking-wider transition-colors">
+                                    📂 View Documents
+                                </button>
+                                {% else %}
+                                <span class="text-app-text-muted italic">No documents uploaded</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Status Badge -->
+                        <td class="py-4 px-6">
+                            {% if company.is_paused %}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                                ⏸️ Paused
+                            </span>
+                            {% elif company.status == 'pending_details' %}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/5 text-app-text-muted border border-app-border">
+                                Pending Details
+                            </span>
+                            {% elif company.status == 'submitted' %}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+                                Submitted
+                            </span>
+                            {% elif company.status == 'under_review' %}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-500 border border-sky-500/20">
+                                Under Review
+                            </span>
+                            {% elif company.status == 'accepted' %}
+                                {% if company.access_expiry_date and company.access_expiry_date < today %}
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                    🔒 Expired
+                                </span>
+                                {% else %}
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    ✅ Accepted
+                                </span>
+                                {% endif %}
+                            {% elif company.status == 'rejected' %}
+                            <div class="space-y-1">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                                    ❌ Rejected
+                                </span>
+                                {% if company.rejection_reason %}
+                                <div class="text-[9px] text-red-400 font-medium max-w-[150px] truncate" title="{{ company.rejection_reason }}">
+                                    Reason: {{ company.rejection_reason }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Trial Access Dates -->
+                        <td class="py-4 px-6">
+                            {% if company.status == 'accepted' %}
+                            <div class="space-y-0.5">
+                                <div class="text-app-text font-bold">Expires: {{ company.access_expiry_date|date:"Y-m-d"|default:"Never" }}</div>
+                                <div class="text-[10px] text-app-text-muted">Started: {{ company.access_start_date|date:"Y-m-d"|default:"-" }}</div>
+                            </div>
+                            {% else %}
+                            <span class="text-app-text-muted italic">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Administrative Actions -->
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                
+                                <!-- Document Actions (Accept / Under Review / Reject) -->
+                                {% if company.status == 'submitted' or company.status == 'under_review' or company.status == 'rejected' %}
+                                    {% if company.status != 'under_review' and company.status != 'rejected' %}
+                                    <form action="{% url 'system_admin_company_action' company.id %}" method="post" class="inline m-0">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="review">
+                                        <button type="submit" class="px-2 py-1 rounded bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Mark as Under Review">
+                                            Review
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    
+                                    <form action="{% url 'system_admin_company_action' company.id %}" method="post" class="inline m-0">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Approve Verification">
+                                            Approve
+                                        </button>
+                                    </form>
+                                    
+                                    <button type="button" @click="openRejectModal('{{ company.id }}', '{{ company.name|escapejs }}')"
+                                        class="px-2 py-1 rounded bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Reject Application">
+                                        Reject
+                                    </button>
+                                {% endif %}
+
+                                <!-- Accepted Operations (Pause/Resume, Extend) -->
+                                {% if company.status == 'accepted' %}
+                                    <!-- Pause / Resume -->
+                                    {% if company.is_paused %}
+                                    <form action="{% url 'system_admin_company_action' company.id %}" method="post" class="inline m-0">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="resume">
+                                        <button type="submit" class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Resume Access">
+                                            Resume
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form action="{% url 'system_admin_company_action' company.id %}" method="post" class="inline m-0">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="pause">
+                                        <button type="submit" class="px-2 py-1 rounded bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Pause Access">
+                                            Pause
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    <!-- Extend Expiry -->
+                                    <button type="button" @click="openExtendModal('{{ company.id }}', '{{ company.name|escapejs }}', '{{ company.access_expiry_date|date:'Y-m-d' }}')"
+                                        class="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Extend or restrict trial expiry date">
+                                        Extend Date
+                                    </button>
+                                {% endif %}
+
+                                <!-- Global Delete Operation -->
+                                <button type="button" @click="openDeleteModal('{{ company.id }}', '{{ company.name|escapejs }}')"
+                                    class="px-2 py-1 rounded bg-red-500/10 text-red-500 hover:bg-red-600 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-all" title="Permanently Delete Company">
+                                    🗑️
+                                </button>
+                                
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% endwith %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-app-text-muted font-bold">
+                            No companies registered on the system yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODALS SECTION -->
+    
+    <!-- Document View Modal -->
+    <div x-show="docModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" x-cloak>
+        <div class="glass-modal rounded-3xl w-full max-w-lg overflow-hidden border border-app-border shadow-2xl animate-scale-up" @click.away="docModalOpen = false">
+            <div class="px-6 py-5 border-b border-app-border flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-app-text">Documents: <span x-text="docCompanyName"></span></h3>
+                <button @click="docModalOpen = false" class="text-app-text-muted hover:text-app-text text-lg">✕</button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                <template x-for="doc in documents" :key="doc.name">
+                    <div class="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl" x-text="doc.icon"></span>
+                            <div>
+                                <h4 class="font-bold text-app-text text-sm" x-text="doc.name"></h4>
+                                <p class="text-[10px] text-app-text-muted">Uploaded Certificate</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a :href="doc.url" target="_blank" class="px-3 py-1.5 rounded-xl bg-brand text-white text-xs font-bold transition-all hover:bg-brand-hover">
+                                Open Link
+                            </a>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="px-6 py-4 bg-black/5 dark:bg-black/20 border-t border-app-border flex justify-end">
+                <button @click="docModalOpen = false" class="px-4 py-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-app-border text-app-text font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Reason Modal -->
+    <div x-show="rejectModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" x-cloak>
+        <div class="glass-modal rounded-3xl w-full max-w-md overflow-hidden border border-app-border shadow-2xl animate-scale-up" @click.away="rejectModalOpen = false">
+            <form :action="'/super-admin/company/' + rejectCompanyId + '/action/'" method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                
+                <div class="px-6 py-5 border-b border-app-border">
+                    <h3 class="text-base font-extrabold text-app-text">Reject: <span class="text-red-500 dark:text-red-400" x-text="rejectCompanyName"></span></h3>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-app-text-muted uppercase tracking-wider">Reason for Rejection</label>
+                        <textarea name="rejection_reason" required rows="4" placeholder="Describe why this registration was rejected..." 
+                            class="w-full rounded-2xl border border-app-border bg-app-bg p-4 text-xs font-bold text-app-text focus:ring-2 focus:ring-red-500/20 outline-none transition-all resize-none"></textarea>
+                    </div>
+                    <p class="text-[10px] text-app-text-muted">This feedback will be displayed to the user so they can correct their documents and submit again.</p>
+                </div>
+                
+                <div class="px-6 py-4 bg-black/5 dark:bg-black/20 border-t border-app-border flex justify-end gap-3">
+                    <button type="button" @click="rejectModalOpen = false" class="px-4 py-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-app-border text-app-text font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                        Confirm Rejection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Extend Expiry Modal -->
+    <div x-show="extendModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" x-cloak>
+        <div class="glass-modal rounded-3xl w-full max-w-md overflow-hidden border border-app-border shadow-2xl animate-scale-up" @click.away="extendModalOpen = false">
+            <form :action="'/super-admin/company/' + extendCompanyId + '/action/'" method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="extend">
+                
+                <div class="px-6 py-5 border-b border-app-border">
+                    <h3 class="text-base font-extrabold text-app-text">Access Expiry: <span class="text-brand dark:text-brand-light" x-text="extendCompanyName"></span></h3>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-app-text-muted uppercase tracking-wider">New Expiry Date</label>
+                        <input type="date" name="expiry_date" required :value="extendExpiryDate"
+                            class="w-full rounded-2xl border border-app-border bg-app-bg p-4 text-xs font-bold text-app-text focus:ring-2 focus:ring-brand/20 outline-none transition-all">
+                    </div>
+                    <p class="text-[10px] text-app-text-muted">Update the subscription or trial access expiry date. This date controls when access is automatically blocked.</p>
+                </div>
+                
+                <div class="px-6 py-4 bg-black/5 dark:bg-black/20 border-t border-app-border flex justify-end gap-3">
+                    <button type="button" @click="extendModalOpen = false" class="px-4 py-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-app-border text-app-text font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-brand hover:bg-brand-hover text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                        Save Expiry Date
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div x-show="deleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" x-cloak>
+        <div class="glass-modal rounded-3xl w-full max-w-md overflow-hidden border border-red-500/30 shadow-2xl animate-scale-up" @click.away="deleteModalOpen = false">
+            <form :action="'/super-admin/company/' + deleteCompanyId + '/action/'" method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                
+                <div class="px-6 py-5 border-b border-app-border bg-red-500/10 text-red-500 flex items-center gap-3">
+                    <span class="text-2xl">⚠️</span>
+                    <h3 class="text-base font-extrabold text-app-text">Delete <span x-text="deleteCompanyName"></span>?</h3>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 dark:text-red-400 text-xs font-semibold leading-relaxed">
+                        CRITICAL WARNING: This action is permanent and completely irreversible. All drivers, deductions, invoices, settings, and profile accounts belonging to this company will be permanently wiped out.
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-app-text-muted uppercase tracking-wider">Type the company name to confirm:</label>
+                        <input type="text" required placeholder="Type the company name exact match..." 
+                            x-data="{ confirmName: '' }" @input="confirmName = $event.target.value"
+                            class="w-full rounded-2xl border border-app-border bg-app-bg p-4 text-xs font-bold text-app-text focus:ring-2 focus:ring-red-500/20 outline-none transition-all">
+                        
+                        <p class="text-[10px] text-app-text-muted mt-1">Copy and paste the exact name: <strong class="text-app-text select-all" x-text="deleteCompanyName"></strong></p>
+                    </div>
+                </div>
+                
+                <div class="px-6 py-4 bg-black/5 dark:bg-black/20 border-t border-app-border flex justify-end gap-3">
+                    <button type="button" @click="deleteModalOpen = false" class="px-4 py-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-app-border text-app-text font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all">
+                        Yes, Delete Permanently
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

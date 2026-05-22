@@ -1,0 +1,396 @@
+{% load static kwd_filters translation_tags %}
+<!DOCTYPE html>
+<html lang="{{ lang }}" x-data="{ 
+    darkMode: true, 
+    logoutModalOpen: false, 
+    lang: '{{ lang }}',
+    translations: {},
+    t(text) {
+        return this.lang === 'ar' ? (this.translations[text] || text) : text;
+    },
+    init() {
+        const data = document.getElementById('translations-data');
+        if (data) {
+            this.translations = JSON.parse(data.textContent);
+        }
+        
+        this.$nextTick(() => {
+            if (this.lang === 'ar') {
+                document.querySelectorAll('input, textarea').forEach(el => {
+                    if (el.placeholder && this.translations[el.placeholder]) {
+                        el.placeholder = this.translations[el.placeholder];
+                    }
+                });
+                document.querySelectorAll('select option').forEach(opt => {
+                    const txt = opt.text.trim();
+                    if (this.translations[txt]) {
+                        opt.text = this.translations[txt];
+                    }
+                });
+            }
+        });
+    }
+}" :class="{ 'dark': darkMode }" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Status — {{ brand_name }}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+
+    <script id="translations-data" type="application/json">
+        {{ TRANSLATIONS_JSON|safe }}
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS v4 Browser -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        body {
+            font-family: 'Inter', 'Tajawal', sans-serif;
+            background-color: #0a0a0f;
+        }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .float-anim { animation: float 3.5s ease-in-out infinite; }
+        
+        .glass-card {
+            background: rgba(17, 17, 24, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .bg-overlay {
+            background: radial-gradient(circle at center, rgba(10, 10, 15, 0.5) 0%, rgba(10, 10, 15, 0.95) 100%);
+        }
+
+        .border-glow:focus-within {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+    </style>
+    
+    <style type="text/tailwindcss">
+        @theme {
+            --color-brand: #10b981;
+            --color-brand-hover: #059669;
+            --color-brand-light: #a7f3d0;
+            
+            --color-app-bg: #0a0a0f;
+            --color-app-card: #111118;
+            --color-app-border: rgba(255, 255, 255, 0.08);
+            --color-app-text: #ffffff;
+            --color-app-text-muted: #9ca3af;
+        }
+    </style>
+</head>
+
+<body class="bg-app-bg text-white overflow-y-auto no-print">
+
+    <!-- Background Image -->
+    <div class="fixed inset-0 z-0 opacity-20 scale-105 pointer-events-none">
+        <img src="{% static 'img/login_bg.png' %}" class="w-full h-full object-cover" alt="Background">
+    </div>
+
+    <!-- Top floating navigation bar -->
+    <div class="absolute top-6 left-6 right-6 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <img src="{% static 'img/logo.png' %}" class="h-10 w-10 rounded-xl object-cover border border-white/10" alt="Logo">
+            <div class="flex flex-col">
+                <span class="text-white font-black tracking-tight text-sm leading-tight">{{ brand_name|default:"ULS" }}</span>
+                <span class="text-gray-400 text-[10px] font-bold leading-tight">{{ company.name }}</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- Language Toggle Form -->
+            <form action="{% url 'set_language' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                <input name="language" type="hidden" :value="lang === 'en' ? 'ar' : 'en'">
+                <button type="submit" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest transition-all">
+                    <span x-show="lang === 'en'">Ar</span>
+                    <span x-show="lang === 'ar'">En</span>
+                </button>
+            </form>
+            
+            <!-- Logout Button -->
+            <button type="button" @click="logoutModalOpen = true" class="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-bold text-xs uppercase tracking-widest transition-all">
+                <span x-text="t('Logout')"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="min-h-screen flex items-center justify-center p-4 py-28 relative z-10">
+        <div class="w-full max-w-2xl relative z-10">
+            
+            <!-- EXPIRED / PAUSED / SUSPENDED STATE -->
+            {% if is_expired or company.is_paused %}
+            <div class="glass-card rounded-3xl shadow-2xl p-10 text-center border-red-500/20">
+                <div class="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 float-anim">
+                    🔒
+                </div>
+                <h1 class="text-3xl font-black text-white mb-3">
+                    {% if company.is_paused %}
+                        <span x-text="t('Account Paused')"></span>
+                    {% else %}
+                        <span x-text="t('Access Expired')"></span>
+                    {% endif %}
+                </h1>
+                <p class="text-gray-400 max-w-md mx-auto mb-8 font-medium">
+                    {% if company.is_paused %}
+                        <span x-text="t('Your company administrative access has been paused by the system administrator. Please contact customer support.')"></span>
+                    {% else %}
+                        <span x-text="t('Your 7-day initial trial access has expired. Please contact the system administrator to extend or upgrade your subscription.')"></span>
+                    {% endif %}
+                </p>
+                <div class="p-4 bg-white/5 border border-white/5 rounded-2xl max-w-sm mx-auto text-xs text-gray-500">
+                    <span x-text="t('Company ID:')"></span> {{ company.id }}
+                </div>
+            </div>
+
+            <!-- SUBMITTED / UNDER REVIEW STATE -->
+            {% elif company.status == 'submitted' or company.status == 'under_review' %}
+            <div class="glass-card rounded-3xl shadow-2xl p-10 text-center border-emerald-500/10">
+                <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 float-anim">
+                    ⏳
+                </div>
+                <h1 class="text-3xl font-black text-white mb-3">
+                    {% if company.status == 'submitted' %}
+                        <span x-text="t('Documents Submitted')"></span>
+                    {% else %}
+                        <span x-text="t('Under Active Review')"></span>
+                    {% endif %}
+                </h1>
+                <p class="text-gray-400 max-w-md mx-auto mb-8 font-medium">
+                    <span x-text="t('Thank you for submitting your verification details. Our administration team is reviewing your documents to verify your business operations. This typically takes up to 24 hours.')"></span>
+                </p>
+                
+                <div class="space-y-4 max-w-md mx-auto">
+                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <span class="text-gray-400 text-sm font-semibold" x-text="t('Current Status')"></span>
+                        <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            {% if company.status == 'submitted' %}
+                                <span x-text="t('Submitted')"></span>
+                            {% else %}
+                                <span x-text="t('Under Review')"></span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <span class="text-gray-400 text-sm font-semibold" x-text="t('Owner Name')"></span>
+                        <span class="text-white text-sm font-bold">{{ company.owner_name }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <span class="text-gray-400 text-sm font-semibold" x-text="t('Owner Mobile')"></span>
+                        <span class="text-white text-sm font-bold">{{ company.owner_mobile_number }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PENDING DETAILS / REJECTED STATE -->
+            {% elif company.status == 'pending_details' or company.status == 'rejected' %}
+            <div class="glass-card rounded-3xl shadow-2xl p-8 md:p-10 transition-all duration-300">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-black text-white mb-2" x-text="t('Company Verification')"></h2>
+                    <p class="text-gray-400 text-sm font-medium" x-text="t('Please upload your business registration and licensing certificates below to activate your portal access.')"></p>
+                </div>
+
+                {% if company.status == 'rejected' %}
+                <div class="mb-8 p-5 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex gap-4 animate-pulse">
+                    <span class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-lg">⚠️</span>
+                    <div>
+                        <h4 class="font-bold text-white mb-1" x-text="t('Verification Rejected')"></h4>
+                        <p class="text-red-300/90 font-medium">{{ company.rejection_reason|default:"No reason provided. Please verify all document details are correct and upload clear copies." }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if form.errors %}
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm">
+                    <p class="font-bold mb-2">Please fix the errors below:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-xs">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Owner Details Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Owner Name -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Owner Name')"></label>
+                            <div class="relative group border-glow rounded-xl transition-all">
+                                {{ form.owner_name }}
+                            </div>
+                        </div>
+                        <!-- Owner Mobile Number -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Owner Mobile Number')"></label>
+                            <div class="relative group border-glow rounded-xl transition-all">
+                                {{ form.owner_mobile_number }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Inputs Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        
+                        <!-- Owner Signature -->
+                        <div class="space-y-2" x-data="{ fileName: '' }">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Owner Signature')"></label>
+                            <div class="relative border border-dashed border-white/10 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors bg-white/2">
+                                <input type="file" name="owner_signature" id="id_owner_signature" class="absolute inset-0 opacity-0 cursor-pointer" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                <div class="text-2xl mb-1">✍️</div>
+                                <div class="text-xs text-gray-300 font-bold" x-text="fileName || t('Upload File')"></div>
+                                <div class="text-[9px] text-gray-500 mt-1" x-text="t('PDF, Image max 1MB')"></div>
+                            </div>
+                            {% if company.owner_signature %}
+                            <div class="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/5 rounded-xl text-[10px] text-gray-400">
+                                <span>✅</span>
+                                <a href="{{ company.owner_signature.url }}" target="_blank" class="hover:text-emerald-400 font-bold truncate">Current File</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Registration Certificate -->
+                        <div class="space-y-2" x-data="{ fileName: '' }">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Registration Certificate')"></label>
+                            <div class="relative border border-dashed border-white/10 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors bg-white/2">
+                                <input type="file" name="registration_certificate" id="id_registration_certificate" class="absolute inset-0 opacity-0 cursor-pointer" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                <div class="text-2xl mb-1">📄</div>
+                                <div class="text-xs text-gray-300 font-bold" x-text="fileName || t('Upload File')"></div>
+                                <div class="text-[9px] text-gray-500 mt-1" x-text="t('PDF, Image max 1MB')"></div>
+                            </div>
+                            {% if company.registration_certificate %}
+                            <div class="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/5 rounded-xl text-[10px] text-gray-400">
+                                <span>✅</span>
+                                <a href="{{ company.registration_certificate.url }}" target="_blank" class="hover:text-emerald-400 font-bold truncate">Current File</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Commercial Certificate -->
+                        <div class="space-y-2" x-data="{ fileName: '' }">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Commercial Certificate')"></label>
+                            <div class="relative border border-dashed border-white/10 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors bg-white/2">
+                                <input type="file" name="commercial_certificate" id="id_commercial_certificate" class="absolute inset-0 opacity-0 cursor-pointer" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                <div class="text-2xl mb-1">📜</div>
+                                <div class="text-xs text-gray-300 font-bold" x-text="fileName || t('Upload File')"></div>
+                                <div class="text-[9px] text-gray-500 mt-1" x-text="t('PDF, Image max 1MB')"></div>
+                            </div>
+                            {% if company.commercial_certificate %}
+                            <div class="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/5 rounded-xl text-[10px] text-gray-400">
+                                <span>✅</span>
+                                <a href="{{ company.commercial_certificate.url }}" target="_blank" class="hover:text-emerald-400 font-bold truncate">Current File</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Authorised Signature Certificate -->
+                        <div class="space-y-2" x-data="{ fileName: '' }">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Authorized Signature Certificate')"></label>
+                            <div class="relative border border-dashed border-white/10 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors bg-white/2">
+                                <input type="file" name="authorized_signature_certificate" id="id_authorized_signature_certificate" class="absolute inset-0 opacity-0 cursor-pointer" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                <div class="text-2xl mb-1">✍️</div>
+                                <div class="text-xs text-gray-300 font-bold" x-text="fileName || t('Upload File')"></div>
+                                <div class="text-[9px] text-gray-500 mt-1" x-text="t('PDF, Image max 1MB')"></div>
+                            </div>
+                            {% if company.authorized_signature_certificate %}
+                            <div class="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/5 rounded-xl text-[10px] text-gray-400">
+                                <span>✅</span>
+                                <a href="{{ company.authorized_signature_certificate.url }}" target="_blank" class="hover:text-emerald-400 font-bold truncate">Current File</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Authorised Signature Only -->
+                        <div class="space-y-2" x-data="{ fileName: '' }">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Authorized Signature Only')"></label>
+                            <div class="relative border border-dashed border-white/10 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors bg-white/2">
+                                <input type="file" name="authorized_signature_only" id="id_authorized_signature_only" class="absolute inset-0 opacity-0 cursor-pointer" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                <div class="text-2xl mb-1">🖋️</div>
+                                <div class="text-xs text-gray-300 font-bold" x-text="fileName || t('Upload File')"></div>
+                                <div class="text-[9px] text-gray-500 mt-1" x-text="t('Image file only')"></div>
+                            </div>
+                            {% if company.authorized_signature_only %}
+                            <div class="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/5 rounded-xl text-[10px] text-gray-400">
+                                <span>✅</span>
+                                <a href="{{ company.authorized_signature_only.url }}" target="_blank" class="hover:text-emerald-400 font-bold truncate">Current File</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-[0_20px_40px_-10px_rgba(16, 185, 129, 0.4)] transition-all duration-300 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] mt-6">
+                        <span x-text="t('Send for Review')"></span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+            
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div x-show="logoutModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center no-print" x-cloak>
+        <div x-show="logoutModalOpen" @click="logoutModalOpen = false"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-1"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-1"
+            x-transition:leave-end="opacity-0"></div>
+        <div x-show="logoutModalOpen"
+            class="relative bg-app-card border border-app-border rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 transform"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+            x-transition:enter-end="opacity-1 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-1 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-app-text mb-2" x-text="t('Confirm Logout')"></h3>
+                <p class="text-sm text-app-text-muted mb-6" x-text="t('Are you sure you want to sign out of your account?')"></p>
+                <div class="flex gap-3">
+                    <button type="button" @click="logoutModalOpen = false"
+                        class="flex-1 px-4 py-2 rounded-xl border border-app-border text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        x-text="t('Cancel')">
+                    </button>
+                    <form method="post" action="{% url 'logout' %}" class="flex-1 m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors" x-text="t('Logout')">
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

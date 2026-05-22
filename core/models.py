@@ -43,10 +43,34 @@ class SystemSettings(models.Model):
 
 
 class Company(models.Model):
+    STATUS_CHOICES = [
+        ('pending_details', 'Pending Details'),
+        ('submitted', 'Submitted'),
+        ('under_review', 'Under Review'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200, unique=True)
     logo = models.ImageField(upload_to='company_logos/', null=True, blank=True, validators=[validate_file_extension])
     
+    # Verification details
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending_details')
+    owner_mobile_number = models.CharField(max_length=20, blank=True, null=True)
+    owner_name = models.CharField(max_length=200, blank=True, null=True)
+    owner_signature = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
+    registration_certificate = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
+    commercial_certificate = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
+    authorized_signature_certificate = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
+    authorized_signature_only = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
+    
+    # Access controls
+    is_paused = models.BooleanField(default=False)
+    access_start_date = models.DateField(null=True, blank=True)
+    access_expiry_date = models.DateField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+
     # Per-company settings
     max_excel_size_mb = models.PositiveIntegerField(default=20, help_text="Maximum size for Excel files (MB)")
     max_other_size_mb = models.PositiveIntegerField(default=1, help_text="Maximum size for other documents/images (MB)")

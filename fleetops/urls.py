@@ -15,6 +15,10 @@ urlpatterns = [
     path('register/', views.register_company, name='register'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('access-denied/', access_denied, name='access_denied'),
+    path('company-status/', views.company_verification_status, name='company_verification_status'),
+    path('super-admin/', views.super_admin_dashboard, name='system_admin_dashboard'),
+    path('super-admin/stats/', views.system_admin_stats, name='system_admin_stats'),
+    path('super-admin/company/<uuid:company_id>/action/', views.super_admin_company_action, name='system_admin_company_action'),
 
     # Portals
     path('admin-portal/', include('portal_admin.urls')),

@@ -5,7 +5,7 @@ import json
 
 def global_context(request):
     """
-    Global context processor for Sayedna Logistics.
+    Global context processor for Unpredictable Logistics Solutions.
     Provides role information, unread counts, and translations.
     """
     context = {}

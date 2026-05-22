@@ -1,1 +1,1 @@
-# SAYYEDNAA LOGISTICS Django Project
+# Unpredictable Logistics Solutions Django Project

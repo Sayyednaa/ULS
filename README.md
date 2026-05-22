@@ -20,13 +20,14 @@ python manage.py runserver
 
 ## 🔑 Demo Accounts
 
-| Role       | Username                         | Password       | Name             |
-|------------|----------------------------------|----------------|------------------|
-| Admin      | admin@unpredictedcode.com        | admin123       | Omar Al-Rashidi  |
-| Manager    | manager@unpredictedcode.com      | manager123     | Sara Al-Mutairi  |
-| Employee   | employee@unpredictedcode.com     | employee123    | Khalid Al-Enezi  |
-| Accountant | accountant@unpredictedcode.com   | accountant123  | Fatima Al-Sabah  |
-| Driver     | driver@unpredictedcode.com       | driver123      | Ahmed Hassan     |
+| Role                | Username                         | Password       | Name             |
+|---------------------|----------------------------------|----------------|------------------|
+| Global System Admin | sysadmin                         | sysadminpass   | System Admin     |
+| Admin               | admin@unpredictedcode.com        | admin123       | Omar Al-Rashidi  |
+| Manager             | manager@unpredictedcode.com      | manager123     | Sara Al-Mutairi  |
+| Employee            | employee@unpredictedcode.com     | employee123    | Khalid Al-Enezi  |
+| Accountant          | accountant@unpredictedcode.com   | accountant123  | Fatima Al-Sabah  |
+| Driver              | driver@unpredictedcode.com       | driver123      | Ahmed Hassan     |
 
 ## 📋 Features
 

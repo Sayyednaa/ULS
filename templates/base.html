@@ -394,6 +394,7 @@
 
             <!-- Navigation -->
             <nav class="flex-1 py-4 px-3 space-y-1">
+                {% if request.user.company %}
                 <!-- DASHBOARD -->
                 <p class="px-3 pt-3 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Dashboard')"></p>
@@ -585,6 +586,21 @@
                 <a href="{% url 'admin_settings' %}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'admin_settings' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>⚙️</span> <span x-text="t('Settings')"></span>
+                </a>
+                {% endif %}
+                {% endif %}
+                
+                <!-- GLOBAL SYSTEM ADMIN -->
+                {% if request.user.is_superuser and not request.user.company %}
+                <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
+                    x-text="t('System Administration')"></p>
+                <a href="{% url 'system_admin_dashboard' %}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'system_admin_dashboard' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    <span>🏢</span> <span x-text="t('Manage Companies')"></span>
+                </a>
+                <a href="{% url 'system_admin_stats' %}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'system_admin_stats' %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    <span>📊</span> <span x-text="t('System Statistics')"></span>
                 </a>
                 {% endif %}
             </nav>

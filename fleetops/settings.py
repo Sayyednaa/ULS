@@ -34,7 +34,7 @@ if sentry_dsn:
 DEBUG = env.bool('DEBUG', default=False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-sayyednaa-logistics-key-change-in-production')
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-unpredictable-logistics-solutions-key-change-in-production')
 
 if DEBUG:
     ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'core.middleware.CurrentRequestMiddleware',
+    'core.middleware.CompanyStatusMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
