@@ -1,4 +1,4 @@
-# SAYYEDNAA LOGISTICS — Phase 1 Showcase
+# UNPREDICTED CODE FLEET & LOGISTICS OS — Phase 1 Showcase
 
 A complete, fully functional fleet management web application built with **pure Django** — no external database, no React, no REST API.
 
@@ -20,16 +20,17 @@ python manage.py runserver
 
 ## 🔑 Demo Accounts
 
-| Role     | Username                         | Password    | Name             |
-|----------|----------------------------------|-------------|------------------|
-| Admin    | admin@sayyednaalogistics.com    | admin123    | Omar Al-Rashidi  |
-| Manager  | manager@sayyednaalogistics.com  | manager123  | Sara Al-Mutairi  |
-| Employee | employee@sayyednaalogistics.com | employee123 | Khalid Al-Enezi  |
-| Driver   | driver@sayyednaalogistics.com   | driver123   | Ahmed Hassan     |
+| Role       | Username                         | Password       | Name             |
+|------------|----------------------------------|----------------|------------------|
+| Admin      | admin@unpredictedcode.com        | admin123       | Omar Al-Rashidi  |
+| Manager    | manager@unpredictedcode.com      | manager123     | Sara Al-Mutairi  |
+| Employee   | employee@unpredictedcode.com     | employee123    | Khalid Al-Enezi  |
+| Accountant | accountant@unpredictedcode.com   | accountant123  | Fatima Al-Sabah  |
+| Driver     | driver@unpredictedcode.com       | driver123      | Ahmed Hassan     |
 
 ## 📋 Features
 
-- **4-Role Access Control** — Admin, Manager, Employee, Driver portals
+- **5-Role Access Control** — Admin, Manager, Employee, Accountant, Driver portals
 - **Driver Management** — Full CRUD with document expiry tracking
 - **Invoice System** — Monthly entries, archiving, Excel export
 - **Deduction Center** — Track driver and employee deductions

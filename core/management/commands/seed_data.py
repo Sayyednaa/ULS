@@ -28,19 +28,19 @@ class Command(BaseCommand):
         self.stdout.write('Creating users...')
 
         superadmin_user = Profile.objects.create_user(
-            username='admin@uls.com',
-            email='admin@uls.com',
+            username='admin@unpredictedcode.com',
+            email='admin@unpredictedcode.com',
             password='admin123',
-            first_name='Super',
-            last_name='Admin',
+            first_name='Omar',
+            last_name='Al-Rashidi',
             role='superadmin',
             position='Administrative',
             company=uls_company
         )
 
         manager_user = Profile.objects.create_user(
-            username='manager@uls.com',
-            email='manager@uls.com',
+            username='manager@unpredictedcode.com',
+            email='manager@unpredictedcode.com',
             password='manager123',
             first_name='Sara',
             last_name='Al-Mutairi',
@@ -50,8 +50,8 @@ class Command(BaseCommand):
         )
 
         employee_user = Profile.objects.create_user(
-            username='employee@uls.com',
-            email='employee@uls.com',
+            username='employee@unpredictedcode.com',
+            email='employee@unpredictedcode.com',
             password='employee123',
             first_name='Khalid',
             last_name='Al-Enezi',
@@ -61,13 +61,24 @@ class Command(BaseCommand):
         )
 
         accountant_user = Profile.objects.create_user(
-            username='accountant@uls.com',
-            email='accountant@uls.com',
+            username='accountant@unpredictedcode.com',
+            email='accountant@unpredictedcode.com',
             password='accountant123',
             first_name='Fatima',
             last_name='Al-Sabah',
             role='accountant',
             position='Accountant',
+            company=uls_company
+        )
+
+        driver_user = Profile.objects.create_user(
+            username='driver@unpredictedcode.com',
+            email='driver@unpredictedcode.com',
+            password='driver123',
+            first_name='Ahmed',
+            last_name='Hassan',
+            role='driver',
+            position='Representative',
             company=uls_company
         )
 
@@ -85,6 +96,7 @@ class Command(BaseCommand):
             ('Hassan Mahmoud', 'bike', 'Jahra'),
         ]
         for name, v, z in talabat_drivers:
+            profile_link = driver_user if name == 'Ahmed Hassan' else None
             d = Driver.objects.create(
                 full_name=name,
                 phone=f'965{random.randint(10000000, 99999999)}',
@@ -96,7 +108,8 @@ class Command(BaseCommand):
                 vehicle_type=v, zone=z,
                 civil_id_expiry=today + timedelta(days=random.randint(30, 300)),
                 driver_license_expiry=today + timedelta(days=random.randint(15, 200)),
-                is_active=True
+                is_active=True,
+                profile=profile_link
             )
             drivers.append(d)
 
