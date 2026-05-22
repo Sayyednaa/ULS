@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize environ
 env = environ.Env(
-    DEBUG=(bool, True)
+    DEBUG=(bool, False)
 )
 
 # Take environment variables from .env file
@@ -31,18 +31,20 @@ if sentry_dsn:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', default=True)
+DEBUG = env.bool('DEBUG', default=False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-sayyednaa-logistics-key-change-in-production')
 
 if DEBUG:
     ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
-        'localhost', '127.0.0.1', '192.168.1.20', '0.0.0.0','securityshadow.pythonanywhere.com'
+        'localhost', '127.0.0.1', '192.168.1.20', 'unpredictedcode.com','www.unpredictedcode.com','0.0.0.0','securityshadow.pythonanywhere.com'
     ])
 else:
     ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
-        'securityshadow.pythonanywhere.com'
+        'securityshadow.pythonanywhere.com',
+        'unpredictedcode.com'
+        ,'www.unpredictedcode.com'
     ])
 INSTALLED_APPS = [
     'django.contrib.admin',
