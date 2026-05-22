@@ -1,26 +1,28 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %}Unpredictable Logistics Solutions | The Ultimate Fleet & Logistics Management OS{% endblock %}
+{% load static translation_tags %}
+
+{% block title %}{{ brand_name }} | The Ultimate Fleet & Logistics Management OS{% endblock %}
 
 {% block extra_css %}
 <!-- SEO Meta Tags -->
-<meta name="description" content="Unpredictable Logistics Solutions - The all-in-one SaaS platform for logistics companies to manage fleets, drivers, invoices, and multi-tenant operations with ease." />
-<meta name="keywords" content="fleet management, logistics saas, driver tracking, invoice automation, multi-tenant logistics, Unpredictable Logistics Solutions" />
-<meta name="author" content="Unpredictable Logistics Solutions" />
-<meta property="og:title" content="Unpredictable Logistics Solutions | Logistics Management OS" />
+<meta name="description" content="{{ brand_name }} - The all-in-one SaaS platform for logistics companies to manage fleets, track compliance status, and automate financial reporting across multiple companies and contracts." />
+<meta name="keywords" content="fleet management, logistics saas, driver tracking, invoice automation, multi-tenant logistics, {{ brand_name }}" />
+<meta name="author" content="{{ brand_name }}" />
+<meta property="og:title" content="{{ brand_name }} | Logistics Management OS" />
 <meta property="og:description" content="Empower your logistics business with a unified operating system for drivers, invoices, and multi-tenant operations." />
 <meta property="og:type" content="website" />
+<meta property="og:image" content="{{ brand_logo }}" />
 
 <style>
     .glass-nav {
-        background: color-mix(in srgb, var(--bg-card), transparent 20%);
+        background: color-mix(in srgb, var(--color-app-card), transparent 25%);
         backdrop-filter: blur(16px);
-        border-bottom: 1px solid var(--border-app);
-        box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
+        border-bottom: 1px solid var(--color-app-border);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
     }
     .hero-gradient {
-        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent),
-                    radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.08), transparent);
+        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 40%);
     }
     .card-reveal {
         opacity: 0;
@@ -32,242 +34,531 @@
         transform: translateY(0);
     }
     .floating {
-        animation: floating 3s ease-in-out infinite;
+        animation: floating 4s ease-in-out infinite;
     }
     @keyframes floating {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+        50% { transform: translateY(-12px); }
     }
-    .feature-card {
-        background: linear-gradient(135deg, rgba(var(--bg-card-rgb), 0.8), rgba(var(--bg-card-rgb), 0.4));
-        backdrop-filter: blur(10px);
+    .glow-on-hover {
+        position: relative;
+        overflow: hidden;
     }
-    .glow-on-hover:hover {
-        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+    .glow-on-hover::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(59, 130, 246, 0.2));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .glow-on-hover:hover::after {
+        opacity: 1;
+    }
+    .glass-card {
+        background: color-mix(in srgb, var(--color-app-card), transparent 30%);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--color-app-border);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen hero-gradient" x-data="{ lang: 'en' }" x-init="lang = localStorage.getItem('fleetops_lang') || 'en'">
+<div class="min-h-screen hero-gradient">
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 right-0 z-50 glass-nav h-20 flex items-center justify-between px-6 lg:px-12">
         <div class="flex items-center gap-3">
-            <img src="{% static 'img/logo.png' %}" alt="ULS Logo" class="h-12 w-12 object-cover rounded-full border border-app-border/50 shadow-sm">
-            <h1 class="font-black text-2xl text-app-text tracking-tighter">ULS</h1>
-        </div>
-        
-        <div class="hidden md:flex items-center gap-8 text-sm font-bold text-app-text-muted">
-            <a href="#features" class="hover:text-emerald-500 transition-colors">Features</a>
-            <a href="#portals" class="hover:text-emerald-500 transition-colors">Portals</a>
-            <a href="#pricing" class="hover:text-emerald-500 transition-colors">Pricing</a>
+            <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="h-10 w-10 object-cover rounded-full border border-app-border/50 shadow-sm">
+            <h1 class="font-black text-xl lg:text-2xl text-app-text tracking-tighter">{{ brand_name }}</h1>
         </div>
 
-        <div class="flex items-center gap-4">
-            <a href="{% url 'login' %}" class="text-sm font-bold text-app-text-muted hover:text-emerald-500 transition-colors">Sign In</a>
-            <a href="{% url 'register' %}" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-black transition-all shadow-xl shadow-emerald-500/20 glow-on-hover">
-                Register Company
+        <div class="flex items-center gap-4 lg:gap-6">
+            <form action="{% url 'set_language' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <input name="language" type="hidden" value="{% if lang == 'en' %}ar{% else %}en{% endif %}">
+                <button type="submit" class="px-3.5 py-1.5 text-xs font-bold text-app-text hover:text-brand border border-app-border rounded-xl bg-app-card/45 backdrop-blur-md flex items-center gap-1.5 transition-all shadow-sm hover:scale-[1.03] cursor-pointer">
+                    🌐 {% if lang == 'en' %}العربية{% else %}English{% endif %}
+                </button>
+            </form>
+            <a href="{% url 'login' %}" class="text-sm font-bold text-app-text-muted hover:text-brand transition-colors">{{ "Sign In"|t:lang }}</a>
+            <a href="{% url 'register' %}" class="px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs lg:text-sm font-black transition-all shadow-lg shadow-brand/20 hover:scale-[1.03]">
+                {{ "Register Company"|t:lang }}
             </a>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-40 pb-20 px-6 lg:px-12 max-w-7xl mx-auto text-center space-y-10">
-        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black tracking-widest uppercase">
-            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-            Multi-Tenant Logistics OS
+    <section class="pt-44 pb-20 px-6 lg:px-12 max-w-7xl mx-auto text-center space-y-10">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-black tracking-widest uppercase">
+            <span class="w-2 h-2 bg-brand rounded-full animate-pulse"></span>
+            {{ "Multi-Tenant Logistics OS"|t:lang }}
         </div>
         
-        <h1 class="text-6xl lg:text-8xl font-black text-app-text tracking-tight leading-[1.1]">
-            Scale Your Logistics <br/>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">Without the Chaos</span>
+        <h1 class="text-5xl lg:text-8xl font-black text-app-text tracking-tight leading-[1.1] max-w-5xl mx-auto">
+            {{ "Scale Your Fleet Operations"|t:lang }} <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-blue-500">{{ "Without the Chaos"|t:lang }}</span>
         </h1>
         
-        <p class="text-xl lg:text-2xl text-app-text-muted max-w-3xl mx-auto leading-relaxed">
-            The all-in-one platform to manage fleets, track driver performance, 
-            and automate financial reporting across multiple companies and contracts.
+        <p class="text-lg lg:text-xl text-app-text-muted max-w-3xl mx-auto leading-relaxed">
+            {{ "The all-in-one SaaS platform to manage fleets, track compliance status, and automate financial reporting across multiple companies and contracts."|t:lang }}
         </p>
 
-        <div class="flex flex-wrap justify-center gap-4 pt-6">
-            <a href="{% url 'register' %}" class="px-10 py-5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl transition-all shadow-2xl shadow-emerald-500/30 flex items-center gap-3 group">
-                Start Your Company Portal
+        <div class="flex flex-wrap justify-center gap-4 pt-4">
+            <a href="{% url 'register' %}" class="px-8 py-4 rounded-2xl bg-brand hover:bg-brand-hover text-white font-black text-lg transition-all shadow-xl shadow-brand/35 hover:scale-[1.05] flex items-center gap-2.5 group">
+                {{ "Start Your Company Portal"|t:lang }}
                 <span class="group-hover:translate-x-1 transition-transform">→</span>
             </a>
-            <a href="#features" class="px-10 py-5 rounded-2xl bg-app-card border border-app-border hover:bg-black/5 dark:hover:bg-white/5 text-app-text font-black text-xl transition-all">
-                View All Features
+            <a href="#features" class="px-8 py-4 rounded-2xl bg-app-card/85 border border-app-border hover:bg-app-card text-app-text font-black text-lg transition-all hover:scale-[1.05] shadow-sm">
+                {{ "Explore Features"|t:lang }}
             </a>
         </div>
 
-        <div class="pt-20 relative">
-            <div class="absolute -inset-10 bg-emerald-500/10 blur-[100px] rounded-full"></div>
-            <div class="relative rounded-[2.5rem] border border-white/10 bg-app-card shadow-2xl overflow-hidden p-2">
-                <img src="/static/img/dashboard.png" alt="Unpredictable Logistics Solutions Dashboard" class="rounded-[2rem] w-full border border-white/5">
+        <div class="pt-16 relative max-w-5xl mx-auto">
+            <div class="absolute -inset-10 bg-brand/8 blur-[100px] rounded-full"></div>
+            <div class="relative rounded-[2rem] border border-app-border bg-app-card/65 shadow-2xl p-2.5 backdrop-blur-sm">
+                <div class="flex items-center gap-2 px-3 pb-3 mb-2 border-b border-app-border">
+                    <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
+                    <span class="text-xs text-app-text-muted font-medium ml-4">https://unpredictedcode.com/dashboard/</span>
+                </div>
+                <img src="{% static 'img/dashboard.png' %}" alt="{{ brand_name }} Dashboard" class="rounded-xl w-full border border-app-border/40 shadow-md">
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 border-y border-app-border bg-app-card/15 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            <div class="space-y-1">
+                <p class="text-4xl lg:text-5xl font-black text-brand">5</p>
+                <p class="text-xs font-bold text-app-text-muted uppercase tracking-wider">{{ "Five Portals. One Unified OS."|t:lang }}</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-4xl lg:text-5xl font-black text-blue-500">100%</p>
+                <p class="text-xs font-bold text-app-text-muted uppercase tracking-wider">{{ "Data Isolation"|t:lang }}</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-4xl lg:text-5xl font-black text-purple-500">99.9%</p>
+                <p class="text-xs font-bold text-app-text-muted uppercase tracking-wider">{{ "Accuracy"|t:lang }}</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-4xl lg:text-5xl font-black text-orange-500">{{ "Zero"|t:lang }}</p>
+                <p class="text-xs font-bold text-app-text-muted uppercase tracking-wider">{{ "Paperwork"|t:lang }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem vs Solution Section -->
+    <section class="py-28 px-6 lg:px-12 max-w-7xl mx-auto space-y-16">
+        <div class="text-center space-y-4 max-w-2xl mx-auto">
+            <h2 class="text-3xl lg:text-5xl font-black text-app-text tracking-tight">{{ "Why Fleet Managers Switch"|t:lang }}</h2>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+            <!-- Old Way -->
+            <div class="glass-card rounded-[2rem] p-8 lg:p-12 space-y-6 border-red-500/10 hover:border-red-500/25 transition-all">
+                <h3 class="text-2xl font-bold text-red-500 flex items-center gap-3">
+                    <span>❌</span> {{ "The Old Way"|t:lang }}
+                </h3>
+                <ul class="space-y-4 text-app-text-muted">
+                    <li class="flex items-start gap-3">
+                        <span class="text-red-500 mt-1">•</span>
+                        <span>{{ "Scattered Excel files & paper receipts"|t:lang }}</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-red-500 mt-1">•</span>
+                        <span>{{ "Expiring documents leading to major government fines"|t:lang }}</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-red-500 mt-1">•</span>
+                        <span>{{ "Days of manual calculations for various contracts"|t:lang }}</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-red-500 mt-1">•</span>
+                        <span>{{ "Disputed deductions with zero signed proof"|t:lang }}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- New Way -->
+            <div class="glass-card rounded-[2rem] p-8 lg:p-12 space-y-6 border-brand/25 hover:border-brand/40 transition-all shadow-lg shadow-brand/5">
+                <h3 class="text-2xl font-bold text-brand flex items-center gap-3">
+                    <span>🚀</span> {{ "The ULS Way"|t:lang }}
+                </h3>
+                <ul class="space-y-4 text-app-text-muted">
+                    <li class="flex items-start gap-3">
+                        <span class="text-brand mt-1">✓</span>
+                        <span>{{ "Centralized database & clean dashboards"|t:lang }}</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-brand mt-1">✓</span>
+                        <span>{{ "Automated alerts sent directly to dashboards & drivers"|t:lang }}</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-brand mt-1">✓</span>
+                        <span>{{ "One-click Excel import and auto-wage calculation"|t:lang }}</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-brand mt-1">✓</span>
+                        <span>{{ "Canvas-signed digital receipts stored securely"|t:lang }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portals / Roles Showcase Section -->
+    <section class="py-24 border-t border-app-border bg-app-card/10">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 space-y-16">
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <h2 class="text-3xl lg:text-5xl font-black text-app-text tracking-tight">
+                    {{ "Five Portals. One Unified OS."|t:lang }}
+                </h2>
+                <p class="text-app-text-muted text-lg lg:text-xl">
+                    {{ "Specialized environments tailored for every role in your logistics operations."|t:lang }}
+                </p>
+            </div>
+
+            <!-- Tabs Component -->
+            <div x-data="{ activeTab: 'admin' }" class="space-y-12">
+                <!-- Tab Controls -->
+                <div class="flex flex-wrap justify-center gap-2 border-b border-app-border pb-4">
+                    <button @click="activeTab = 'admin'" :class="activeTab === 'admin' ? 'border-brand text-brand bg-brand/10' : 'border-transparent text-app-text-muted hover:text-app-text bg-transparent'" class="px-6 py-3 border-b-2 font-bold text-sm lg:text-base rounded-t-xl transition-all duration-200 cursor-pointer">
+                        {{ "Admin Portal"|t:lang }}
+                    </button>
+                    <button @click="activeTab = 'manager'" :class="activeTab === 'manager' ? 'border-brand text-brand bg-brand/10' : 'border-transparent text-app-text-muted hover:text-app-text bg-transparent'" class="px-6 py-3 border-b-2 font-bold text-sm lg:text-base rounded-t-xl transition-all duration-200 cursor-pointer">
+                        {{ "Manager Portal"|t:lang }}
+                    </button>
+                    <button @click="activeTab = 'accountant'" :class="activeTab === 'accountant' ? 'border-brand text-brand bg-brand/10' : 'border-transparent text-app-text-muted hover:text-app-text bg-transparent'" class="px-6 py-3 border-b-2 font-bold text-sm lg:text-base rounded-t-xl transition-all duration-200 cursor-pointer">
+                        {{ "Accountant Portal"|t:lang }}
+                    </button>
+                    <button @click="activeTab = 'employee'" :class="activeTab === 'employee' ? 'border-brand text-brand bg-brand/10' : 'border-transparent text-app-text-muted hover:text-app-text bg-transparent'" class="px-6 py-3 border-b-2 font-bold text-sm lg:text-base rounded-t-xl transition-all duration-200 cursor-pointer">
+                        {{ "Employee Portal"|t:lang }}
+                    </button>
+                    <button @click="activeTab = 'driver'" :class="activeTab === 'driver' ? 'border-brand text-brand bg-brand/10' : 'border-transparent text-app-text-muted hover:text-app-text bg-transparent'" class="px-6 py-3 border-b-2 font-bold text-sm lg:text-base rounded-t-xl transition-all duration-200 cursor-pointer">
+                        {{ "Driver Portal"|t:lang }}
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="mt-8 bg-app-card/60 backdrop-blur-xl border border-app-border rounded-3xl p-8 lg:p-12 shadow-2xl relative overflow-hidden">
+                    <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand/5 blur-[120px] rounded-full pointer-events-none"></div>
+                    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+                    <!-- Admin Tab -->
+                    <div x-show="activeTab === 'admin'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0" class="grid lg:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6 text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase">
+                                {{ "superadmin"|t:lang }} & {{ "admin"|t:lang }}
+                            </div>
+                            <h3 class="text-3xl font-black text-app-text">{{ "Admin Portal"|t:lang }}</h3>
+                            <p class="text-app-text-muted leading-relaxed">
+                                Complete strategic oversight of company settings, tenant workspaces, and system configurations. Admins can customize branding and oversee global ledgers.
+                            </p>
+                            <ul class="space-y-3 text-app-text-muted">
+                                <li class="flex items-center gap-3">
+                                    <span class="text-emerald-500 text-lg">✓</span> Company-wide branding & settings overrides
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-emerald-500 text-lg">✓</span> Complete driver directory & active fleet counts
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-emerald-500 text-lg">✓</span> Global financial ledger monitoring & PDF archive access
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="relative bg-black/40 border border-white/5 rounded-2xl p-6 shadow-inner font-mono text-xs space-y-4 text-left">
+                            <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                </div>
+                                <span class="text-gray-500">system_config.json</span>
+                            </div>
+                            <p class="text-emerald-400">"brand_name": "{{ brand_name }}"</p>
+                            <p class="text-blue-400">"default_currency": "{{ app_currency }}"</p>
+                            <p class="text-purple-400">"tenant_isolation_mode": "uuid_strict"</p>
+                            <p class="text-gray-400">// Automatically isolation configured for 5 sub-roles</p>
+                        </div>
+                    </div>
+
+                    <!-- Manager Tab -->
+                    <div x-show="activeTab === 'manager'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0" class="grid lg:grid-cols-2 gap-12 items-center text-left" x-cloak>
+                        <div class="space-y-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase">
+                                {{ "manager"|t:lang }}
+                            </div>
+                            <h3 class="text-3xl font-black text-app-text">{{ "Manager Portal"|t:lang }}</h3>
+                            <p class="text-app-text-muted leading-relaxed">
+                                Designed for operations coordinators to manage driver profiles, assign tasks, and verify team attendance records on a daily basis.
+                            </p>
+                            <ul class="space-y-3 text-app-text-muted">
+                                <li class="flex items-center gap-3">
+                                    <span class="text-blue-500 text-lg">✓</span> Assign tasks directly to administrative staff
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-blue-500 text-lg">✓</span> Track driver zones and update status instantly
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-blue-500 text-lg">✓</span> Color-coded warnings on missing or expiring worker files
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-black/40 border border-white/5 rounded-2xl p-6 shadow-inner space-y-4 text-left">
+                            <div class="text-sm font-bold text-app-text border-b border-white/10 pb-3 mb-2 flex justify-between">
+                                <span>Task List Manager</span>
+                                <span class="text-blue-500 text-xs font-mono">Operations</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="p-3 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between">
+                                    <span class="text-xs text-app-text-muted">Approve driver leaves</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] bg-yellow-500/10 text-yellow-500">Pending</span>
+                                </div>
+                                <div class="p-3 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between">
+                                    <span class="text-xs text-app-text-muted">Review monthly reports</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] bg-green-500/10 text-green-500">Completed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accountant Tab -->
+                    <div x-show="activeTab === 'accountant'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0" class="grid lg:grid-cols-2 gap-12 items-center text-left" x-cloak>
+                        <div class="space-y-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-black uppercase">
+                                {{ "accountant"|t:lang }}
+                            </div>
+                            <h3 class="text-3xl font-black text-app-text">{{ "Accountant Portal"|t:lang }}</h3>
+                            <p class="text-app-text-muted leading-relaxed">
+                                Automate complex invoicing structures. Accountants can import delivery sheets from Excel, run formula calculations for Talabat or Pharmazone contracts, and split deductions.
+                            </p>
+                            <ul class="space-y-3 text-app-text-muted">
+                                <li class="flex items-center gap-3">
+                                    <span class="text-purple-500 text-lg">✓</span> Pre-configured formulas for regional logistics giants
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-purple-500 text-lg">✓</span> Split deductions across multiple months in installment plans
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-purple-500 text-lg">✓</span> Digital signature captures for ledger approval verification
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-black/40 border border-white/5 rounded-2xl p-6 shadow-inner space-y-4 font-mono text-xs text-left">
+                            <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-2">
+                                <span class="text-app-text font-bold">Salary Ledger Split</span>
+                                <span class="text-purple-500">Calculated</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Talabat base pay:</span>
+                                    <span class="text-app-text">150.000 {{ app_currency }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Installment Deduction:</span>
+                                    <span class="text-red-500">-25.000 {{ app_currency }}</span>
+                                </div>
+                                <div class="border-t border-white/10 pt-2 flex justify-between font-bold">
+                                    <span class="text-gray-400">Net Salary:</span>
+                                    <span class="text-emerald-400">125.000 {{ app_currency }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employee Tab -->
+                    <div x-show="activeTab === 'employee'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0" class="grid lg:grid-cols-2 gap-12 items-center text-left" x-cloak>
+                        <div class="space-y-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-black uppercase">
+                                {{ "employee"|t:lang }}
+                            </div>
+                            <h3 class="text-3xl font-black text-app-text">{{ "Employee Portal"|t:lang }}</h3>
+                            <p class="text-app-text-muted leading-relaxed">
+                                Empowers office clerks and operations assistants to register new drivers, upload physical contract files, and update driver basic identification details.
+                            </p>
+                            <ul class="space-y-3 text-app-text-muted">
+                                <li class="flex items-center gap-3">
+                                    <span class="text-orange-500 text-lg">✓</span> Simple data entry form with input validation rules
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-orange-500 text-lg">✓</span> Document upload center supporting PDF, PNG, and JPEG
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-orange-500 text-lg">✓</span> Secure storage of employee serials and IBAN banks
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-black/40 border border-white/5 rounded-2xl p-6 shadow-inner space-y-3 text-left">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-white/10 pb-2">Driver Form Fields</div>
+                            <div class="space-y-1">
+                                <p class="text-xs text-app-text-muted">👤 {{ "Full Name"|t:lang }}</p>
+                                <p class="text-xs text-app-text-muted">💳 {{ "Civil ID Number"|t:lang }}</p>
+                                <p class="text-xs text-app-text-muted">📅 {{ "Civil ID Expiry"|t:lang }}</p>
+                                <p class="text-xs text-app-text-muted">🏥 {{ "Health Card Expiry"|t:lang }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Tab -->
+                    <div x-show="activeTab === 'driver'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0" class="grid lg:grid-cols-2 gap-12 items-center text-left" x-cloak>
+                        <div class="space-y-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase">
+                                {{ "driver"|t:lang }}
+                            </div>
+                            <h3 class="text-3xl font-black text-app-text">{{ "Driver Portal"|t:lang }}</h3>
+                            <p class="text-app-text-muted leading-relaxed">
+                                Mobile-responsive portal specifically built for drivers. They can check their pending dues, see if any of their documents are near expiration, and preview monthly salary details.
+                            </p>
+                            <ul class="space-y-3 text-app-text-muted">
+                                <li class="flex items-center gap-3">
+                                    <span class="text-emerald-500 text-lg">✓</span> Fully mobile-optimized user interface
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-emerald-500 text-lg">✓</span> Direct document upload for expiry renewals
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-emerald-500 text-lg">✓</span> Clear visibility of monthly salary slips
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="mx-auto max-w-[240px] bg-black/60 border-4 border-gray-800 rounded-[2.5rem] p-4 shadow-2xl relative overflow-hidden text-left">
+                            <div class="w-20 h-4 bg-gray-800 rounded-full mx-auto mb-4"></div>
+                            <div class="space-y-3 font-sans">
+                                <div class="text-[10px] text-gray-500">My Mobile Dashboard</div>
+                                <div class="p-2 bg-emerald-500/10 border border-emerald-500/25 rounded-xl">
+                                    <div class="text-[9px] text-emerald-400 font-bold uppercase">Civil ID Status</div>
+                                    <div class="text-[10px] text-app-text">Expires in 45 Days</div>
+                                </div>
+                                <div class="p-2 bg-white/5 border border-white/5 rounded-xl">
+                                    <div class="text-[9px] text-gray-400 font-bold uppercase">Last payslip</div>
+                                    <div class="text-[10px] text-app-text">Received (120.000 {{ app_currency }})</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Features Grid -->
-    <section id="features" class="py-32 px-6 lg:px-12 max-w-7xl mx-auto">
-        <div class="text-center mb-20 space-y-4">
-            <h2 class="text-4xl lg:text-5xl font-black text-app-text">Built for Modern Logistics</h2>
-            <p class="text-app-text-muted text-lg">Powerful tools to automate every aspect of your fleet operations.</p>
+    <section id="features" class="py-32 px-6 lg:px-12 max-w-7xl mx-auto space-y-20 border-t border-app-border">
+        <div class="text-center space-y-4 max-w-2xl mx-auto">
+            <h2 class="text-3xl lg:text-5xl font-black text-app-text tracking-tight">
+                {{ "Built for Modern Logistics"|t:lang }}
+            </h2>
+            <p class="text-app-text-muted text-lg lg:text-xl">
+                {{ "Powerful tools to automate every aspect of your fleet operations and compliance requirements."|t:lang }}
+            </p>
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Feature 1 -->
-            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-emerald-500/50 transition-all group card-reveal">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-8 group-hover:scale-110 transition-transform">🏢</div>
-                <h3 class="text-2xl font-black text-app-text mb-4">Multi-Tenant Core</h3>
-                <p class="text-app-text-muted leading-relaxed">
-                    Create isolated portals for different companies. Manage independent sets of drivers, 
-                    contracts, and reports under one unified super-admin dashboard.
+            <!-- Feature 1: Multi-Tenant Workspace Security -->
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-brand/40 transition-all duration-300 group card-reveal shadow-sm hover:shadow-md text-left">
+                <div class="w-14 h-14 rounded-2xl bg-brand/10 text-brand flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">🏢</div>
+                <h3 class="text-xl font-bold text-app-text mb-4">{{ "Multi-Tenant Workspace Security"|t:lang }}</h3>
+                <p class="text-app-text-muted leading-relaxed text-sm">
+                    {{ "Complete data isolation with independent databases and portal directories for each registered company."|t:lang }}
                 </p>
             </div>
 
-            <!-- Feature 2 -->
-            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-blue-500/50 transition-all group card-reveal" style="transition-delay: 0.1s;">
-                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-2xl mb-8 group-hover:scale-110 transition-transform">📑</div>
-                <h3 class="text-2xl font-black text-app-text mb-4">Contract Snapshots</h3>
-                <p class="text-app-text-muted leading-relaxed">
-                    Never lose historical context. Unpredictable Logistics Solutions captures contract data at the time of invoice 
-                    creation, ensuring accurate reporting even when drivers move.
+            <!-- Feature 2: Compliance Warning Engine -->
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-blue-500/40 transition-all duration-300 group card-reveal shadow-sm hover:shadow-md text-left" style="transition-delay: 0.1s;">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">⚠️</div>
+                <h3 class="text-xl font-bold text-app-text mb-4">{{ "Compliance Warning Engine"|t:lang }}</h3>
+                <p class="text-app-text-muted leading-relaxed text-sm">
+                    {{ "Automated alerts for expiring Civil IDs, Passports, Work Permits, Licenses, and Vehicle Registrations before they turn into costly fines."|t:lang }}
                 </p>
             </div>
 
-            <!-- Feature 3 -->
-            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-purple-500/50 transition-all group card-reveal" style="transition-delay: 0.2s;">
-                <div class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 text-2xl mb-8 group-hover:scale-110 transition-transform">💰</div>
-                <h3 class="text-2xl font-black text-app-text mb-4">Auto-Invoicing</h3>
-                <p class="text-app-text-muted leading-relaxed">
-                    Streamline daily order tracking and automated monthly salary calculations for 
-                    Talabat, Pharmazone, and custom service contracts.
+            <!-- Feature 3: Dedicated Regional Calculators -->
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-purple-500/40 transition-all duration-300 group card-reveal shadow-sm hover:shadow-md text-left" style="transition-delay: 0.2s;">
+                <div class="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">📊</div>
+                <h3 class="text-xl font-bold text-app-text mb-4">{{ "Dedicated Regional Calculators"|t:lang }}</h3>
+                <p class="text-app-text-muted leading-relaxed text-sm">
+                    {{ "Pre-configured rules for Talabat, Pharmazone, and Burger King contracts. Import order details via Excel in seconds."|t:lang }}
                 </p>
             </div>
 
-            <!-- Feature 4 -->
-            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-orange-500/50 transition-all group card-reveal" style="transition-delay: 0.3s;">
-                <div class="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 text-2xl mb-8 group-hover:scale-110 transition-transform">📈</div>
-                <h3 class="text-2xl font-black text-app-text mb-4">Real-time P&L</h3>
-                <p class="text-app-text-muted leading-relaxed">
-                    Instantly generate Profit & Loss reports for each contract. Track expenses, 
-                    deductions, and net margins with one click.
+            <!-- Feature 4: Installment & Deduction Manager -->
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-orange-500/40 transition-all duration-300 group card-reveal shadow-sm hover:shadow-md text-left" style="transition-delay: 0.3s;">
+                <div class="w-14 h-14 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">💸</div>
+                <h3 class="text-xl font-bold text-app-text mb-4">{{ "Installment & Deduction Manager"|t:lang }}</h3>
+                <p class="text-app-text-muted leading-relaxed text-sm">
+                    {{ "Automatically split worker deductions across multiple months. Maintain complete payment records."|t:lang }}
                 </p>
             </div>
 
-            <!-- Feature 5 -->
-            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-emerald-500/50 transition-all group card-reveal" style="transition-delay: 0.4s;">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl mb-8 group-hover:scale-110 transition-transform">🔑</div>
-                <h3 class="text-2xl font-black text-app-text mb-4">Role Portals</h3>
-                <p class="text-app-text-muted leading-relaxed">
-                    Tailored experiences for Managers, Accountants, Employees, and Drivers. 
-                    Everyone sees exactly what they need, nothing more.
+            <!-- Feature 5: Audit-Ready Digital Signatures -->
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-brand/40 transition-all duration-300 group card-reveal shadow-sm hover:shadow-md text-left" style="transition-delay: 0.4s;">
+                <div class="w-14 h-14 rounded-2xl bg-brand/10 text-brand flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">✍️</div>
+                <h3 class="text-xl font-bold text-app-text mb-4">{{ "Audit-Ready Digital Signatures"|t:lang }}</h3>
+                <p class="text-app-text-muted leading-relaxed text-sm">
+                    {{ "Verify transactions and salary slip approvals with canvas-based touch signature capture for absolute compliance."|t:lang }}
                 </p>
             </div>
 
-            <!-- Feature 6 -->
-            <div class="p-8 rounded-[2rem] bg-app-card border border-app-border hover:border-blue-500/50 transition-all group card-reveal" style="transition-delay: 0.5s;">
-                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-2xl mb-8 group-hover:scale-110 transition-transform">📱</div>
-                <h3 class="text-2xl font-black text-app-text mb-4">Driver Self-Service</h3>
-                <p class="text-app-text-muted leading-relaxed">
-                    Drivers can track their own deliveries, check document expiry statuses, 
-                    and view their monthly pay slips directly from their mobile portal.
+            <!-- Feature 6: Driver Self-Service Portal -->
+            <div class="p-8 rounded-3xl bg-app-card border border-app-border hover:border-blue-500/40 transition-all duration-300 group card-reveal shadow-sm hover:shadow-md text-left" style="transition-delay: 0.5s;">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">📱</div>
+                <h3 class="text-xl font-bold text-app-text mb-4">{{ "Driver Self-Service Portal"|t:lang }}</h3>
+                <p class="text-app-text-muted leading-relaxed text-sm">
+                    {{ "Empower drivers to track deliveries, view document expiry warnings, and download monthly payslips on mobile."|t:lang }}
                 </p>
             </div>
         </div>
     </section>
 
-    <!-- Portals Section -->
-    <section id="portals" class="py-24 bg-white/[0.02] border-y border-app-border">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-20 items-center">
-            <div class="space-y-8">
-                <h2 class="text-5xl font-black text-app-text leading-tight">Five Portals. <br/>One Unified System.</h2>
-                <p class="text-xl text-app-text-muted leading-relaxed">
-                    Unpredictable Logistics Solutions provides specialized environments for every role in your company, 
-                    ensuring maximum efficiency and data security.
-                </p>
-                <div class="space-y-4">
-                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-app-card border border-app-border">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">A</div>
-                        <div class="text-app-text font-bold text-lg">Accountant Portal</div>
-                    </div>
-                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-app-card border border-app-border">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">M</div>
-                        <div class="text-app-text font-bold text-lg">Manager Portal</div>
-                    </div>
-                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-app-card border border-app-border opacity-60">
-                        <div class="w-10 h-10 rounded-xl bg-gray-500/20 text-gray-400 flex items-center justify-center font-bold">...</div>
-                        <div class="text-app-text font-bold text-lg">and 3 more specialized roles</div>
-                    </div>
-                </div>
-            </div>
-            <div class="relative">
-                <div class="absolute -inset-20 bg-blue-500/10 blur-[100px] rounded-full"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-6 rounded-[2rem] bg-emerald-500 text-white space-y-2 shadow-2xl shadow-emerald-500/20 floating">
-                        <p class="text-4xl font-black">20+</p>
-                        <p class="font-bold opacity-80 uppercase tracking-widest text-[10px]">Auto Reports</p>
-                    </div>
-                    <div class="p-6 rounded-[2rem] bg-blue-500 text-white space-y-2 shadow-2xl shadow-blue-500/20 mt-12 floating" style="animation-delay: 0.5s;">
-                        <p class="text-4xl font-black">100%</p>
-                        <p class="font-bold opacity-80 uppercase tracking-widest text-[10px]">Data Isolation</p>
-                    </div>
-                    <div class="p-6 rounded-[2rem] bg-app-card border border-app-border space-y-2 shadow-xl">
-                        <p class="text-4xl font-black text-app-text">99.9%</p>
-                        <p class="font-bold text-app-text-muted uppercase tracking-widest text-[10px]">Accuracy</p>
-                    </div>
-                    <div class="p-6 rounded-[2rem] bg-app-card border border-app-border space-y-2 shadow-xl mt-12">
-                        <p class="text-4xl font-black text-app-text">Zero</p>
-                        <p class="font-bold text-app-text-muted uppercase tracking-widest text-[10px]">Paperwork</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="py-32 px-6 lg:px-12 max-w-7xl mx-auto text-center">
-        <div class="bg-gradient-to-br from-app-card to-app-bg p-16 lg:p-32 rounded-[4rem] border border-app-border shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 blur-[100px] rounded-full"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 blur-[100px] rounded-full"></div>
+    <!-- Final CTA Section -->
+    <section class="py-28 px-6 lg:px-12 max-w-7xl mx-auto">
+        <div class="bg-gradient-to-br from-app-card to-app-bg p-12 lg:p-24 rounded-[3rem] border border-app-border shadow-2xl relative overflow-hidden text-center space-y-8 animate-fade-in">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-brand/5 blur-[120px] rounded-full pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
             
-            <div class="relative z-10 space-y-10">
-                <h2 class="text-5xl lg:text-7xl font-black text-app-text tracking-tight">Ready to Modernize?</h2>
-                <p class="text-xl text-app-text-muted max-w-2xl mx-auto">
-                    Register your company today and experience the future of fleet management. 
-                    Setup takes less than 2 minutes.
+            <div class="relative z-10 space-y-8 max-w-3xl mx-auto">
+                <h2 class="text-4xl lg:text-6xl font-black text-app-text tracking-tight">
+                    {{ "Ready to Modernize Your Fleet?"|t:lang }}
+                </h2>
+                <p class="text-base lg:text-lg text-app-text-muted">
+                    {{ "Register your company today and experience the future of logistics management. Setup takes less than 2 minutes."|t:lang }}
                 </p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a href="{% url 'register' %}" class="px-12 py-5 bg-emerald-500 text-white font-black text-2xl rounded-2xl hover:scale-105 transition-transform shadow-2xl shadow-emerald-500/30">
-                        Register Your Company Portal
+                <div class="flex justify-center pt-4">
+                    <a href="{% url 'register' %}" class="px-10 py-5 bg-brand text-white font-black text-lg lg:text-xl rounded-2xl hover:scale-[1.04] transition-all shadow-xl shadow-brand/30 hover:bg-brand-hover">
+                        {{ "Register Your Company Portal"|t:lang }}
                     </a>
                 </div>
-                <p class="text-app-text-muted text-sm font-bold uppercase tracking-widest">NO CREDIT CARD REQUIRED</p>
+                <p class="text-app-text-muted text-xs font-bold uppercase tracking-widest">{{ "NO CREDIT CARD REQUIRED"|t:lang }}</p>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-12 border-t border-app-border px-6 lg:px-12">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </div>
-                <span class="text-app-text font-black text-xl tracking-tighter">ULS<span class="text-emerald-500">Logistics</span></span>
+    <footer class="py-16 border-t border-app-border px-6 lg:px-12 bg-app-card/10">
+        <div class="max-w-7xl mx-auto space-y-12">
+            <div class="flex flex-col  justify-between items-center gap-8">
+                
+                
+                <p>© <span id='year'></span>{{ " Unpredictable Logistics Solutions ."|t:lang }}</p>
             </div>
-            <p class="text-app-text-muted text-sm font-medium">© 2026 Unpredictable Logistics Solutions SaaS. Empowering Logistics Worldwide.</p>
-            <div class="flex gap-8 text-sm font-bold text-app-text-muted">
-                <a href="#" class="hover:text-emerald-500 transition-colors">Privacy</a>
-                <a href="#" class="hover:text-emerald-500 transition-colors">Terms</a>
-                <a href="#" class="hover:text-emerald-500 transition-colors">Support</a>
-            </div>
+                
         </div>
     </footer>
 </div>
-
 <script>
+    const element=document.getElementById('year')
+    const year=new Date().getFullYear()
+    element.innerText=year
+</script>
+<script>
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('visible');
