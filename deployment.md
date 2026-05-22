@@ -81,9 +81,9 @@ sudo systemctl status postgresql
 
 For security, it is highly recommended to run the Django process under a dedicated user account rather than `root`.
 
-1. Create a dedicated system user `django`:
+1. Create a dedicated system user `django_user`:
    ```bash
-   sudo adduser --system --group --home /var/www/uls django
+   sudo adduser --system --group --home /var/www/uls django_user
    ```
 
 2. Clone your repository into the app folder (or move your existing files here):
@@ -92,20 +92,20 @@ For security, it is highly recommended to run the Django process under a dedicat
    ```
    *(Note: Ensure you replace `https://github.com/your-username/ULS.git` with your repository URL).*
 
-3. Transfer directory ownership to the `django` user:
+3. Transfer directory ownership to the `django_user` user:
    ```bash
-   sudo chown -R django:django /var/www/uls
+   sudo chown -R django_user:django_user /var/www/uls
    ```
 
 ---
 
 ## 4. Python Virtual Environment & Dependencies
 
-Switch to the `django` user to set up Python and install the workspace dependencies:
+Switch to the `django_user` user to set up Python and install the workspace dependencies:
 
 1. Switch shell user:
    ```bash
-   sudo -u django -i
+   sudo -u django_user -i
    ```
 
 2. Navigate to the application root directory:
@@ -136,7 +136,7 @@ Switch to the `django` user to set up Python and install the workspace dependenc
 
 ## 5. Production Configuration (.env)
 
-While still logged in as the `django` user in `/var/www/uls/app`, create your production environment settings file:
+While still logged in as the `django_user` user in `/var/www/uls/app`, create your production environment settings file:
 
 1. Open `.env` for editing:
    ```bash
@@ -160,7 +160,7 @@ While still logged in as the `django` user in `/var/www/uls/app`, create your pr
 
 3. Save and close the file (`Ctrl+O`, `Enter`, `Ctrl+X`).
 
-4. Restrict permissions to the `.env` file so only the `django` user can read it:
+4. Restrict permissions to the `.env` file so only the `django_user` user can read it:
    ```bash
    chmod 600 .env
    ```
@@ -186,7 +186,7 @@ With your virtual environment activated, run the following setup commands:
    python manage.py seed_data
    ```
 
-4. Exit the `django` user session back to your admin user shell:
+4. Exit the `django_user` user session back to your admin user shell:
    ```bash
    exit
    ```
@@ -229,7 +229,7 @@ We will use systemd to manage Gunicorn. It will auto-start Gunicorn on system bo
    After=network.target
 
    [Service]
-   User=django
+   User=django_user
    Group=www-data
    WorkingDirectory=/var/www/uls/app
    ExecStart=/var/www/uls/app/.venv/bin/gunicorn \
@@ -318,7 +318,7 @@ Nginx will face the public web. It will handle incoming HTTP/HTTPS connections, 
 
 6. Grant Nginx read/execute permissions to the static and media files:
    ```bash
-   sudo usermod -aG django www-data
+   sudo usermod -aG django_user www-data
    sudo chmod 710 /var/www/uls
    ```
 
@@ -346,9 +346,9 @@ Secure the application with SSL using Let's Encrypt Certbot.
 
 To push code updates from git to the server:
 
-1. Switch to the `django` user and pull the latest codebase changes:
+1. Switch to the `django_user` user and pull the latest codebase changes:
    ```bash
-   sudo -u django -i
+   sudo -u django_user -i
    cd /var/www/uls/app
    source .venv/bin/activate
    git pull origin main
