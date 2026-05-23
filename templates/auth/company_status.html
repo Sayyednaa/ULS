@@ -198,6 +198,12 @@
                         <span class="text-gray-400 text-sm font-semibold" x-text="t('Owner Mobile')"></span>
                         <span class="text-white text-sm font-bold">{{ company.owner_mobile_number }}</span>
                     </div>
+                    {% if company.description %}
+                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 text-left">
+                        <span class="text-gray-400 text-sm font-semibold block mb-1.5" x-text="t('Company Description')"></span>
+                        <p class="text-white text-sm font-medium whitespace-pre-wrap">{{ company.description }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -250,6 +256,14 @@
                             <div class="relative group border-glow rounded-xl transition-all">
                                 {{ form.owner_mobile_number }}
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Describe About Your Company -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1" x-text="t('Describe About Your Company')"></label>
+                        <div class="relative group border-glow rounded-xl transition-all">
+                            {{ form.description }}
                         </div>
                     </div>
 

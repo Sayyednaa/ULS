@@ -59,6 +59,7 @@ class Company(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending_details')
     owner_mobile_number = models.CharField(max_length=20, blank=True, null=True)
     owner_name = models.CharField(max_length=200, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     owner_signature = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
     registration_certificate = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])
     commercial_certificate = models.FileField(upload_to='company_documents/', null=True, blank=True, validators=[validate_file_extension])

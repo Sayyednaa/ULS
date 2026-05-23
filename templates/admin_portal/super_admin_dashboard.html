@@ -260,6 +260,11 @@
                                     {% if company.owner_mobile_number %}
                                     <div class="text-[10px] text-app-text-muted font-normal">Phone: <span class="text-app-text font-bold">📞 {{ company.owner_mobile_number }}</span></div>
                                     {% endif %}
+                                    {% if company.description %}
+                                    <div class="text-[10px] text-app-text-muted font-normal mt-1 max-w-[200px]" title="{{ company.description }}">
+                                        About: <span class="text-app-text font-semibold line-clamp-2 whitespace-pre-wrap">{{ company.description }}</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
 
                                 {% if company.owner_signature or company.registration_certificate or company.commercial_certificate or company.authorized_signature_certificate or company.authorized_signature_only %}

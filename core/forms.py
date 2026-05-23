@@ -541,6 +541,7 @@ class CompanyVerificationForm(forms.ModelForm):
         fields = [
             'owner_name',
             'owner_mobile_number',
+            'description',
             'owner_signature',
             'registration_certificate',
             'commercial_certificate',
@@ -550,6 +551,7 @@ class CompanyVerificationForm(forms.ModelForm):
         widgets = {
             'owner_name': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Enter Owner Name'}),
             'owner_mobile_number': forms.TextInput(attrs={'class': TW_INPUT, 'placeholder': 'Enter Owner Mobile Number'}),
+            'description': forms.Textarea(attrs={'class': TW_TEXTAREA, 'placeholder': 'Describe About Your Company'}),
             'owner_signature': forms.FileInput(attrs={'class': TW_FILE}),
             'registration_certificate': forms.FileInput(attrs={'class': TW_FILE}),
             'commercial_certificate': forms.FileInput(attrs={'class': TW_FILE}),
@@ -563,6 +565,7 @@ class CompanyVerificationForm(forms.ModelForm):
         mandatory_fields = [
             ('owner_name', 'Owner Name'),
             ('owner_mobile_number', 'Owner Mobile Number'),
+            ('description', 'Company Description'),
             ('owner_signature', 'Owner Signature'),
             ('registration_certificate', 'Company Registration Certificate'),
             ('commercial_certificate', 'Company Registered Commercial Certificate'),

@@ -90,6 +90,8 @@ TRANSLATIONS = {
     "WP Salary": "راتب إذن العمل",
     "Basic Salary": "الراتب الأساسي",
     "Company Name": "اسم الشركة",
+    "Describe About Your Company": "تحدث عن شركتك",
+    "Company Description": "وصف الشركة",
     "Contract Type": "نوع العقد",
     "Work Contract": "عقد العمل",
     "Profession": "المهنة",
