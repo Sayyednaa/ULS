@@ -12,14 +12,16 @@
     </div>
 </div>
 
-<div x-data="documentGenerator()" class="grid grid-cols-1 xl:grid-cols-4 gap-8">
-    <!-- Sidebar: Document Settings -->
-    <div class="xl:col-span-1 space-y-6">
-        <div class="bg-white dark:bg-[#15151e] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
-            <!-- Decorative gradient accent -->
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#f97316] to-[#fbcfe8]"></div>
-            
-            <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white" x-text="t('Document Settings')"></h3>
+<div x-data="documentGenerator()">
+    <!-- Top Sections: Settings & Details placed horizontally -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+        <!-- Sidebar: Document Settings -->
+        <div class="md:col-span-4 lg:col-span-3 space-y-6">
+            <div class="bg-white dark:bg-[#15151e] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+                <!-- Decorative gradient accent -->
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#f97316] to-[#fbcfe8]"></div>
+                
+                <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white" x-text="t('Document Settings')"></h3>
             
             <!-- Select Driver -->
             <div class="mb-5 relative group">
@@ -70,11 +72,11 @@
         </div>
     </div>
 
-    <!-- Main Content: Settings & Document -->
-    <div class="xl:col-span-3 space-y-6">
-        <!-- Document Details Form -->
-        <div class="bg-white dark:bg-[#15151e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+        <!-- Main Content: Settings & Document -->
+        <div class="md:col-span-8 lg:col-span-9 space-y-6">
+            <!-- Document Details Form -->
+            <div class="bg-white dark:bg-[#15151e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
                 <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <span x-text="t('Fill Document Details')"></span>
             </h3>
@@ -235,20 +237,34 @@
                 </template>
                 
             </div>
-            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-50 dark:bg-[#1a1a24]">
-                            <tr class="text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider">
-                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Date')"></th>
-                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Document Type')"></th>
-                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Driver')"></th>
-                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Creator')"></th>
-                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Due Date')"></th>
-                                <th class="p-4 border-b border-gray-200 dark:border-gray-800 text-right" x-text="t('Actions')"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm divide-y divide-gray-100 dark:divide-gray-800">
+        </div>
+    </div>
+</div>
+
+<!-- Document Preview Placeholder (if required later) -->
+<!-- <div id="preview-section" class="mt-8"></div> -->
+
+<!-- History Section -->
+<div class="mt-8">
+    <div class="bg-white dark:bg-[#15151e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span x-text="t('Recent Document History')"></span>
+        </h3>
+        <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 dark:bg-[#1a1a24]">
+                        <tr class="text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider">
+                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Date')"></th>
+                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Document Type')"></th>
+                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Driver')"></th>
+                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Creator')"></th>
+                            <th class="p-4 border-b border-gray-200 dark:border-gray-800 min-w-[120px]" x-text="t('Due Date')"></th>
+                            <th class="p-4 border-b border-gray-200 dark:border-gray-800 text-right" x-text="t('Actions')"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm divide-y divide-gray-100 dark:divide-gray-800">
                             {% for record in history_records %}
                             <tr class="hover:bg-orange-50/50 dark:hover:bg-gray-800/30 transition-colors">
                                 <td class="p-4 text-gray-600 dark:text-gray-400 font-medium text-xs">{{ record.created_at|date:"Y-m-d H:i" }}</td>
@@ -271,10 +287,6 @@
                                 </td>
                                 <td class="p-4 text-right">
                                     <div class="flex items-center justify-end gap-4">
-                                        <a href="?history_id={{ record.id }}" class="text-brand hover:text-orange-600 font-medium text-xs flex items-center gap-1 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                            <span x-text="t('View')"></span>
-                                        </a>
                                         <a href="{% url 'print_operation_document' %}?history_id={{ record.id }}&print=true" target="_blank" class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium text-xs flex items-center gap-1 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                             <span x-text="t('Print')"></span>
@@ -535,7 +547,11 @@
                     });
                     
                     if (response.ok) {
+                        const data = await response.json();
                         alert(this.t('Document saved successfully!'));
+                        if (data.history_id) {
+                            window.open(`{% url 'print_operation_document' %}?history_id=${data.history_id}&print=true`, '_blank');
+                        }
                         window.location.href = "{% url 'operation_documents' %}";
                     } else {
                         try {

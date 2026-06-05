@@ -666,7 +666,7 @@ class SaveOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
                     pass
             
             # Save history
-            OperationDocumentHistory.objects.create(
+            history_record = OperationDocumentHistory.objects.create(
                 creator=request.user,
                 driver=driver,
                 doc_type=doc_type,
@@ -675,7 +675,7 @@ class SaveOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
                 company=driver.company
             )
             
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'history_id': str(history_record.id)})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
