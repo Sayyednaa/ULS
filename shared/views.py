@@ -767,6 +767,102 @@ class PrintOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
             
         return render(request, template_name, context)
 
+class PreviewOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
+    def post(self, request):
+        from core.models import Driver, COMPANY_CHOICES
+        import json
+        from django.utils import timezone
+        from core.models import SystemSettings
+        
+        try:
+            data = json.loads(request.body)
+        except:
+            data = {}
+            
+        driver_id = data.get('driver_id')
+        doc_type = data.get('doc_type') or data.get('docType')
+        
+        driver = None
+        if driver_id:
+            try:
+                driver = self.get_queryset_by_company(Driver).get(id=driver_id)
+            except Driver.DoesNotExist:
+                pass
+                
+        def to_arabic_digits(text):
+            if not text: return ''
+            text = str(text)
+            arabic_digits = {'0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'}
+            for eng, ar in arabic_digits.items():
+                text = text.replace(eng, ar)
+            return text
+            
+        now = timezone.now()
+        date_en = data.get('doc_date') or now.strftime('%Y-%m-%d')
+        date_ar = to_arabic_digits(date_en)
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(date_en, '%Y-%m-%d')
+            date_month_en = dt.strftime('%B %Y')
+        except:
+            date_month_en = now.strftime('%B %Y')
+        date_month_ar = to_arabic_digits(date_month_en)
+        
+        company = driver.company if driver else request.user.company
+        company_name = dict(COMPANY_CHOICES).get(company.name if company else '', data.get('company_name', ''))
+        company_name_ar = data.get('company_name_ar', '')
+        
+        company_logo_url = None
+        if company and company.logo:
+            company_logo_url = company.logo.url
+        else:
+            system_settings = SystemSettings.objects.first()
+            if system_settings and system_settings.logo:
+                company_logo_url = system_settings.logo.url
+                
+        # Mock a record for the template
+        class MockRecord:
+            def __init__(self, doc_type):
+                self.doc_type = doc_type
+        
+        record = MockRecord(doc_type)
+                
+        context = {
+            'record': record,
+            'driver': driver,
+            'data': data,
+            'auto_print': False,
+            'date_en': data.get('formatted_date') or date_en,
+            'date_ar': data.get('formatted_date_ar') or date_ar,
+            'date_month_en': data.get('formatted_date_month') or date_month_en,
+            'date_month_ar': data.get('formatted_date_month_ar') or date_month_ar,
+            'company_name': data.get('company_name') or company_name,
+            'company_name_ar': data.get('company_name_ar') or company_name_ar,
+            'company_logo_url': company_logo_url,
+            'driver_name_ar': data.get('driver_name_ar', ''),
+            'civil_id_ar': to_arabic_digits(data.get('civil_id_number_ar', driver.civil_id_number if driver else '')),
+            'deduction_amount_ar': to_arabic_digits(data.get('deduction_amount', '00.00')),
+            'inst1_amount_ar': to_arabic_digits(data.get('inst1_amount', '00.00')),
+            'inst2_amount_ar': to_arabic_digits(data.get('inst2_amount', '00.00')),
+            'inst3_amount_ar': to_arabic_digits(data.get('inst3_amount', '00.00')),
+            'inst4_amount_ar': to_arabic_digits(data.get('inst4_amount', '00.00')),
+            'serial_number_ar': to_arabic_digits(data.get('serial_number', '')),
+            'phone_number_ar': to_arabic_digits(data.get('phone_number', '')),
+            'plate_number_ar': to_arabic_digits(data.get('plate_number', '')),
+        }
+        
+        template_map = {
+            'warning_letter': 'shared/print/warning_letter.html',
+            'penalty_deduction': 'shared/print/penalty_deduction.html',
+            'deliver_pledge': 'shared/print/deliver_pledge.html',
+            'mobile_receiving': 'shared/print/deliver_pledge.html',
+            'ack_receipt': 'shared/print/ack_receipt.html',
+            'car_receipt': 'shared/print/car_receipt.html',
+        }
+        
+        template_name = template_map.get(doc_type, 'shared/print_layout.html')
+        return render(request, template_name, context)
+
 class DeleteOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
     def post(self, request, pk):
         from core.models import OperationDocumentHistory

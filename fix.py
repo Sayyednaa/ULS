@@ -1,186 +1,216 @@
 import os
 
-def fix_talabat():
-    with open('templates/accountant_portal/talabat.html', 'r', encoding='utf-8') as f:
-        t_html = f.read()
+file_path = r'c:\Users\Abdul\Documents\Ali\Code\ULS\templates\shared\operation_documents.html'
+with open(file_path, 'r', encoding='utf-8') as f:
+    content = f.read()
 
-    # 1. Modify the form
-    t_html = t_html.replace(
-        '<form method="post" action="{% url \'accountant_talabat\' %}" enctype="multipart/form-data" class="space-y-6">',
-        '<form method="post" action="{% url \'accountant_talabat\' %}" enctype="multipart/form-data" class="space-y-6" @submit.prevent="openSignatureModal()" id="salaryForm">'
-    )
+# 1. Fix input classes
+old_class = 'class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand"'
+new_class = 'class="w-full px-3 py-2 border border-app-border bg-gray-50/50 dark:bg-[#1a1a24] text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand"'
+content = content.replace(old_class, new_class)
 
-    # 2. Add hidden inputs after csrf
-    t_html = t_html.replace(
-        '{% csrf_token %}',
-        '{% csrf_token %}\n            <input type="hidden" name="installment_id" x-model="installmentId">\n            <input type="hidden" name="signature_data" id="signature_data">'
-    )
+# Fix textarea
+content = content.replace('class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand"', new_class)
 
-    # 3. Add driver change event
-    t_html = t_html.replace(
-        '<select name="driver_id" x-model="selectedDriverId" @change="updateDriverDetails" class="w-full',
-        '<select name="driver_id" x-model="selectedDriverId" @change="updateDriverDetails($event); checkPendingDeduction()" class="w-full'
-    )
+# Fix date inputs that might have different classes
+old_class_date = 'class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand"'
+content = content.replace(old_class_date, new_class)
 
-    # 4. Add month change event
-    t_html = t_html.replace(
-        '<input type="month" name="month" class="w-full',
-        '<input type="month" name="month" x-model="month" @change="checkPendingDeduction()" class="w-full'
-    )
+# Fix Select
+old_class_select = 'class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm"'
+new_class_select = 'class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-[#1a1a24] text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all duration-200 shadow-sm"'
+content = content.replace(old_class_select, new_class_select)
 
-    # 5. Add Deduction binding
-    t_html = t_html.replace(
-        '<input type="number" step="0.001" name="deduction" class="w-full',
-        '<input type="number" step="0.001" name="deduction" x-model.number="deduction" class="w-full'
-    )
+# Also fix companyName input text colors
+old_comp_name_class = 'class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm"'
+content = content.replace(old_comp_name_class, new_class_select)
 
-    # 6. Add Signature Modal (INSIDE the x-data div)
-    modal = '''
-    <!-- Signature Modal -->
-    <div id="signatureModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-gray-900 border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-                <h2 class="text-xl font-bold text-white" x-text="t('Digital Signature Required')"></h2>
-                <button type="button" @click="closeSignatureModal()" class="text-gray-400 hover:text-white">✕</button>
+# Fix search query input text colors
+old_search_class = 'class="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm"'
+new_search_class = 'class="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-[#1a1a24] text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all duration-200 shadow-sm"'
+content = content.replace(old_search_class, new_search_class)
+
+# 2. Fix placeholders
+content = content.replace('placeholder="Yes / نعم"', ':placeholder="t(\'Yes / نعم\')"')
+content = content.replace('placeholder="e.g. 50"', ':placeholder="t(\'e.g. 50\')"')
+content = content.replace('placeholder="Month 1"', ':placeholder="t(\'Month 1\')"')
+content = content.replace('placeholder="Amount 1"', ':placeholder="t(\'Amount 1\')"')
+content = content.replace('placeholder="Month 2"', ':placeholder="t(\'Month 2\')"')
+content = content.replace('placeholder="Amount 2"', ':placeholder="t(\'Amount 2\')"')
+content = content.replace('placeholder="Month 3"', ':placeholder="t(\'Month 3\')"')
+content = content.replace('placeholder="Amount 3"', ':placeholder="t(\'Amount 3\')"')
+content = content.replace('placeholder="Month 4"', ':placeholder="t(\'Month 4\')"')
+content = content.replace('placeholder="Amount 4"', ':placeholder="t(\'Amount 4\')"')
+
+# 3. Fix Warning Levels
+content = content.replace('<option value="1">1st Written Warning</option>', '<option value="1" x-text="t(\'1st Written Warning\')"></option>')
+content = content.replace('<option value="2">2nd Written Warning</option>', '<option value="2" x-text="t(\'2nd Written Warning\')"></option>')
+content = content.replace('<option value="3">3rd Written Warning</option>', '<option value="3" x-text="t(\'3rd Written Warning\')"></option>')
+
+# 4. Preview Section
+preview_html = """
             </div>
-            <div class="p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-300" x-text="t('Digital Signature')"></label>
-                        <div class="relative bg-white rounded-xl border border-gray-700 overflow-hidden" style="height: 200px;">
-                            <canvas id="signaturePad" class="w-full h-full cursor-crosshair"></canvas>
-                            <button type="button" onclick="clearSignature()" class="absolute top-2 right-2 px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs rounded border border-gray-400">Clear</button>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-300" x-text="t('Or Upload Signature Image')"></label>
-                        <div class="h-[200px] flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-xl hover:border-emerald-500 transition-colors cursor-pointer group relative bg-gray-800/30">
-                            <input type="file" name="signature_image" form="salaryForm" class="absolute inset-0 opacity-0 cursor-pointer">
-                            <span class="text-xs text-gray-400" x-text="t('Click to upload image')"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-end pt-4">
-                    <button type="button" @click="submitForm()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all" x-text="t('Confirm & Save')"></button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-'''
-    # Replace the end of block (the original closing div)
-    t_html = t_html.replace('</div>\n{% endblock %}', modal)
-
-    # 7. Add Alpine JS Methods
-    methods = '''
-            installmentId: '',
-            month: '',
             
-            checkPendingDeduction() {
-                if (!this.selectedDriverId || !this.month) return;
-                fetch(`/accountant-portal/api/check-pending-deduction/?driver_id=${this.selectedDriverId}&month=${this.month}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.amount > 0) {
-                        this.deduction = data.amount;
-                        this.installmentId = data.installment_id;
-                    } else {
-                        this.deduction = 0;
-                        this.installmentId = '';
+            <!-- Document Preview -->
+            <div class="bg-white dark:bg-[#15151e] rounded-2xl p-6 mt-6 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span x-text="t('Live Preview')"></span>
+                </h3>
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white relative" style="height: 600px;">
+                    <div x-show="isPreviewLoading" class="absolute inset-0 bg-white/80 dark:bg-black/50 z-10 flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
+                    </div>
+                    <iframe x-ref="previewFrame" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+"""
+content = content.replace('            </div>\n        </div>\n    </div>', preview_html + '\n        </div>\n    </div>')
+
+
+# Add @input / @change trigger on the wrapper to update preview
+wrapper_start = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4"'
+new_wrapper_start = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" @input.debounce.500ms="updatePreview()"'
+content = content.replace(wrapper_start, new_wrapper_start)
+
+# Similarly update on select type
+content = content.replace('x-model="docType"', 'x-model="docType" @change="updatePreview()"')
+
+# Add isPreviewLoading
+content = content.replace("dropdownOpen: false,", "dropdownOpen: false,\n            isPreviewLoading: false,")
+
+# 5. Add updatePreview JS logic
+preview_script = """
+            async updatePreview() {
+                if (!this.selectedDriver || !this.docType) return;
+                
+                this.isPreviewLoading = true;
+                
+                const payload = {
+                    driver_id: this.selectedDriver.id,
+                    doc_type: this.docType,
+                    due_date: this.dueDate || null,
+                    doc_date: this.docDate,
+                    company_name: this.companyName,
+                    company_name_ar: this.companyNameAr,
+                    model_details: this.modelDetails,
+                    model_details_ar: this.modelDetailsAr,
+                    serial_number: this.serialNumber,
+                    phone_number: this.phoneNumber,
+                    car_registration: this.carRegistration,
+                    advertising_license: this.advertisingLicense,
+                    municipality_permit: this.municipalityPermit,
+                    violation_reason: this.violationReason,
+                    violation_reason_ar: this.violationReasonAr,
+                    deduction_amount: this.deductionAmount,
+                    warning_level: this.warningLevel,
+                    inst1_month: this.inst1Month,
+                    inst1_month_ar: this.inst1MonthAr,
+                    inst1_amount: this.inst1Amount,
+                    inst2_month: this.inst2Month,
+                    inst2_month_ar: this.inst2MonthAr,
+                    inst2_amount: this.inst2Amount,
+                    inst3_month: this.inst3Month,
+                    inst3_month_ar: this.inst3MonthAr,
+                    inst3_amount: this.inst3Amount,
+                    inst4_month: this.inst4Month,
+                    inst4_month_ar: this.inst4MonthAr,
+                    inst4_amount: this.inst4Amount,
+                    driver_name_ar: this.driverNameAr,
+                    car_type: this.carType,
+                    car_type_ar: this.carTypeAr,
+                    plate_number: this.plateNumber,
+                    chassis_number: this.chassisNumber,
+                    car_body_damage: this.carBodyDamage,
+                    car_tire_damage: this.carTireDamage,
+                    car_accessories: this.carAccessories,
+                    other_damages: this.otherDamages,
+                    other_notes: this.otherNotes,
+                    fuel_card: this.fuelCard,
+                    nationality: this.nationality,
+                    nationality_ar: this.nationalityAr
+                };
+                
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}';
+                
+                try {
+                    const response = await fetch("{% url 'preview_operation_document' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (response.ok) {
+                        const html = await response.text();
+                        const doc = this.$refs.previewFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
                     }
-                });
+                } catch(e) {
+                    console.error('Preview failed', e);
+                } finally {
+                    this.isPreviewLoading = false;
+                }
             },
-            
-            openSignatureModal() {
-                document.getElementById('signatureModal').classList.remove('hidden');
-                setTimeout(() => {
-                    if(typeof resizeCanvas === 'function') resizeCanvas();
-                }, 100);
-            },
-            
-            closeSignatureModal() {
-                document.getElementById('signatureModal').classList.add('hidden');
-            },
-            
-            submitForm() {
-                document.getElementById('salaryForm').submit();
-            },
-'''
-    t_html = t_html.replace('driverId: \'\',', 'driverId: \'\',' + methods)
+"""
 
-    # 8. Add vanilla signature JS
-    signature_js = '''
-<script>
-    let canvas, ctx, drawing = false;
-    document.addEventListener('DOMContentLoaded', () => {
-        canvas = document.getElementById('signaturePad');
-        if(!canvas) return;
-        ctx = canvas.getContext('2d');
-        window.resizeCanvas = function() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            ctx.scale(ratio, ratio);
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-        };
-        
-        function startDrawing(e) { drawing = true; draw(e); }
-        function stopDrawing() { drawing = false; ctx.beginPath(); document.getElementById('signature_data').value = canvas.toDataURL(); }
-        function draw(e) {
-            if (!drawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-            ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
-        }
-        
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-        canvas.addEventListener('touchend', stopDrawing);
-        
-        window.clearSignature = function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            document.getElementById('signature_data').value = '';
-        };
-    });
-</script>
-{% endblock %}
-'''
-    t_html = t_html.replace('</script>\n{% endblock %}', '</script>\n' + signature_js)
+content = content.replace("async saveDocument() {", preview_script + "\n            async saveDocument() {")
 
-    with open('templates/accountant_portal/talabat.html', 'w', encoding='utf-8') as f:
-        f.write(t_html)
+# Call updatePreview when selecting driver
+content = content.replace("this.dropdownOpen = false;", "this.dropdownOpen = false;\n                this.updatePreview();")
 
-def fix_contract():
-    with open('templates/accountant_portal/contract_salary.html', 'r', encoding='utf-8') as f:
-        c_html = f.read()
+# Validation logic
+validation_script = """
+                if (!this.selectedDriver || !this.docType) {
+                    alert(this.t('Please select a driver and document type'));
+                    return;
+                }
+                
+                // Check mandatory fields
+                if (!this.docDate) { alert(this.t('Please fill all mandatory fields')); return; }
+                
+                if (this.docType === 'deliver_pledge' || this.docType === 'mobile_receiving') {
+                    if (!this.modelDetails || !this.serialNumber || !this.phoneNumber) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'ack_receipt') {
+                    if (!this.carType || !this.modelDetails || !this.plateNumber || !this.carRegistration || !this.advertisingLicense || !this.municipalityPermit) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'car_receipt') {
+                    if (!this.nationality || !this.carType || !this.modelDetails || !this.plateNumber || !this.chassisNumber || !this.carBodyDamage || !this.carTireDamage || !this.carAccessories || !this.otherDamages || !this.otherNotes || !this.fuelCard) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'warning_letter' || this.docType === 'penalty_deduction') {
+                    if (!this.violationReason) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'penalty_deduction') {
+                    if (!this.deductionAmount) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'warning_letter') {
+                    if (!this.warningLevel) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+"""
 
-    # Move the modal inside the x-data scope:
-    # 1. find the end block
-    # 2. remove the closing div that was above the modal
-    
-    # We will just replace "    </div>\n</div>\n\n<!-- Signature Modal -->"
-    # with "    <!-- Signature Modal -->"
-    # and then replace "{% endblock %}" with "    </div>\n</div>\n{% endblock %}"
-    
-    c_html = c_html.replace(
-        '    </div>\n</div>\n\n<!-- Signature Modal -->',
-        '    <!-- Signature Modal -->'
-    )
-    
-    c_html = c_html.replace(
-        '</div>\n{% endblock %}',
-        '</div>\n    </div>\n</div>\n{% endblock %}'
-    )
+content = content.replace("""                if (!this.selectedDriver || !this.docType) {
+                    alert(this.t('Please select a driver and document type'));
+                    return;
+                }""", validation_script)
 
-    with open('templates/accountant_portal/contract_salary.html', 'w', encoding='utf-8') as f:
-        f.write(c_html)
+with open(file_path, 'w', encoding='utf-8') as f:
+    f.write(content)
 
-fix_talabat()
-fix_contract()
+print("HTML modified successfully.")

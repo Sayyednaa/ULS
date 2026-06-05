@@ -17,28 +17,28 @@
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
         <!-- Sidebar: Document Settings -->
         <div class="md:col-span-4 lg:col-span-3 space-y-6">
-            <div class="bg-white dark:bg-[#15151e] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+            <div class="bg-app-card rounded-2xl p-6 border border-app-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
                 <!-- Decorative gradient accent -->
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#f97316] to-[#fbcfe8]"></div>
+                <div class="absolute top-0 left-0 w-full h-1 bg-brand"></div>
                 
-                <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white" x-text="t('Document Settings')"></h3>
+                <h3 class="text-lg font-bold mb-6 text-app-text" x-text="t('Document Settings')"></h3>
             
             <!-- Select Driver -->
             <div class="mb-5 relative group">
-                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="t('Select Driver')"></label>
+                <label class="block text-[11px] font-bold text-app-text-muted uppercase tracking-wider mb-2" x-text="t('Select Driver')"></label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand transition-colors">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-app-text-muted group-focus-within:text-brand transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </span>
-                    <input type="text" x-model="searchQuery" @focus="dropdownOpen = true" @click.away="dropdownOpen = false" class="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm" :placeholder="t('Search drivers...')">
+                    <input type="text" x-model="searchQuery" @focus="dropdownOpen = true" @click.away="dropdownOpen = false" class="w-full pl-9 pr-3 py-2.5 bg-app-bg text-app-text border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all duration-200 shadow-sm" :placeholder="t('Search drivers...')">
                 </div>
                 
                 <!-- Dropdown List -->
-                <div x-show="dropdownOpen && filteredDrivers.length > 0" x-transition.opacity.duration.200ms class="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a24] border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                <div x-show="dropdownOpen && filteredDrivers.length > 0" x-transition.opacity.duration.200ms class="absolute z-50 w-full mt-2 bg-app-card border border-app-border rounded-xl shadow-xl max-h-60 overflow-y-auto">
                     <template x-for="driver in filteredDrivers" :key="driver.id">
-                        <div @click="selectDriver(driver)" class="px-4 py-3 hover:bg-orange-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-50 dark:border-gray-800 last:border-0 transition-colors">
-                            <div class="font-bold text-sm text-gray-800 dark:text-gray-200" x-text="driver.full_name"></div>
-                            <div class="text-xs text-gray-500 mt-0.5" x-text="driver.civil_id"></div>
+                        <div @click="selectDriver(driver)" class="px-4 py-3 hover:bg-brand/10 cursor-pointer border-b border-app-border last:border-0 transition-colors">
+                            <div class="font-bold text-sm text-app-text" x-text="driver.full_name"></div>
+                            <div class="text-xs text-app-text-muted mt-0.5" x-text="driver.civil_id"></div>
                         </div>
                     </template>
                 </div>
@@ -46,8 +46,8 @@
 
             <!-- Document Type -->
             <div class="mb-5">
-                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="t('Document Type')"></label>
-                <select x-model="docType" class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm">
+                <label class="block text-[11px] font-bold text-app-text-muted uppercase tracking-wider mb-2" x-text="t('Document Type')"></label>
+                <select x-model="docType" @change="updatePreview()" class="w-full px-3 py-2.5 bg-app-bg text-app-text border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all duration-200 shadow-sm">
                     <option value="" disabled selected x-text="t('Select Type')"></option>
                     <option value="car_receipt" x-text="t('Vehicle Receipt Acknowledgement')"></option>
                     <option value="ack_receipt" x-text="t('Acknowledgment of receipt')"></option>
@@ -60,12 +60,12 @@
 
             <!-- Company Name -->
             <div class="mb-6">
-                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="t('Company Name')"></label>
-                <input type="text" x-model="companyName" @change="companyNameAr = await translateText(companyName)" class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm">
+                <label class="block text-[11px] font-bold text-app-text-muted uppercase tracking-wider mb-2" x-text="t('Company Name')"></label>
+                <input type="text" x-model="companyName" @change="companyNameAr = await translateText(companyName)" class="w-full px-3 py-2.5 bg-app-bg text-app-text border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all duration-200 shadow-sm">
             </div>
 
             <!-- Save Button -->
-            <button @click="saveDocument" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(249,115,22,0.6)] transform hover:-translate-y-0.5">
+            <button @click="saveDocument" class="w-full flex items-center justify-center gap-2 bg-brand hover:brightness-110 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md transform hover:-translate-y-0.5">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                 <span x-text="t('Save Document')"></span>
             </button>
@@ -75,13 +75,13 @@
         <!-- Main Content: Settings & Document -->
         <div class="md:col-span-8 lg:col-span-9 space-y-6">
             <!-- Document Details Form -->
-            <div class="bg-white dark:bg-[#15151e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+            <div class="bg-app-card rounded-2xl p-8 border border-app-border shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <h3 class="text-lg font-bold mb-6 text-app-text flex items-center gap-2">
                 <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <span x-text="t('Fill Document Details')"></span>
             </h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" @input.debounce.500ms="updatePreview()">
                 <!-- Generic fields for most documents -->
                 <div>
                     <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('As of Date')"></label>
@@ -127,15 +127,15 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Registration Book')"></label>
-                            <input type="text" x-model="carRegistration" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Yes / نعم">
+                            <input type="text" x-model="carRegistration" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Yes / نعم')">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Advertising Car/Vehicle license')"></label>
-                            <input type="text" x-model="advertisingLicense" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Yes / نعم">
+                            <input type="text" x-model="advertisingLicense" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Yes / نعم')">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Municipality Car/Vehicle permit')"></label>
-                            <input type="text" x-model="municipalityPermit" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Yes / نعم">
+                            <input type="text" x-model="municipalityPermit" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Yes / نعم')">
                         </div>
                     </div>
                 </template>
@@ -201,25 +201,25 @@
                 <template x-if="docType === 'penalty_deduction'">
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Deduction Total Amount')"></label>
-                        <input type="text" x-model="deductionAmount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-4" placeholder="e.g. 50">
+                        <input type="text" x-model="deductionAmount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-4" :placeholder="t('e.g. 50')">
                         
                         <label class="block text-xs font-bold text-app-text-muted mb-2" x-text="t('Installments')"></label>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <input type="text" x-model="inst1Month" @change="inst1MonthAr = await translateText(inst1Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 1">
-                                <input type="text" x-model="inst1Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 1">
+                                <input type="text" x-model="inst1Month" @change="inst1MonthAr = await translateText(inst1Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" :placeholder="t('Month 1')">
+                                <input type="text" x-model="inst1Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Amount 1')">
                             </div>
                             <div>
-                                <input type="text" x-model="inst2Month" @change="inst2MonthAr = await translateText(inst2Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 2">
-                                <input type="text" x-model="inst2Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 2">
+                                <input type="text" x-model="inst2Month" @change="inst2MonthAr = await translateText(inst2Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" :placeholder="t('Month 2')">
+                                <input type="text" x-model="inst2Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Amount 2')">
                             </div>
                             <div>
-                                <input type="text" x-model="inst3Month" @change="inst3MonthAr = await translateText(inst3Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 3">
-                                <input type="text" x-model="inst3Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 3">
+                                <input type="text" x-model="inst3Month" @change="inst3MonthAr = await translateText(inst3Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" :placeholder="t('Month 3')">
+                                <input type="text" x-model="inst3Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Amount 3')">
                             </div>
                             <div>
-                                <input type="text" x-model="inst4Month" @change="inst4MonthAr = await translateText(inst4Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 4">
-                                <input type="text" x-model="inst4Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 4">
+                                <input type="text" x-model="inst4Month" @change="inst4MonthAr = await translateText(inst4Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" :placeholder="t('Month 4')">
+                                <input type="text" x-model="inst4Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" :placeholder="t('Amount 4')">
                             </div>
                         </div>
                     </div>
@@ -229,14 +229,16 @@
                     <div>
                         <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Warning Level')"></label>
                         <select x-model="warningLevel" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
-                            <option value="1">1st Written Warning</option>
-                            <option value="2">2nd Written Warning</option>
-                            <option value="3">3rd Written Warning</option>
+                            <option value="1" x-text="t('1st Written Warning')"></option>
+                            <option value="2" x-text="t('2nd Written Warning')"></option>
+                            <option value="3" x-text="t('3rd Written Warning')"></option>
                         </select>
                     </div>
                 </template>
                 
+
             </div>
+
         </div>
     </div>
 </div>
@@ -244,17 +246,31 @@
 <!-- Document Preview Placeholder (if required later) -->
 <!-- <div id="preview-section" class="mt-8"></div> -->
 
+            <!-- Document Preview -->
+            <div class="bg-app-card rounded-2xl p-6 mt-6 border border-app-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full">
+                <h3 class="text-lg font-bold mb-4 text-app-text flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span x-text="t('Live Preview')"></span>
+                </h3>
+                <div class="border border-app-border rounded-xl overflow-hidden bg-white relative" style="height: 600px;">
+                    <div x-show="isPreviewLoading" class="absolute inset-0 bg-white/80 dark:bg-black/50 z-10 flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
+                    </div>
+                    <iframe x-ref="previewFrame" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+
 <!-- History Section -->
 <div class="mt-8">
-    <div class="bg-white dark:bg-[#15151e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+    <div class="bg-app-card rounded-2xl p-8 border border-app-border shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <h3 class="text-lg font-bold mb-6 text-app-text flex items-center gap-2">
             <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span x-text="t('Recent Document History')"></span>
         </h3>
         <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-50 dark:bg-[#1a1a24]">
+                    <thead class="bg-app-bg">
                         <tr class="text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider">
                             <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Date')"></th>
                             <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Document Type')"></th>
@@ -266,7 +282,7 @@
                     </thead>
                     <tbody class="text-sm divide-y divide-gray-100 dark:divide-gray-800">
                             {% for record in history_records %}
-                            <tr class="hover:bg-orange-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                            <tr class="hover:bg-brand/5 dark:hover:bg-gray-800/30 transition-colors">
                                 <td class="p-4 text-gray-600 dark:text-gray-400 font-medium text-xs">{{ record.created_at|date:"Y-m-d H:i" }}</td>
                                 <td class="p-4 font-bold text-gray-900 dark:text-gray-100">{{ record.get_doc_type_display }}</td>
                                 <td class="p-4">
@@ -287,7 +303,7 @@
                                 </td>
                                 <td class="p-4 text-right">
                                     <div class="flex items-center justify-end gap-4">
-                                        <a href="{% url 'print_operation_document' %}?history_id={{ record.id }}&print=true" target="_blank" class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium text-xs flex items-center gap-1 transition-colors">
+                                        <a href="{% url 'print_operation_document' %}?history_id={{ record.id }}&print=true" target="_blank" class="text-app-text-muted hover:text-app-text font-medium text-xs flex items-center gap-1 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                             <span x-text="t('Print')"></span>
                                         </a>
@@ -312,7 +328,9 @@
                         </tbody>
                     </table>
                 </div>
+
             </div>
+
         </div>
     </div>
 
@@ -325,6 +343,7 @@
             drivers: driversData,
             searchQuery: '',
             dropdownOpen: false,
+            isPreviewLoading: false,
             selectedDriver: null,
             
             docType: 'penalty_deduction',
@@ -476,17 +495,131 @@
                 this.searchQuery = driver.full_name;
                 this.companyName = driver.company_name;
                 this.dropdownOpen = false;
+                this.updatePreview();
                 
                 // Auto-translate values
                 this.driverNameAr = await this.translateText(driver.full_name);
                 this.companyNameAr = await this.translateText(driver.company_name);
             },
             
+            
+            async updatePreview() {
+                if (!this.selectedDriver || !this.docType) return;
+                
+                this.isPreviewLoading = true;
+                
+                const payload = {
+                    driver_id: this.selectedDriver.id,
+                    doc_type: this.docType,
+                    due_date: this.dueDate || null,
+                    doc_date: this.docDate,
+                    company_name: this.companyName,
+                    company_name_ar: this.companyNameAr,
+                    model_details: this.modelDetails,
+                    model_details_ar: this.modelDetailsAr,
+                    serial_number: this.serialNumber,
+                    phone_number: this.phoneNumber,
+                    car_registration: this.carRegistration,
+                    advertising_license: this.advertisingLicense,
+                    municipality_permit: this.municipalityPermit,
+                    violation_reason: this.violationReason,
+                    violation_reason_ar: this.violationReasonAr,
+                    deduction_amount: this.deductionAmount,
+                    warning_level: this.warningLevel,
+                    inst1_month: this.inst1Month,
+                    inst1_month_ar: this.inst1MonthAr,
+                    inst1_amount: this.inst1Amount,
+                    inst2_month: this.inst2Month,
+                    inst2_month_ar: this.inst2MonthAr,
+                    inst2_amount: this.inst2Amount,
+                    inst3_month: this.inst3Month,
+                    inst3_month_ar: this.inst3MonthAr,
+                    inst3_amount: this.inst3Amount,
+                    inst4_month: this.inst4Month,
+                    inst4_month_ar: this.inst4MonthAr,
+                    inst4_amount: this.inst4Amount,
+                    driver_name_ar: this.driverNameAr,
+                    car_type: this.carType,
+                    car_type_ar: this.carTypeAr,
+                    plate_number: this.plateNumber,
+                    chassis_number: this.chassisNumber,
+                    car_body_damage: this.carBodyDamage,
+                    car_tire_damage: this.carTireDamage,
+                    car_accessories: this.carAccessories,
+                    other_damages: this.otherDamages,
+                    other_notes: this.otherNotes,
+                    fuel_card: this.fuelCard,
+                    nationality: this.nationality,
+                    nationality_ar: this.nationalityAr
+                };
+                
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}';
+                
+                try {
+                    const response = await fetch("{% url 'preview_operation_document' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (response.ok) {
+                        const html = await response.text();
+                        const doc = this.$refs.previewFrame.contentWindow.document;
+                        doc.open();
+                        doc.write(html);
+                        doc.close();
+                    }
+                } catch(e) {
+                    console.error('Preview failed', e);
+                } finally {
+                    this.isPreviewLoading = false;
+                }
+            },
+
             async saveDocument() {
+
                 if (!this.selectedDriver || !this.docType) {
                     alert(this.t('Please select a driver and document type'));
                     return;
                 }
+                
+                // Check mandatory fields
+                if (!this.docDate || !this.dueDate) { alert(this.t('Please fill all mandatory fields')); return; }
+                
+                if (this.docType === 'deliver_pledge' || this.docType === 'mobile_receiving') {
+                    if (!this.modelDetails || !this.serialNumber || !this.phoneNumber) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'ack_receipt') {
+                    if (!this.carType || !this.modelDetails || !this.plateNumber || !this.carRegistration || !this.advertisingLicense || !this.municipalityPermit) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'car_receipt') {
+                    if (!this.nationality || !this.carType || !this.modelDetails || !this.plateNumber || !this.chassisNumber || !this.carBodyDamage || !this.carTireDamage || !this.carAccessories || !this.otherDamages || !this.otherNotes || !this.fuelCard) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'warning_letter' || this.docType === 'penalty_deduction') {
+                    if (!this.violationReason) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'penalty_deduction') {
+                    if (!this.deductionAmount) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+                if (this.docType === 'warning_letter') {
+                    if (!this.warningLevel) {
+                        alert(this.t('Please fill all mandatory fields')); return;
+                    }
+                }
+
                 this.isSaving = true;
                 
                 // Save document history

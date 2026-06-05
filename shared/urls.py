@@ -52,6 +52,7 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('operation-documents/', views.OperationDocumentsView.as_view(), name='operation_documents'),
     path('operation-documents/save/', views.SaveOperationDocumentView.as_view(), name='save_operation_document'),
+    path('operation-documents/preview/', views.PreviewOperationDocumentView.as_view(), name='preview_operation_document'),
     path('operation-documents/print/', views.PrintOperationDocumentView.as_view(), name='print_operation_document'),
     path('operation-documents/<uuid:pk>/delete/', views.DeleteOperationDocumentView.as_view(), name='delete_operation_document'),
 ]
