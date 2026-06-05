@@ -599,6 +599,42 @@ class Task(models.Model):
     def __str__(self):
         return f"{self.title} ({self.status})"
 
+# ─── Operation Document History ─────────────────────────────────────────────
+
+class OperationDocumentHistory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    creator = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='operation_documents')
+    driver = models.ForeignKey('Driver', on_delete=models.CASCADE, related_name='operation_documents')
+    doc_type = models.CharField(max_length=50)
+    due_date = models.DateField(null=True, blank=True)
+    content_data = models.JSONField(default=dict)
+    is_expired_notification_sent = models.BooleanField(default=False)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.company and self.creator:
+            self.company = self.creator.company
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['creator', 'due_date'])]
+
+    def __str__(self):
+        return f"{self.get_doc_type_display()} for {self.driver} by {self.creator}"
+
+    def get_doc_type_display(self):
+        doc_types = {
+            'car_receipt': 'Vehicle Receipt Acknowledgement',
+            'ack_receipt': 'Acknowledgment of receipt',
+            'mobile_receiving': 'Mobile Receiving',
+            'deliver_pledge': 'Deliver and pledge',
+            'warning_letter': 'Warning Letter',
+            'penalty_deduction': 'Administrative Penalty Deduction'
+        }
+        return doc_types.get(self.doc_type, self.doc_type)
+
 # ─── CompanyFile ────────────────────────────────────────────────────────────
 
 class CompanyFile(models.Model):

@@ -1,0 +1,414 @@
+        <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-md overflow-hidden relative print-area text-black" id="printable-area">
+            <style>
+                @media print {
+                    body * { visibility: hidden; }
+                    #printable-area, #printable-area * { visibility: visible; }
+                    #printable-area {
+                        position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; margin: 0; padding: 20px;
+                    }
+                    .no-print { display: none !important; }
+                }
+            </style>
+            
+            <div x-show="!selectedDriver" class="text-center py-20 text-gray-400 no-print">
+                <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p x-text="t('Please select a driver and document type to preview')"></p>
+            </div>
+            
+            <div x-show="selectedDriver" class="w-full max-w-4xl mx-auto" dir="ltr">
+                <!-- Shared Header for all documents -->
+                <div class="flex justify-between items-start mb-8 text-sm">
+                    <div>
+                        <p class="font-bold">Date: <span x-text="formattedDate"></span></p>
+                        <p class="mt-4"><span class="font-bold">Name:</span> <span x-text="selectedDriver.full_name"></span></p>
+                        <p><span class="font-bold">ID#:</span> <span x-text="selectedDriver.civil_id"></span></p>
+                        <p><span class="font-bold">Designation:</span> <span x-text="selectedDriver.designation"></span></p>
+                        <p><span class="font-bold">Company:</span> <span x-text="companyName"></span></p>
+                    </div>
+                    <div class="text-right" dir="rtl">
+                        <p class="font-bold">التاريخ: <span x-text="formattedDateAr"></span></p>
+                        <p class="mt-4"><span class="font-bold">الاسم:</span> <span x-text="driverNameAr"></span></p>
+                        <p><span class="font-bold">بطاقة مدنية#:</span> <span x-text="toArabicDigits(selectedDriver.civil_id)"></span></p>
+                        <p><span class="font-bold">المسمى الوظيفي:</span> <span x-text="selectedDriver.designation === 'Car Driver' ? 'سائق سيارة' : selectedDriver.designation"></span></p>
+                        <p><span class="font-bold">شركة:</span> <span x-text="companyNameAr"></span></p>
+                    </div>
+                </div>
+
+                <!-- Warning Letter -->
+                <div x-show="docType === 'warning_letter'">
+                    <h2 class="text-center font-bold text-xl mb-6">رسالة تحذير</h2>
+                    <div class="flex justify-between gap-8 text-sm leading-relaxed mb-12">
+                        <div class="w-1/2">
+                            <p class="font-bold mb-2">Dear Mr. <span x-text="selectedDriver.full_name"></span>,</p>
+                            <p>Kindly be informed that this is a First written warning to indicate your negligence in failing to (<span class="underline underline-offset-4 font-semibold" x-text="violationReason || '_______________________'"></span>), which violates the obligations imposed upon you.</p>
+                            <br>
+                            <p>Please be informed, further strict disciplinary action will apply in case of repetition.</p>
+                        </div>
+                        <div class="w-1/2 text-right" dir="rtl">
+                            <p class="font-bold mb-2">السيد/ <span x-text="driverNameAr"></span>،</p>
+                            <p>يرجى العلم بأن هذا الكتاب هو تحذير مكتوب <span x-text="warningLevel === '1' ? 'أول' : (warningLevel === '2' ? 'ثاني' : 'ثالث')"></span> للإشارة الى إهمالك في (<span class="underline underline-offset-4 font-semibold" x-text="violationReasonAr || '_______________________'"></span>) الذي ينتهك الالتزامات المفروضة عليك.</p>
+                            <br>
+                            <p>يرجى العلم بأنه في حال التكرار فإنه سيتم إتخاذ اجراءات تأديبية اشد صرامة.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Warning Checkboxes -->
+                    <div class="flex justify-between text-center font-bold text-sm mb-16 px-10">
+                        <div>
+                            <p>1st Written Warning</p>
+                            <p>تحذير مكتوب أول</p>
+                            <div class="border-2 border-black w-32 h-10 mx-auto mt-2 flex items-center justify-center">
+                                <svg x-show="warningLevel === '1'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <p>2nd Written Warning</p>
+                            <p>تحذير مكتوب ثاني</p>
+                            <div class="border-2 border-black w-32 h-10 mx-auto mt-2 flex items-center justify-center">
+                                <svg x-show="warningLevel === '2'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <p>3rd Written Warning</p>
+                            <p>تحذير مكتوب ثالث</p>
+                            <div class="border-2 border-black w-32 h-10 mx-auto mt-2 flex items-center justify-center">
+                                <svg x-show="warningLevel === '3'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Warning Signatures -->
+                    <div class="flex justify-between mt-8 font-bold text-sm">
+                        <div>
+                            <p class="mb-4">Name: Mr. <span x-text="selectedDriver.full_name"></span></p>
+                            <p>Signature:</p>
+                        </div>
+                        <div class="text-right" dir="rtl">
+                            <p class="mb-4">الاسم: السيد/ <span x-text="driverNameAr"></span></p>
+                            <p>التوقيع:</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-8 font-bold text-sm">
+                        <div>
+                            <p class="mb-4">Name: HR.</p>
+                            <p>Signature:</p>
+                        </div>
+                        <div class="text-right" dir="rtl">
+                            <p class="mb-4">الاسم: الموارد البشرية.</p>
+                            <p>التوقيع:</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Penalty Deduction -->
+                <div x-show="docType === 'penalty_deduction'">
+                    <div class="flex justify-between gap-8 text-sm leading-relaxed mb-8">
+                        <div class="w-1/2">
+                            <p class="font-bold mb-2">Dear Mr. <span x-text="selectedDriver.full_name"></span>,</p>
+                            <p>Please note that this letter is a deduction decision to (<span class="underline underline-offset-4 font-semibold" x-text="violationReason || '_______________________'"></span>) indicate your neglect to follow the tasks assigned to you which violates the obligations imposed on you. <span class="font-bold" x-text="deductionAmount || '00.00'"></span> KWD will be deducted from your <span class="underline underline-offset-4 font-semibold" x-text="formattedDateMonth"></span> salary, taking into account not exceeding the legal deduction percentage and the amount will be paid in installments after management Approval.</p>
+                            <br>
+                            <p>Copies of the invoices referred to in this warning have been attached. Kindly review them and take the necessary action in accordance with the approved procedures.</p>
+                        </div>
+                        <div class="w-1/2 text-right" dir="rtl">
+                            <p class="font-bold mb-2">السيد/ <span x-text="driverNameAr"></span>،</p>
+                            <p>يرجى العلم بأن هذا الكتاب هو قرار خصم للإشارة إلى إهمالك اتباع المهام المحدد لك في (<span class="underline underline-offset-4 font-semibold" x-text="violationReasonAr || '_______________________'"></span>) الذي ينتهك الالتزامات المفروضة عليك ، فسيتم خصم <span class="font-bold" x-text="toArabicDigits(deductionAmount || '00.00')"></span> دينار من راتب شهر <span class="underline underline-offset-4 font-semibold" x-text="formattedDateMonthAr"></span> مع مراعاة عدم تجاوز نسبة الخصم القانونية وتقسط المبلغ على دفعات بعد موافقة الإدارة.</p>
+                            <br>
+                            <p>تم إرفاق نسخ من الفواتير المشار إليها ضمن هذا الإنذار، ويرجى منكم الاطلاع عليها واتخاذ ما يلزم وفق الإجراءات المعتمدة.</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mb-2 text-right" dir="rtl" x-text="companyNameAr"></p>
+                    
+                    <!-- Deduction Tables -->
+                    <div class="flex justify-between gap-8 mb-12 text-sm">
+                        <div class="w-1/2">
+                            <table class="w-full border-collapse border border-black">
+                                <tbody>
+                                    <tr><td class="border border-black p-2 h-10 w-2/3 text-center"><span x-text="inst1Month"></span></td><td class="border border-black p-2 text-center font-bold"><span x-text="inst1Amount || '00.00'"></span> KD</td></tr>
+                                    <tr><td class="border border-black p-2 h-10 w-2/3 text-center"><span x-text="inst2Month"></span></td><td class="border border-black p-2 text-center font-bold"><span x-text="inst2Amount || '00.00'"></span> KD</td></tr>
+                                    <tr><td class="border border-black p-2 h-10 w-2/3 text-center"><span x-text="inst3Month"></span></td><td class="border border-black p-2 text-center font-bold"><span x-text="inst3Amount || '00.00'"></span> KD</td></tr>
+                                    <tr><td class="border border-black p-2 h-10 w-2/3 text-center"><span x-text="inst4Month"></span></td><td class="border border-black p-2 text-center font-bold"><span x-text="inst4Amount || '00.00'"></span> KD</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="w-1/2">
+                            <table class="w-full border-collapse border border-black" dir="rtl">
+                                <tbody>
+                                    <tr><td class="border border-black p-2 text-center font-bold w-1/3"><span x-text="toArabicDigits(inst1Amount || '00.00')"></span> د.ك</td><td class="border border-black p-2 h-10 text-center">شهر <span x-text="inst1MonthAr || '________________'"></span></td></tr>
+                                    <tr><td class="border border-black p-2 text-center font-bold w-1/3"><span x-text="toArabicDigits(inst2Amount || '00.00')"></span> د.ك</td><td class="border border-black p-2 h-10 text-center">شهر <span x-text="inst2MonthAr || '________________'"></span></td></tr>
+                                    <tr><td class="border border-black p-2 text-center font-bold w-1/3"><span x-text="toArabicDigits(inst3Amount || '00.00')"></span> د.ك</td><td class="border border-black p-2 h-10 text-center">شهر <span x-text="inst3MonthAr || '________________'"></span></td></tr>
+                                    <tr><td class="border border-black p-2 text-center font-bold w-1/3"><span x-text="toArabicDigits(inst4Amount || '00.00')"></span> د.ك</td><td class="border border-black p-2 h-10 text-center">شهر <span x-text="inst4MonthAr || '________________'"></span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deliver and Pledge / Mobile Receiving -->
+                <div x-show="docType === 'deliver_pledge' || docType === 'mobile_receiving'" class="text-sm">
+                    <div class="flex justify-between items-center mb-6 font-bold">
+                        <div>
+                            <p>the undersigned</p>
+                            <p>I hereby declare that I am:</p>
+                        </div>
+                        <div class="text-right" dir="rtl">
+                            <p>أقر أنا :</p>
+                            <p>الموقع أدناه</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-6 font-bold">
+                        <div>
+                            <p>the undersigned</p>
+                            <p>I hold civil ID number: <span x-text="selectedDriver ? selectedDriver.civil_id : ''"></span></p>
+                        </div>
+                        <div class="text-right" dir="rtl">
+                            <p>احمل بطاقة مدنية رقم : <span x-text="selectedDriver ? selectedDriver.civil_id : ''"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between gap-8 leading-relaxed mb-12">
+                        <div class="w-1/2 text-justify">
+                            <p>I hereby acknowledge that I have received a <span class="font-bold uppercase" x-text="modelDetails || '_______________________'"></span> phone, serial number (<span class="font-bold" x-text="serialNumber || '_______________________'"></span>), phone number (<span class="font-bold" x-text="phoneNumber || '_______________________'"></span>), as a deposit for use in the company's business. I pledge to preserve it and return it to the company upon completion of its purpose or upon leaving my job. In the event that I do not return all or part of the aforementioned deposit, I authorize the company to take the necessary action to deduct the value it estimates for this deposit or to take whatever legal action it deems appropriate regarding it. This is my acknowledgment of this.</p>
+                            <p class="font-bold mt-8">This is my acknowledgment of that.</p>
+                        </div>
+                        <div class="w-1/2 text-right text-justify" dir="rtl">
+                            <p>انى استلمت هاتف (<span class="font-bold uppercase" x-text="modelDetailsAr || '_______________________'"></span>) رقم التسلسل (<span class="font-bold" x-text="toArabicDigits(serialNumber) || '_______________________'"></span>) رقم تليفون (<span class="font-bold" x-text="toArabicDigits(phoneNumber) || '_______________________'"></span>) ذلك كعهده لاستخدامها فى اعمال الشركة و اتعهد بالمحافظة عليها و اعادة تسليمها للشركة لدى انتهاء الغرض من استخدامها او لدى ترك العمل وفى حالة عدم تسليم العهدة المذكورة اعلاه كلها او بعضها فاننى افوض الشركة نحو اتخاذ اللازم نحو خصم القيمة التى تقدرها مقابل هذه العهده أو اتخاذ ما تراه ملائما قانونا بشأنها</p>
+                            <p class="font-bold mt-8">وهذا إقرار مني بذلك,,,</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Deliver Pledge Signature -->
+                    <div class="flex justify-between text-sm">
+                        <div>
+                            <p class="mb-4">Headquarters and its contents:</p>
+                            <p class="mb-4">Name: <span x-text="selectedDriver.full_name"></span></p>
+                            <p>Signature:</p>
+                            <div class="mt-8 flex items-center">
+                                <span>Fingerprint:</span>
+                                <div class="w-24 h-24 border border-black ml-4"></div>
+                            </div>
+                        </div>
+                        <div class="text-right" dir="rtl">
+                            <p class="mb-4">المقر بما فية :</p>
+                            <p class="mb-4"><span x-text="driverNameAr"></span> :الاسم</p>
+                            <p>التوقيع :</p>
+                            <div class="mt-8 flex items-center justify-end">
+                                <div class="w-24 h-24 mr-4"></div>
+                                <span>البصمة :</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acknowledgment of receipt -->
+                <div x-show="docType === 'ack_receipt'" class="text-sm font-bold">
+                    <div class="flex justify-between items-center mb-8">
+                        <div></div>
+                        <div class="text-center">
+                            <h2 class="text-xl">إقرار استلام</h2>
+                            <h2 class="text-xl">Acknowledgment of receipt</h2>
+                        </div>
+                        <div></div>
+                    </div>
+                    
+                    <div class="flex justify-between gap-8 leading-relaxed mb-6">
+                        <div class="w-1/2">
+                            <p>I, <span class="font-bold underline" x-text="selectedDriver ? selectedDriver.full_name : ''"></span> ,</p>
+                            <p>the undersigned, declare that,</p>
+                            <p>Civil ID No: <span class="font-bold" x-text="selectedDriver ? selectedDriver.civil_id : ''"></span></p>
+                            <p>That I have received from: <span class="font-bold" x-text="companyName"></span> Company for delivering consumer orders.</p>
+                        </div>
+                        <div class="w-1/2 text-right" dir="rtl">
+                            <p>أقر أنا/ <span class="font-bold underline" x-text="driverNameAr"></span></p>
+                            <p>الموقع أدناه ،</p>
+                            <p>بطاقة مدنية رقم : <span class="font-bold" x-text="toArabicDigits(selectedDriver ? selectedDriver.civil_id : '')"></span></p>
+                            <p>بأنني قد إستلمت من : السادة / <span class="font-bold" x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full mb-6">
+                        <table class="w-full border-collapse border border-black">
+                            <tbody>
+                                <tr>
+                                    <td class="border border-black p-2 font-bold w-1/4 text-sm">Car/Vehicle</td>
+                                    <td class="border border-black p-2 text-center font-bold w-1/4 text-sm"><span x-text="carType"></span></td>
+                                    <td class="border border-black p-2 text-center font-bold w-1/4 text-sm" dir="rtl"><span x-text="carTypeAr"></span></td>
+                                    <td class="border border-black p-2 text-right font-bold w-1/4 text-sm" dir="rtl">السيارة</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-2 font-bold text-sm">Model</td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm"><span x-text="modelDetails || '_______________'"></span></td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span x-text="modelDetailsAr || '_______________'"></span></td>
+                                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">موديل</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-2 font-bold text-sm">Plate number</td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm"><span x-text="plateNumber"></span></td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span x-text="toArabicDigits(plateNumber)"></span></td>
+                                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">رقم اللوحة</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-2 font-bold text-sm">Car/Vehicle Registration Book</td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm"><span x-text="carRegistration || 'Yes / نعم'"></span></td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span x-text="carRegistration || 'Yes / نعم'"></span></td>
+                                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">دفتر السيارة</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-2 font-bold text-sm">Advertising Car/Vehicle license</td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm"><span x-text="advertisingLicense || 'Yes / نعم'"></span></td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span x-text="advertisingLicense || 'Yes / نعم'"></span></td>
+                                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">رخصة إعلان السيارة</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-2 font-bold text-sm">Municipality Car/Vehicle permit</td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm"><span x-text="municipalityPermit || 'Yes / نعم'"></span></td>
+                                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span x-text="municipalityPermit || 'Yes / نعم'"></span></td>
+                                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">تصريح البلدية السيارة</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium">
+                        <div class="w-1/2">
+                            <p>As of <span class="font-bold" x-text="formattedDate"></span>, I am fully responsible for them, and in the event of any damage or loss, I bear full legal responsibility.</p>
+                            <div class="mt-8 font-bold">
+                                <p class="mb-4">Name:</p>
+                                <p>Signature:</p>
+                            </div>
+                        </div>
+                        <div class="w-1/2 text-right" dir="rtl">
+                            <p>إعتباراً من تاريخ <span class="font-bold" x-text="formattedDateAr"></span> اصبحت مسئول عنهم مسئولية كامله و فى حالة اى تلف أو فقدانهم اتحمل كافة المسئولية القانونيه كاملا .</p>
+                            <div class="mt-8 font-bold">
+                                <p class="mb-4">الاسم:</p>
+                                <p>التوقيع :</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-12 font-bold">
+                        <p class="text-lg">المفوض بالتوقيع</p>
+                        <p class="text-lg">Authorized signatory</p>
+                    </div>
+                </div>
+
+                <!-- Car Receipt Acknowledgment -->
+                <div x-show="docType === 'car_receipt'" class="text-sm">
+                    <div class="text-center mb-6">
+                        <h2 class="font-bold text-xl">إقرار استلام سيارة</h2>
+                        <h2 class="font-bold text-xl">Vehicle Receipt Acknowledgment</h2>
+                    </div>
+                    
+                    <div class="flex justify-between gap-8 leading-relaxed mb-4">
+                        <div class="w-1/2">
+                            <p class="font-bold">I, <span class="underline" x-text="selectedDriver ? selectedDriver.full_name : ''"></span>, the undersigned,</p>
+                            <p class="font-bold">nationality <span class="underline px-2" x-text="nationality"></span> , holding Civil ID No. ( <span x-text="selectedDriver ? selectedDriver.civil_id : ''"></span> ), declare that I have received from Messrs. <span x-text="companyName"></span> Company for delivering consumer orders, the vehicle shown in the table below:</p>
+                        </div>
+                        <div class="w-1/2 text-right" dir="rtl">
+                            <p class="font-bold">أقر أنا/ <span class="underline" x-text="driverNameAr"></span> .. الموقع أدناه،</p>
+                            <p class="font-bold">.. الجنسية <span class="underline px-2" x-text="nationalityAr"></span> ، أحمل بطاقة مدنية رقم ( <span x-text="toArabicDigits(selectedDriver ? selectedDriver.civil_id : '')"></span> ) بأنني قد استلمت من السادة / <span x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية، سيارة المبين بالجدول أدناه:</p>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full mb-4">
+                        <table class="w-full border-collapse border border-black text-sm">
+                            <tbody>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                                    <td class="border border-black p-1 font-bold">Car/Vehicle type :</td>
+                                    <td class="border border-black p-1 text-center font-bold w-1/3" colspan="2"><span x-text="carType"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">نوع سيارة :</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                                    <td class="border border-black p-1 font-bold">Model :</td>
+                                    <td class="border border-black p-1 text-center" colspan="2"><span x-text="modelDetails || '_________________'"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">موديل :</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                                    <td class="border border-black p-1 font-bold">Metal plate number :</td>
+                                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span x-text="plateNumber"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">رقم اللوحات المعدنية :</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                                    <td class="border border-black p-1 font-bold">Chassis number :</td>
+                                    <td class="border border-black p-1 text-center" colspan="2"><span x-text="chassisNumber || '_________________'"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">رقم الشاصي :</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex justify-between mb-1 text-sm font-bold">
+                        <div>Notes about the Car/Vehicle:</div>
+                        <div dir="rtl">ملاحظات عن السيارة:</div>
+                    </div>
+                    
+                    <div class="w-full mb-4">
+                        <table class="w-full border-collapse border border-black text-sm">
+                            <tbody>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                                    <td class="border border-black p-1 font-bold w-1/4">Car/Vehicle body damage</td>
+                                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span x-text="carBodyDamage || 'Nothing / لا يوجد'"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold w-1/4" dir="rtl">تلفيات بالجسم الخارجي سيارة</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                                    <td class="border border-black p-1 font-bold">Car/Vehicle tire damage</td>
+                                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span x-text="carTireDamage || 'Nothing / لا يوجد'"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">تلفيات بإطارات سيارة</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                                    <td class="border border-black p-1 font-bold leading-tight">Car/Vehicle accessories (spare tire -<br>tire key - Car/Vehicle license)</td>
+                                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span x-text="carAccessories || 'مفتاح احتياطي - إطار احتياطي - رخصة سيارة'"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">ملحقات سيارة(إطار احتياطي - مفتاح<br>إطارات - رخصة سيارة)</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                                    <td class="border border-black p-1 font-bold">Other damages</td>
+                                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span x-text="otherDamages"></span></td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">تلفيات أخرى</td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black p-1 text-center font-bold w-8">5</td>
+                                    <td class="border border-black p-1 font-bold">
+                                        Other notes.<br><br>Fuel Card
+                                    </td>
+                                    <td class="border border-black p-1 text-center font-bold" colspan="2">
+                                        <div class="mb-4"><span x-text="otherNotes"></span></div>
+                                        <div><span x-text="fuelCard"></span></div>
+                                    </td>
+                                    <td class="border border-black p-1 text-right font-bold" dir="rtl">
+                                        ملاحظات أخرى.<br><br>كرت بنزين
+                                    </td>
+                                    <td class="border border-black p-1 text-center font-bold w-8">5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex border border-black p-2 gap-4 text-xs leading-relaxed text-justify">
+                        <div class="w-1/2">
+                            As of <span class="font-bold" x-text="formattedDate"></span>, I acknowledge that the use of the entrusted goods is limited to delivering consumer orders within the scope of the business. I also acknowledge that I am fully responsible for any damages that may occur to them as a result of any accidents or defects in use, whatever they may be. I also acknowledge, irrevocably, that I am solely responsible to the company or any third party, whether a natural or legal person, for any traffic violations, damages, or accidents that occur while the goods are in my custody. I also bear civil and criminal liability for the use of the goods to the company or any third party, and I am a guarantor to the company in the event that a third party claims against it for civil and criminal
+                        </div>
+                        <div class="w-1/2" dir="rtl">
+                            إعتباراً من تاريخ <span class="font-bold" x-text="formattedDateAr"></span> ، أقر ان اقتصر استخدام العهدة في العمل عليها لتوصيل الطلبات الاستهلاكية محل نشاط <span x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية، كما أقر أنني أصبحت مسئولاً مسئولية كاملة سيارة عن أي تلفيات تلحق بها سيارة نتيجة أي حوادث أو عيوب إستخدام أياً كانت ، كما أنني اقر اقرار لا يقبل الرجوع فيه انني أصبحت مسئولاً وحدي في مواجهة الشركة او الغير سواء كان الغير شخص طبيعي او اعتباري عن أي مخالفات مرورية أو أضرار أو حوادث، خلال وجودها سيارة فى ، كما انني اتحمل المسئولية المدنية والجنائية عن الاستخدام في مواجهة الشركة او الغير وانني ضامن للشركة في حالة رجوع الغير عليها عن المسئولية المدنية والجزائية
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>

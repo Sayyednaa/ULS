@@ -511,19 +511,26 @@
                 {% endif %}
 
 
-                <!-- ACCOUNTANT: Forms -->
-                {% if is_accountant or is_superadmin %}
+                <!-- FORMS -->
+                {% if is_accountant or is_admin or is_manager or is_superadmin %}
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Forms')"></p>
+                {% if is_accountant or is_superadmin %}
                 <a href="{% url 'accountant_driver_add' %}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'driver-add' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>📝</span> <span x-text="t('Driver Info Form')"></span>
                 </a>
+                {% endif %}
+                <a href="{% url 'operation_documents' %}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'operation-documents' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
+                    <span>📄</span> <span x-text="t('Operation Documents')"></span>
+                </a>
+                {% endif %}
 
                 <!-- ACCOUNTANT: Department -->
+                {% if is_accountant or is_superadmin %}
                 <p class="px-3 pt-5 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest"
                     x-text="t('Accountant Department')"></p>
-                {% if is_accountant or is_superadmin %}
                 <a href="{% url 'admin_deductions' %}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'deductions' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🧾</span> <span x-text="t('Deduction Invoices')"></span>
@@ -532,7 +539,6 @@
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'pending-dues' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>⏳</span> <span x-text="t('Pending Dues')"></span>
                 </a>
-                {% endif %}
                 <a href="{% url 'accountant_talabat' %}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 {% if 'talabat' in request.path %}bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500{% else %}text-app-text-muted hover:text-app-text hover:bg-black/5 dark:hover:bg-white/5{% endif %}">
                     <span>🍔</span> <span x-text="t('Talabat')"></span>

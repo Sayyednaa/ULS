@@ -65,3 +65,34 @@ def check_and_notify_expiries(user):
                     title=title,
                     is_read=False
                 ).delete()
+
+def check_operation_documents_expiries(user):
+    from core.models import OperationDocumentHistory, Notification
+    from datetime import date
+    
+    today = date.today()
+    
+    # Get all operation documents created by this user that are due and haven't been notified yet
+    expired_docs = OperationDocumentHistory.objects.filter(
+        creator=user,
+        due_date__lte=today,
+        is_expired_notification_sent=False
+    )
+    
+    for doc in expired_docs:
+        doc_type_display = doc.get_doc_type_display()
+        driver_name = doc.driver.full_name
+        title = f"Document Expired: {doc_type_display}"
+        body = f"The {doc_type_display} document for driver {driver_name} has expired."
+        
+        Notification.objects.create(
+            user=user,
+            title=title,
+            body=body,
+            type='document_expiry',
+            related_driver=doc.driver
+        )
+        
+        # Mark as sent
+        doc.is_expired_notification_sent = True
+        doc.save()

@@ -1,0 +1,111 @@
+{% extends "shared/print_layout.html" %}
+
+{% block document_content %}
+<div class="text-sm font-bold">
+    <div class="flex justify-between items-center mb-8">
+        <div></div>
+        <div class="text-center">
+            <h2 class="text-xl">إقرار استلام</h2>
+            <h2 class="text-xl">Acknowledgment of receipt</h2>
+        </div>
+        <div></div>
+    </div>
+    
+    <div class="flex justify-between gap-8 leading-relaxed mb-6">
+        <div class="w-1/2">
+            <p>I, <span class="font-bold underline">{{ driver.full_name }}</span> ,</p>
+            <p>the undersigned, declare that,</p>
+            <p>Civil ID No: <span class="font-bold">{{ driver.civil_id_number }}</span></p>
+            <p>That I have received from: <span class="font-bold">{{ company_name }}</span> Company for delivering consumer orders.</p>
+        </div>
+        <div class="w-1/2 text-right" dir="rtl">
+            <p>أقر أنا/ <span class="font-bold underline">{{ driver_name_ar }}</span></p>
+            <p>الموقع أدناه ،</p>
+            <p>بطاقة مدنية رقم : <span class="font-bold">{{ civil_id_ar }}</span></p>
+            <p>بأنني قد إستلمت من : السادة / <span class="font-bold">{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية.</p>
+        </div>
+    </div>
+    
+    <div class="w-full mb-6">
+        <table class="w-full border-collapse border border-black">
+            <tbody>
+                <tr>
+                    <td class="border border-black p-2 font-bold w-1/4 text-sm">Car/Vehicle</td>
+                    <td class="border border-black p-2 text-center font-bold w-1/4 text-sm"><span>{{ data.car_type }}</span></td>
+                    <td class="border border-black p-2 text-center font-bold w-1/4 text-sm" dir="rtl"><span>{{ data.car_type_ar }}</span></td>
+                    <td class="border border-black p-2 text-right font-bold w-1/4 text-sm" dir="rtl">السيارة</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-2 font-bold text-sm">Model</td>
+                    <td class="border border-black p-2 text-center font-bold text-sm"><span>{{ data.model_details|default:'_______________' }}</span></td>
+                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span>{{ data.model_details_ar|default:'_______________' }}</span></td>
+                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">موديل</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-2 font-bold text-sm">Plate number</td>
+                    <td class="border border-black p-2 text-center font-bold text-sm"><span>{{ data.plate_number }}</span></td>
+                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span>{{ plate_number_ar }}</span></td>
+                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">رقم اللوحة</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-2 font-bold text-sm">Car/Vehicle Registration Book</td>
+                    <td class="border border-black p-2 text-center font-bold text-sm"><span>{{ data.car_registration|default:'Yes / نعم' }}</span></td>
+                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span>{{ data.car_registration|default:'Yes / نعم' }}</span></td>
+                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">دفتر السيارة</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-2 font-bold text-sm">Advertising Car/Vehicle license</td>
+                    <td class="border border-black p-2 text-center font-bold text-sm"><span>{{ data.advertising_license|default:'Yes / نعم' }}</span></td>
+                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span>{{ data.advertising_license|default:'Yes / نعم' }}</span></td>
+                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">رخصة إعلان السيارة</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-2 font-bold text-sm">Municipality Car/Vehicle permit</td>
+                    <td class="border border-black p-2 text-center font-bold text-sm"><span>{{ data.municipality_permit|default:'Yes / نعم' }}</span></td>
+                    <td class="border border-black p-2 text-center font-bold text-sm" dir="rtl"><span>{{ data.municipality_permit|default:'Yes / نعم' }}</span></td>
+                    <td class="border border-black p-2 text-right font-bold text-sm" dir="rtl">تصريح البلدية السيارة</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium bg-gray-50 p-6 rounded-lg border border-gray-200 no-print">
+        <div class="w-1/2">
+            <p>As of <span class="font-bold">{{ date_en }}</span>, I am fully responsible for them, and in the event of any damage or loss, I bear full legal responsibility.</p>
+            <div class="mt-8 font-bold">
+                <p class="mb-4">Name:</p>
+                <p>Signature:</p>
+            </div>
+        </div>
+        <div class="w-1/2 text-right" dir="rtl">
+            <p>إعتباراً من تاريخ <span class="font-bold">{{ date_ar }}</span> اصبحت مسئول عنهم مسئولية كامله و فى حالة اى تلف أو فقدانهم اتحمل كافة المسئولية القانونيه كاملا .</p>
+            <div class="mt-8 font-bold">
+                <p class="mb-4">الاسم:</p>
+                <p>التوقيع :</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium border border-black p-6 print-only" style="display: none;">
+        <div class="w-1/2">
+            <p>As of <span class="font-bold">{{ date_en }}</span>, I am fully responsible for them, and in the event of any damage or loss, I bear full legal responsibility.</p>
+            <div class="mt-8 font-bold">
+                <p class="mb-4">Name:</p>
+                <p>Signature:</p>
+            </div>
+        </div>
+        <div class="w-1/2 text-right" dir="rtl">
+            <p>إعتباراً من تاريخ <span class="font-bold">{{ date_ar }}</span> اصبحت مسئول عنهم مسئولية كامله و فى حالة اى تلف أو فقدانهم اتحمل كافة المسئولية القانونيه كاملا .</p>
+            <div class="mt-8 font-bold">
+                <p class="mb-4">الاسم:</p>
+                <p>التوقيع :</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-12 font-bold">
+        <p class="text-lg">المفوض بالتوقيع</p>
+        <p class="text-lg">Authorized signatory</p>
+    </div>
+</div>
+{% endblock %}

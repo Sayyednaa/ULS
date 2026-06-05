@@ -599,3 +599,183 @@ class DriverReceivingsDeleteView(StaffRequiredMixin, CompanyDataMixin, View):
         django_messages.success(request, f'Deleted {name} receiving for {driver_name}.')
         return redirect('driver_receivings')
 
+class OperationDocumentsView(StaffRequiredMixin, CompanyDataMixin, View):
+    def get(self, request):
+        drivers = self.get_queryset_by_company(Driver).filter(is_active=True).order_by('full_name')
+        
+        drivers_data = []
+        for d in drivers:
+            company_display = dict(COMPANY_CHOICES).get(d.company_name, d.company_name) if d.company_name else ''
+            drivers_data.append({
+                'id': str(d.id),
+                'full_name': d.full_name,
+                'company_name': company_display,
+                'civil_id': d.civil_id_number,
+                'designation': d.position or 'Car Driver',
+                'vehicle_name': d.vehicle_name,
+                'vehicle_plate_number': d.vehicle_plate_number,
+                'phone': d.phone,
+            })
+            
+        from core.models import OperationDocumentHistory
+        history_records = self.get_queryset_by_company(OperationDocumentHistory).order_by('-created_at')[:20]
+        
+        initial_data = None
+        history_id = request.GET.get('history_id')
+        if history_id:
+            try:
+                record = self.get_queryset_by_company(OperationDocumentHistory).get(id=history_id)
+                initial_data = record.content_data
+            except OperationDocumentHistory.DoesNotExist:
+                pass
+        
+        import json
+        return render(request, 'shared/operation_documents.html', {
+            'drivers_json': json.dumps(drivers_data),
+            'drivers': drivers,
+            'history_records': history_records,
+            'initial_data_json': json.dumps(initial_data) if initial_data else 'null',
+            'viewing_history': bool(initial_data)
+        })
+
+
+class SaveOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
+    def post(self, request):
+        import json
+        from django.http import JsonResponse
+        from core.models import Driver, OperationDocumentHistory
+        
+        try:
+            data = json.loads(request.body)
+            driver_id = data.get('driver_id')
+            doc_type = data.get('doc_type') or data.get('docType')
+            due_date = data.get('due_date') or data.get('dueDate')
+            
+            if not driver_id or not doc_type:
+                return JsonResponse({'error': 'Missing driver or document type'}, status=400)
+                
+            driver = self.get_queryset_by_company(Driver).get(id=driver_id)
+            
+            # Format due date if provided
+            parsed_due_date = None
+            if due_date:
+                try:
+                    from datetime import datetime
+                    parsed_due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+                except ValueError:
+                    pass
+            
+            # Save history
+            OperationDocumentHistory.objects.create(
+                creator=request.user,
+                driver=driver,
+                doc_type=doc_type,
+                due_date=parsed_due_date,
+                content_data=data,
+                company=driver.company
+            )
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+class PrintOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
+    def get(self, request):
+        history_id = request.GET.get('history_id')
+        if not history_id:
+            return redirect('operation_documents')
+            
+        from core.models import OperationDocumentHistory, Driver, COMPANY_CHOICES
+        try:
+            record = self.get_queryset_by_company(OperationDocumentHistory).get(id=history_id)
+        except OperationDocumentHistory.DoesNotExist:
+            return redirect('operation_documents')
+            
+        import json
+        
+        from django.utils import timezone
+        from core.models import SystemSettings
+        
+        driver = None
+        if record.driver:
+            driver = record.driver
+            
+        data = record.content_data or {}
+        
+        # Helper to convert English digits to Arabic digits
+        def to_arabic_digits(text):
+            if not text:
+                return ''
+            text = str(text)
+            arabic_digits = {'0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'}
+            for eng, ar in arabic_digits.items():
+                text = text.replace(eng, ar)
+            return text
+            
+        # Format dates for templates
+        date_en = record.created_at.strftime('%Y-%m-%d')
+        date_ar = to_arabic_digits(date_en)
+        date_month_en = record.created_at.strftime('%B %Y')
+        date_month_ar = to_arabic_digits(date_month_en)
+        
+        # Get Arabic company name and logo
+        company_name = dict(COMPANY_CHOICES).get(record.company.name if record.company else '', data.get('company_name', ''))
+        company_name_ar = data.get('company_name_ar', '')
+        
+        company_logo_url = None
+        if record.company and record.company.logo:
+            company_logo_url = record.company.logo.url
+        else:
+            system_settings = SystemSettings.objects.first()
+            if system_settings and system_settings.logo:
+                company_logo_url = system_settings.logo.url
+        
+        context = {
+            'record': record,
+            'driver': driver,
+            'data': data,
+            'auto_print': request.GET.get('print', 'true') == 'true',
+            'date_en': data.get('formatted_date') or date_en,
+            'date_ar': data.get('formatted_date_ar') or date_ar,
+            'date_month_en': data.get('formatted_date_month') or date_month_en,
+            'date_month_ar': data.get('formatted_date_month_ar') or date_month_ar,
+            'company_name': data.get('company_name') or company_name,
+            'company_name_ar': data.get('company_name_ar') or company_name_ar,
+            'company_logo_url': company_logo_url,
+            'driver_name_ar': data.get('driver_name_ar', ''),
+            'civil_id_ar': to_arabic_digits(data.get('civil_id_number_ar', driver.civil_id_number if driver else '')),
+            'deduction_amount_ar': to_arabic_digits(data.get('deduction_amount', '00.00')),
+            'inst1_amount_ar': to_arabic_digits(data.get('inst1_amount', '00.00')),
+            'inst2_amount_ar': to_arabic_digits(data.get('inst2_amount', '00.00')),
+            'inst3_amount_ar': to_arabic_digits(data.get('inst3_amount', '00.00')),
+            'inst4_amount_ar': to_arabic_digits(data.get('inst4_amount', '00.00')),
+            'serial_number_ar': to_arabic_digits(data.get('serial_number', '')),
+            'phone_number_ar': to_arabic_digits(data.get('phone_number', '')),
+            'plate_number_ar': to_arabic_digits(data.get('plate_number', '')),
+        }
+        
+        template_map = {
+            'warning_letter': 'shared/print/warning_letter.html',
+            'penalty_deduction': 'shared/print/penalty_deduction.html',
+            'deliver_pledge': 'shared/print/deliver_pledge.html',
+            'mobile_receiving': 'shared/print/deliver_pledge.html',
+            'ack_receipt': 'shared/print/ack_receipt.html',
+            'car_receipt': 'shared/print/car_receipt.html',
+        }
+        
+        template_name = template_map.get(record.doc_type, 'shared/print_layout.html')
+            
+        return render(request, template_name, context)
+
+class DeleteOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
+    def post(self, request, pk):
+        from core.models import OperationDocumentHistory
+        record = get_object_or_404(self.get_queryset_by_company(OperationDocumentHistory), pk=pk)
+        
+        # Optionally restrict employees to only delete their own records
+        if request.user.role == 'employee' and record.creator != request.user:
+            return redirect('access_denied')
+            
+        record.delete()
+        django_messages.success(request, 'Document record deleted successfully.')
+        return redirect('operation_documents')

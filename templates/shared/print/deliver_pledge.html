@@ -1,0 +1,83 @@
+{% extends "shared/print_layout.html" %}
+
+{% block document_content %}
+<h2 class="text-center font-bold text-xl mb-1">إقرار وتعهد باستلام عهدة</h2>
+<h2 class="text-center font-bold text-xl mb-6">Delivery and Pledge Acknowledgment</h2>
+<div class="text-sm">
+    <div class="flex justify-between items-center mb-6 font-bold">
+        <div>
+            <p>the undersigned</p>
+            <p>I hereby declare that I am:</p>
+        </div>
+        <div class="text-right" dir="rtl">
+            <p>أقر أنا :</p>
+            <p>الموقع أدناه</p>
+        </div>
+    </div>
+    
+    <div class="flex justify-between items-center mb-6 font-bold">
+        <div>
+            <p>the undersigned</p>
+            <p>I hold civil ID number: <span>{{ driver.civil_id_number }}</span></p>
+        </div>
+        <div class="text-right" dir="rtl">
+            <p>احمل بطاقة مدنية رقم : <span>{{ civil_id_ar }}</span></p>
+        </div>
+    </div>
+    
+    <div class="flex justify-between gap-8 leading-relaxed mb-12">
+        <div class="w-1/2 text-justify">
+            <p>I hereby acknowledge that I have received a <span class="font-bold uppercase">{{ data.model_details|default:'_______________________' }}</span> phone, serial number (<span class="font-bold">{{ data.serial_number|default:'_______________________' }}</span>), phone number (<span class="font-bold">{{ data.phone_number|default:'_______________________' }}</span>), as a deposit for use in the company's business. I pledge to preserve it and return it to the company upon completion of its purpose or upon leaving my job. In the event that I do not return all or part of the aforementioned deposit, I authorize the company to take the necessary action to deduct the value it estimates for this deposit or to take whatever legal action it deems appropriate regarding it. This is my acknowledgment of this.</p>
+            <p class="font-bold mt-8">This is my acknowledgment of that.</p>
+        </div>
+        <div class="w-1/2 text-right text-justify" dir="rtl">
+            <p>انى استلمت هاتف (<span class="font-bold uppercase">{{ data.model_details_ar|default:'_______________________' }}</span>) رقم التسلسل (<span class="font-bold">{{ serial_number_ar|default:'_______________________' }}</span>) رقم تليفون (<span class="font-bold">{{ phone_number_ar|default:'_______________________' }}</span>) ذلك كعهده لاستخدامها فى اعمال الشركة و اتعهد بالمحافظة عليها و اعادة تسليمها للشركة لدى انتهاء الغرض من استخدامها او لدى ترك العمل وفى حالة عدم تسليم العهدة المذكورة اعلاه كلها او بعضها فاننى افوض الشركة نحو اتخاذ اللازم نحو خصم القيمة التى تقدرها مقابل هذه العهده أو اتخاذ ما تراه ملائما قانونا بشأنها</p>
+            <p class="font-bold mt-8">وهذا إقرار مني بذلك,,,</p>
+        </div>
+    </div>
+    
+    <!-- Deliver Pledge Signature -->
+    <div class="flex justify-between text-sm mt-12 bg-gray-50 border border-gray-200 p-6 rounded-lg no-print">
+        <div>
+            <p class="mb-4 font-bold text-gray-500">Headquarters and its contents:</p>
+            <p class="mb-4"><span class="font-bold">Name:</span> <span>{{ driver.full_name }}</span></p>
+            <p><span class="font-bold">Signature:</span> _____________________</p>
+            <div class="mt-8 flex items-center">
+                <span class="font-bold text-gray-500 mr-4">Fingerprint:</span>
+                <div class="w-24 h-24 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center text-gray-300">Place here</div>
+            </div>
+        </div>
+        <div class="text-right" dir="rtl">
+            <p class="mb-4 font-bold text-gray-500">المقر بما فية :</p>
+            <p class="mb-4"><span>{{ driver_name_ar }}</span> <span class="font-bold">:الاسم</span></p>
+            <p>_____________________ <span class="font-bold">:التوقيع</span></p>
+            <div class="mt-8 flex items-center justify-end">
+                <div class="w-24 h-24 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center text-gray-300 ml-4">ضع بصمتك هنا</div>
+                <span class="font-bold text-gray-500">البصمة :</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Print specific signature box -->
+    <div class="flex justify-between text-sm mt-12 border border-black p-6 print-only" style="display: none;">
+        <div>
+            <p class="mb-4 font-bold">Headquarters and its contents:</p>
+            <p class="mb-4"><span class="font-bold">Name:</span> <span>{{ driver.full_name }}</span></p>
+            <p><span class="font-bold">Signature:</span> _____________________</p>
+            <div class="mt-8 flex items-center">
+                <span class="font-bold mr-4">Fingerprint:</span>
+                <div class="w-24 h-24 border border-black"></div>
+            </div>
+        </div>
+        <div class="text-right" dir="rtl">
+            <p class="mb-4 font-bold">المقر بما فية :</p>
+            <p class="mb-4"><span>{{ driver_name_ar }}</span> <span class="font-bold">:الاسم</span></p>
+            <p>_____________________ <span class="font-bold">:التوقيع</span></p>
+            <div class="mt-8 flex items-center justify-end">
+                <div class="w-24 h-24 border border-black ml-4"></div>
+                <span class="font-bold">البصمة :</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

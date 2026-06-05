@@ -1,0 +1,556 @@
+{% extends 'base.html' %}
+{% load static translation_tags %}
+
+{% block title %}Operation Documents | {{ brand_name }}{% endblock %}
+{% block page_title %}Operation Documents{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+        <h1 class="text-2xl font-bold uppercase tracking-tight text-app-text" x-text="t('OPERATION DOCUMENTS')"></h1>
+        <p class="text-sm text-app-text-muted" x-text="t('Generate and print official operation forms and documents for drivers.')"></p>
+    </div>
+</div>
+
+<div x-data="documentGenerator()" class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+    <!-- Sidebar: Document Settings -->
+    <div class="xl:col-span-1 space-y-6">
+        <div class="bg-white dark:bg-[#15151e] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+            <!-- Decorative gradient accent -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#f97316] to-[#fbcfe8]"></div>
+            
+            <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white" x-text="t('Document Settings')"></h3>
+            
+            <!-- Select Driver -->
+            <div class="mb-5 relative group">
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="t('Select Driver')"></label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                    <input type="text" x-model="searchQuery" @focus="dropdownOpen = true" @click.away="dropdownOpen = false" class="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm" :placeholder="t('Search drivers...')">
+                </div>
+                
+                <!-- Dropdown List -->
+                <div x-show="dropdownOpen && filteredDrivers.length > 0" x-transition.opacity.duration.200ms class="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a24] border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                    <template x-for="driver in filteredDrivers" :key="driver.id">
+                        <div @click="selectDriver(driver)" class="px-4 py-3 hover:bg-orange-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-50 dark:border-gray-800 last:border-0 transition-colors">
+                            <div class="font-bold text-sm text-gray-800 dark:text-gray-200" x-text="driver.full_name"></div>
+                            <div class="text-xs text-gray-500 mt-0.5" x-text="driver.civil_id"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Document Type -->
+            <div class="mb-5">
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="t('Document Type')"></label>
+                <select x-model="docType" class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm">
+                    <option value="" disabled selected x-text="t('Select Type')"></option>
+                    <option value="car_receipt" x-text="t('Vehicle Receipt Acknowledgement')"></option>
+                    <option value="ack_receipt" x-text="t('Acknowledgment of receipt')"></option>
+                    <option value="mobile_receiving" x-text="t('Mobile Receiving')"></option>
+                    <option value="deliver_pledge" x-text="t('Deliver and pledge')"></option>
+                    <option value="warning_letter" x-text="t('Warning Letter')"></option>
+                    <option value="penalty_deduction" x-text="t('Administrative Penalty Deduction')"></option>
+                </select>
+            </div>
+
+            <!-- Company Name -->
+            <div class="mb-6">
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="t('Company Name')"></label>
+                <input type="text" x-model="companyName" @change="companyNameAr = await translateText(companyName)" class="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand bg-gray-50/50 dark:bg-[#1a1a24] transition-all duration-200 shadow-sm">
+            </div>
+
+            <!-- Save Button -->
+            <button @click="saveDocument" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(249,115,22,0.6)] transform hover:-translate-y-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                <span x-text="t('Save Document')"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content: Settings & Document -->
+    <div class="xl:col-span-3 space-y-6">
+        <!-- Document Details Form -->
+        <div class="bg-white dark:bg-[#15151e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <h3 class="text-lg font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span x-text="t('Fill Document Details')"></span>
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Generic fields for most documents -->
+                <div>
+                    <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('As of Date')"></label>
+                    <input type="date" x-model="docDate" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Duration / Due Date')"></label>
+                    <input type="date" x-model="dueDate" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                </div>
+                
+                <!-- Specific to Deliver Pledge & Mobile Receiving -->
+                <template x-if="docType === 'deliver_pledge' || docType === 'mobile_receiving'">
+                    <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Model / Item Details')"></label>
+                            <input type="text" x-model="modelDetails" @change="modelDetailsAr = await translateText(modelDetails)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Serial Number')"></label>
+                            <input type="text" x-model="serialNumber" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Phone Number')"></label>
+                            <input type="text" x-model="phoneNumber" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Specific to Ack Receipt -->
+                <template x-if="docType === 'ack_receipt'">
+                    <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Type')"></label>
+                            <input type="text" x-model="carType" @change="carTypeAr = await translateText(carType)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Model')"></label>
+                            <input type="text" x-model="modelDetails" @change="modelDetailsAr = await translateText(modelDetails)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Plate Number')"></label>
+                            <input type="text" x-model="plateNumber" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Registration Book')"></label>
+                            <input type="text" x-model="carRegistration" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Yes / نعم">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Advertising Car/Vehicle license')"></label>
+                            <input type="text" x-model="advertisingLicense" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Yes / نعم">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Municipality Car/Vehicle permit')"></label>
+                            <input type="text" x-model="municipalityPermit" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Yes / نعم">
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Specific to Car Receipt -->
+                <template x-if="docType === 'car_receipt'">
+                    <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Nationality')"></label>
+                            <input type="text" x-model="nationality" @change="nationalityAr = await translateText(nationality)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Type')"></label>
+                            <input type="text" x-model="carType" @change="carTypeAr = await translateText(carType)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Model')"></label>
+                            <input type="text" x-model="modelDetails" @change="modelDetailsAr = await translateText(modelDetails)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Plate Number')"></label>
+                            <input type="text" x-model="plateNumber" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Chassis Number')"></label>
+                            <input type="text" x-model="chassisNumber" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Body Damage')"></label>
+                            <input type="text" x-model="carBodyDamage" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Tire Damage')"></label>
+                            <input type="text" x-model="carTireDamage" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Car/Vehicle Accessories')"></label>
+                            <input type="text" x-model="carAccessories" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Other Damages')"></label>
+                            <input type="text" x-model="otherDamages" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Other Notes')"></label>
+                            <input type="text" x-model="otherNotes" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Fuel Card')"></label>
+                            <input type="text" x-model="fuelCard" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                        </div>
+                    </div>
+                </template>
+                
+                <!-- Specific to Warning Letter & Penalty Deduction -->
+                <template x-if="docType === 'warning_letter' || docType === 'penalty_deduction'">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Reason / Violation')"></label>
+                        <textarea x-model="violationReason" @change="violationReasonAr = await translateText(violationReason)" rows="2" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand"></textarea>
+                    </div>
+                </template>
+                
+                <template x-if="docType === 'penalty_deduction'">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Deduction Total Amount')"></label>
+                        <input type="text" x-model="deductionAmount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-4" placeholder="e.g. 50">
+                        
+                        <label class="block text-xs font-bold text-app-text-muted mb-2" x-text="t('Installments')"></label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <input type="text" x-model="inst1Month" @change="inst1MonthAr = await translateText(inst1Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 1">
+                                <input type="text" x-model="inst1Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 1">
+                            </div>
+                            <div>
+                                <input type="text" x-model="inst2Month" @change="inst2MonthAr = await translateText(inst2Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 2">
+                                <input type="text" x-model="inst2Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 2">
+                            </div>
+                            <div>
+                                <input type="text" x-model="inst3Month" @change="inst3MonthAr = await translateText(inst3Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 3">
+                                <input type="text" x-model="inst3Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 3">
+                            </div>
+                            <div>
+                                <input type="text" x-model="inst4Month" @change="inst4MonthAr = await translateText(inst4Month)" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand mb-1" placeholder="Month 4">
+                                <input type="text" x-model="inst4Amount" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand" placeholder="Amount 4">
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                
+                <template x-if="docType === 'warning_letter'">
+                    <div>
+                        <label class="block text-xs font-bold text-app-text-muted mb-1" x-text="t('Warning Level')"></label>
+                        <select x-model="warningLevel" class="w-full px-3 py-2 border border-app-border rounded-xl text-sm focus:ring-2 focus:ring-brand focus:border-brand">
+                            <option value="1">1st Written Warning</option>
+                            <option value="2">2nd Written Warning</option>
+                            <option value="3">3rd Written Warning</option>
+                        </select>
+                    </div>
+                </template>
+                
+            </div>
+            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 dark:bg-[#1a1a24]">
+                            <tr class="text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider">
+                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Date')"></th>
+                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Document Type')"></th>
+                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Driver')"></th>
+                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Creator')"></th>
+                                <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Due Date')"></th>
+                                <th class="p-4 border-b border-gray-200 dark:border-gray-800 text-right" x-text="t('Actions')"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-gray-100 dark:divide-gray-800">
+                            {% for record in history_records %}
+                            <tr class="hover:bg-orange-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                                <td class="p-4 text-gray-600 dark:text-gray-400 font-medium text-xs">{{ record.created_at|date:"Y-m-d H:i" }}</td>
+                                <td class="p-4 font-bold text-gray-900 dark:text-gray-100">{{ record.get_doc_type_display }}</td>
+                                <td class="p-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
+                                            {{ record.driver.full_name|make_list|first }}
+                                        </div>
+                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ record.driver.full_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-gray-600 dark:text-gray-400">{{ record.creator.get_full_name }}</td>
+                                <td class="p-4">
+                                    {% if record.due_date %}
+                                        <span class="px-2.5 py-1 bg-brand/10 text-brand rounded-md text-xs font-bold border border-brand/20">{{ record.due_date|date:"Y-m-d" }}</span>
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 text-right">
+                                    <div class="flex items-center justify-end gap-4">
+                                        <a href="?history_id={{ record.id }}" class="text-brand hover:text-orange-600 font-medium text-xs flex items-center gap-1 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            <span x-text="t('View')"></span>
+                                        </a>
+                                        <a href="{% url 'print_operation_document' %}?history_id={{ record.id }}&print=true" target="_blank" class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium text-xs flex items-center gap-1 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                            <span x-text="t('Print')"></span>
+                                        </a>
+                                        <form action="{% url 'delete_operation_document' record.id %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this document record?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-500 hover:text-red-600 font-medium text-xs flex items-center gap-1 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                <span x-text="t('Delete')"></span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-500 italic">
+                                    <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <span x-text="t('No history records found.')"></span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const driversData = {{ drivers_json|safe }};
+    
+    function documentGenerator() {
+        return {
+            initialData: {{ initial_data_json|safe }},
+            drivers: driversData,
+            searchQuery: '',
+            dropdownOpen: false,
+            selectedDriver: null,
+            
+            docType: 'penalty_deduction',
+            companyName: '',
+            companyNameAr: '',
+            driverNameAr: '',
+            
+            // Document Form Fields
+            docDate: new Date().toISOString().split('T')[0],
+            dueDate: '',
+            modelDetails: '',
+            modelDetailsAr: '',
+            carRegistration: '',
+            advertisingLicense: '',
+            municipalityPermit: '',
+            violationReason: '',
+            violationReasonAr: '',
+            deductionAmount: '',
+            warningLevel: '1',
+            
+            serialNumber: '',
+            phoneNumber: '',
+            
+            carType: '',
+            carTypeAr: '',
+            plateNumber: '',
+            chassisNumber: '',
+            carBodyDamage: '',
+            carTireDamage: '',
+            carAccessories: '',
+            otherDamages: '',
+            otherNotes: '',
+            fuelCard: '',
+            nationality: '',
+            nationalityAr: '',
+            
+            inst1Month: '', inst1MonthAr: '', inst1Amount: '',
+            inst2Month: '', inst2MonthAr: '', inst2Amount: '',
+            inst3Month: '', inst3MonthAr: '', inst3Amount: '',
+            inst4Month: '', inst4MonthAr: '', inst4Amount: '',
+            
+            get filteredDrivers() {
+                if (this.searchQuery === '') return this.drivers;
+                const lowerCaseQuery = this.searchQuery.toLowerCase();
+                return this.drivers.filter(driver => 
+                    driver.full_name.toLowerCase().includes(lowerCaseQuery) ||
+                    driver.civil_id.includes(lowerCaseQuery)
+                );
+            },
+            
+            init() {
+                if (this.initialData) {
+                    const mapping = {
+                        doc_type: 'docType', due_date: 'dueDate', doc_date: 'docDate',
+                        company_name: 'companyName', company_name_ar: 'companyNameAr',
+                        model_details: 'modelDetails', model_details_ar: 'modelDetailsAr',
+                        serial_number: 'serialNumber', phone_number: 'phoneNumber',
+                        car_registration: 'carRegistration', advertising_license: 'advertisingLicense',
+                        municipality_permit: 'municipalityPermit', violation_reason: 'violationReason',
+                        violation_reason_ar: 'violationReasonAr', deduction_amount: 'deductionAmount',
+                        warning_level: 'warningLevel', inst1_month: 'inst1Month', inst1_month_ar: 'inst1MonthAr',
+                        inst1_amount: 'inst1Amount', inst2_month: 'inst2Month', inst2_month_ar: 'inst2MonthAr',
+                        inst2_amount: 'inst2Amount', inst3_month: 'inst3Month', inst3_month_ar: 'inst3MonthAr',
+                        inst3_amount: 'inst3Amount', inst4_month: 'inst4Month', inst4_month_ar: 'inst4MonthAr',
+                        inst4_amount: 'inst4Amount', driver_name_ar: 'driverNameAr'
+                    };
+                    // Pre-fill state from history
+                    for (let key in this.initialData) {
+                        let mappedKey = mapping[key] || key;
+                        if (this.hasOwnProperty(mappedKey)) {
+                            this[mappedKey] = this.initialData[key];
+                        }
+                    }
+                    // Select driver
+                    if (this.initialData.driver_id) {
+                        const drv = this.drivers.find(d => String(d.id) === String(this.initialData.driver_id));
+                        if (drv) {
+                            this.selectedDriver = drv;
+                            this.searchQuery = drv.full_name;
+                        }
+                    }
+                    // Check for print flag
+                    if (new URLSearchParams(window.location.search).get('print') === 'true') {
+                        setTimeout(() => window.print(), 500);
+                    }
+                }
+            },
+            
+            async translateText(text) {
+                if (!text) return '';
+                const dict = {
+                    'sayedna': 'سيدنا',
+                    'talabat': 'طلبات',
+                    'pharma zone': 'فارما زون',
+                    'pharmazone': 'فارمازون',
+                    'burger king': 'برجر كنج',
+                    'burgerking': 'برجر كنج',
+                };
+                if (dict[text.toLowerCase()]) return dict[text.toLowerCase()];
+                
+                try {
+                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ar`);
+                    const data = await res.json();
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        return data.responseData.translatedText;
+                    }
+                    return text;
+                } catch(e) {
+                    return text;
+                }
+            },
+            
+            toArabicDigits(str) {
+                if (!str) return '';
+                const id = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+                return str.toString().replace(/[0-9]/g, function(w){
+                    return id[+w];
+                });
+            },
+            
+            get formattedDate() {
+                if (!this.docDate) return '';
+                const d = new Date(this.docDate);
+                return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            },
+            
+            get formattedDateMonth() {
+                if (!this.docDate) return '';
+                const d = new Date(this.docDate);
+                return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+            },
+            
+            get formattedDateAr() {
+                if (!this.docDate) return '';
+                const d = new Date(this.docDate);
+                const enFormat = d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                return this.toArabicDigits(enFormat);
+            },
+            
+            get formattedDateMonthAr() {
+                if (!this.docDate) return '';
+                const d = new Date(this.docDate);
+                const enFormat = d.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
+                return this.toArabicDigits(enFormat);
+            },
+            
+            async selectDriver(driver) {
+                this.selectedDriver = driver;
+                this.searchQuery = driver.full_name;
+                this.companyName = driver.company_name;
+                this.dropdownOpen = false;
+                
+                // Auto-translate values
+                this.driverNameAr = await this.translateText(driver.full_name);
+                this.companyNameAr = await this.translateText(driver.company_name);
+            },
+            
+            async saveDocument() {
+                if (!this.selectedDriver || !this.docType) {
+                    alert(this.t('Please select a driver and document type'));
+                    return;
+                }
+                this.isSaving = true;
+                
+                // Save document history
+                try {
+                    const payload = {
+                        driver_id: this.selectedDriver.id,
+                        doc_type: this.docType,
+                        due_date: this.dueDate || null,
+                        doc_date: this.docDate,
+                        company_name: this.companyName,
+                        company_name_ar: this.companyNameAr,
+                        model_details: this.modelDetails,
+                        model_details_ar: this.modelDetailsAr,
+                        serial_number: this.serialNumber,
+                        phone_number: this.phoneNumber,
+                        car_registration: this.carRegistration,
+                        advertising_license: this.advertisingLicense,
+                        municipality_permit: this.municipalityPermit,
+                        violation_reason: this.violationReason,
+                        violation_reason_ar: this.violationReasonAr,
+                        deduction_amount: this.deductionAmount,
+                        warning_level: this.warningLevel,
+                        inst1_month: this.inst1Month,
+                        inst1_month_ar: this.inst1MonthAr,
+                        inst1_amount: this.inst1Amount,
+                        inst2_month: this.inst2Month,
+                        inst2_month_ar: this.inst2MonthAr,
+                        inst2_amount: this.inst2Amount,
+                        inst3_month: this.inst3Month,
+                        inst3_month_ar: this.inst3MonthAr,
+                        inst3_amount: this.inst3Amount,
+                        inst4_month: this.inst4Month,
+                        inst4_month_ar: this.inst4MonthAr,
+                        inst4_amount: this.inst4Amount,
+                        driver_name_ar: this.driverNameAr,
+                        car_type: this.carType,
+                        car_type_ar: this.carTypeAr,
+                        plate_number: this.plateNumber,
+                        chassis_number: this.chassisNumber,
+                        car_body_damage: this.carBodyDamage,
+                        car_tire_damage: this.carTireDamage,
+                        car_accessories: this.carAccessories,
+                        other_damages: this.otherDamages,
+                        other_notes: this.otherNotes,
+                        fuel_card: this.fuelCard,
+                        nationality: this.nationality,
+                        nationality_ar: this.nationalityAr
+                    };
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}';
+                    
+                    const response = await fetch("{% url 'save_operation_document' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (response.ok) {
+                        alert(this.t('Document saved successfully!'));
+                        window.location.href = "{% url 'operation_documents' %}";
+                    } else {
+                        try {
+                            const errData = await response.json();
+                            alert(this.t('Failed to save document. Error: ') + (errData.error || response.statusText));
+                        } catch (e) {
+                            alert(this.t('Failed to save document. Status: ') + response.status);
+                        }
+                    }
+                } catch(e) {
+                    console.error('Failed to save document history', e);
+                    alert(this.t('An error occurred while saving.'));
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

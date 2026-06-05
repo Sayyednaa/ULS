@@ -50,4 +50,8 @@ urlpatterns = [
     path('bulk/template/<str:model_type>/', views.TemplateDownloadView.as_view(), name='template_download'),
     path('bulk/upload/<str:model_type>/', views.BulkUploadView.as_view(), name='bulk_upload'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('operation-documents/', views.OperationDocumentsView.as_view(), name='operation_documents'),
+    path('operation-documents/save/', views.SaveOperationDocumentView.as_view(), name='save_operation_document'),
+    path('operation-documents/print/', views.PrintOperationDocumentView.as_view(), name='print_operation_document'),
+    path('operation-documents/<uuid:pk>/delete/', views.DeleteOperationDocumentView.as_view(), name='delete_operation_document'),
 ]

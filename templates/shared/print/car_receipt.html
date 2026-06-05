@@ -1,0 +1,119 @@
+{% extends "shared/print_layout.html" %}
+
+{% block document_content %}
+<div class="text-sm">
+    <div class="text-center mb-6">
+        <h2 class="font-bold text-xl">إقرار استلام سيارة</h2>
+        <h2 class="font-bold text-xl">Vehicle Receipt Acknowledgment</h2>
+    </div>
+    
+    <div class="flex justify-between gap-8 leading-relaxed mb-4">
+        <div class="w-1/2">
+            <p class="font-bold">I, <span class="underline">{{ driver.full_name }}</span>, the undersigned,</p>
+            <p class="font-bold">nationality <span class="underline px-2">{{ data.nationality }}</span> , holding Civil ID No. ( <span>{{ driver.civil_id_number }}</span> ), declare that I have received from Messrs. <span>{{ company_name }}</span> Company for delivering consumer orders, the vehicle shown in the table below:</p>
+        </div>
+        <div class="w-1/2 text-right" dir="rtl">
+            <p class="font-bold">أقر أنا/ <span class="underline">{{ driver_name_ar }}</span> .. الموقع أدناه،</p>
+            <p class="font-bold">.. الجنسية <span class="underline px-2">{{ data.nationality_ar }}</span> ، أحمل بطاقة مدنية رقم ( <span>{{ civil_id_ar }}</span> ) بأنني قد استلمت من السادة / <span>{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية، سيارة المبين بالجدول أدناه:</p>
+        </div>
+    </div>
+    
+    <div class="w-full mb-4">
+        <table class="w-full border-collapse border border-black text-sm">
+            <tbody>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                    <td class="border border-black p-1 font-bold">Car/Vehicle type :</td>
+                    <td class="border border-black p-1 text-center font-bold w-1/3" colspan="2"><span>{{ data.car_type }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">نوع سيارة :</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                    <td class="border border-black p-1 font-bold">Model :</td>
+                    <td class="border border-black p-1 text-center" colspan="2"><span>{{ data.model_details|default:'_________________' }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">موديل :</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                    <td class="border border-black p-1 font-bold">Metal plate number :</td>
+                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span>{{ data.plate_number }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">رقم اللوحات المعدنية :</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                    <td class="border border-black p-1 font-bold">Chassis number :</td>
+                    <td class="border border-black p-1 text-center" colspan="2"><span>{{ data.chassis_number|default:'_________________' }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">رقم الشاصي :</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="flex justify-between mb-1 text-sm font-bold">
+        <div>Notes about the Car/Vehicle:</div>
+        <div dir="rtl">ملاحظات عن السيارة:</div>
+    </div>
+    
+    <div class="w-full mb-4">
+        <table class="w-full border-collapse border border-black text-sm">
+            <tbody>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                    <td class="border border-black p-1 font-bold w-1/4">Car/Vehicle body damage</td>
+                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span>{{ data.car_body_damage|default:'Nothing / لا يوجد' }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold w-1/4" dir="rtl">تلفيات بالجسم الخارجي سيارة</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">1</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                    <td class="border border-black p-1 font-bold">Car/Vehicle tire damage</td>
+                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span>{{ data.car_tire_damage|default:'Nothing / لا يوجد' }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">تلفيات بإطارات سيارة</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">2</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                    <td class="border border-black p-1 font-bold leading-tight">Car/Vehicle accessories (spare tire -<br>tire key - Car/Vehicle license)</td>
+                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span>{{ data.car_accessories|default:'مفتاح احتياطي - إطار احتياطي - رخصة سيارة' }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">ملحقات سيارة(إطار احتياطي - مفتاح<br>إطارات - رخصة سيارة)</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">3</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                    <td class="border border-black p-1 font-bold">Other damages</td>
+                    <td class="border border-black p-1 text-center font-bold" colspan="2"><span>{{ data.other_damages }}</span></td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">تلفيات أخرى</td>
+                    <td class="border border-black p-1 text-center font-bold w-8">4</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 text-center font-bold w-8">5</td>
+                    <td class="border border-black p-1 font-bold">
+                        Other notes.<br><br>Fuel Card
+                    </td>
+                    <td class="border border-black p-1 text-center font-bold" colspan="2">
+                        <div class="mb-4"><span>{{ data.other_notes }}</span></div>
+                        <div><span>{{ data.fuel_card }}</span></div>
+                    </td>
+                    <td class="border border-black p-1 text-right font-bold" dir="rtl">
+                        ملاحظات أخرى.<br><br>كرت بنزين
+                    </td>
+                    <td class="border border-black p-1 text-center font-bold w-8">5</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="flex border border-black p-2 gap-4 text-xs leading-relaxed text-justify">
+        <div class="w-1/2">
+            As of <span class="font-bold">{{ date_en }}</span>, I acknowledge that the use of the entrusted goods is limited to delivering consumer orders within the scope of the business. I also acknowledge that I am fully responsible for any damages that may occur to them as a result of any accidents or defects in use, whatever they may be. I also acknowledge, irrevocably, that I am solely responsible to the company or any third party, whether a natural or legal person, for any traffic violations, damages, or accidents that occur while the goods are in my custody. I also bear civil and criminal liability for the use of the goods to the company or any third party, and I am a guarantor to the company in the event that a third party claims against it for civil and criminal
+        </div>
+        <div class="w-1/2" dir="rtl">
+            إعتباراً من تاريخ <span class="font-bold">{{ date_ar }}</span> ، أقر ان اقتصر استخدام العهدة في العمل عليها لتوصيل الطلبات الاستهلاكية محل نشاط <span>{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية، كما أقر أنني أصبحت مسئولاً مسئولية كاملة سيارة عن أي تلفيات تلحق بها سيارة نتيجة أي حوادث أو عيوب إستخدام أياً كانت ، كما أنني اقر اقرار لا يقبل الرجوع فيه انني أصبحت مسئولاً وحدي في مواجهة الشركة او الغير سواء كان الغير شخص طبيعي او اعتباري عن أي مخالفات مرورية أو أضرار أو حوادث، خلال وجودها سيارة فى ، كما انني اتحمل المسئولية المدنية والجنائية عن الاستخدام في مواجهة الشركة او الغير وانني ضامن للشركة في حالة رجوع الغير عليها عن المسئولية المدنية والجزائية
+        </div>
+    </div>
+</div>
+{% endblock %}

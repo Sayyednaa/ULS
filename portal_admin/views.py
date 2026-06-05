@@ -18,7 +18,7 @@ from core.models import (
     ROLE_CHOICES, COMPANY_CHOICES, CONTRACT_CHOICES, VEHICLE_CHOICES,
 )
 from core.forms import ProfileForm, DriverForm, DeductionForm, DeductionInstallmentForm, TaskAssignmentForm, SystemSettingsForm, CompanyForm
-from core.utils import notify_superadmin_action, check_and_notify_expiries
+from core.utils import notify_superadmin_action, check_and_notify_expiries, check_operation_documents_expiries
 from django.views import View
 
 
@@ -76,6 +76,7 @@ def get_chart_data(company=None, contract_filter=None, driver_id=None):
 class AdminDashboardView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         check_and_notify_expiries(request.user)
+        check_operation_documents_expiries(request.user)
         today = date.today()
         contract_filter = request.GET.get('company', '') # This was 'company' in params but actually meant contract type
         driver_id = request.GET.get('driver_id', '')

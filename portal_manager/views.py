@@ -13,7 +13,7 @@ from core.models import (
     Profile, COMPANY_CHOICES, CONTRACT_CHOICES, VEHICLE_CHOICES,
 )
 from core.forms import DriverForm, DeductionForm, DeductionInstallmentForm, TaskAssignmentForm
-from core.utils import notify_superadmin_action, check_and_notify_expiries
+from core.utils import notify_superadmin_action, check_and_notify_expiries, check_operation_documents_expiries
 from portal_admin.views import (
     DriverAddView, DriverEditView, DriverDeleteView, DriverToggleActiveView, 
     DriverSalarySlipView, MarkInstallmentPaidView, DriverProfilePrintView
@@ -25,6 +25,7 @@ from portal_admin.views import get_chart_data
 class ManagerDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
         check_and_notify_expiries(request.user)
+        check_operation_documents_expiries(request.user)
         today = date.today()
         contract_filter = request.GET.get('company', '') # contract type
         driver_id = request.GET.get('driver_id', '')
