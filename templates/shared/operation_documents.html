@@ -267,33 +267,33 @@
             <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span x-text="t('Recent Document History')"></span>
         </h3>
-        <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+        <div class="overflow-hidden rounded-xl border border-app-border">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-app-bg">
-                        <tr class="text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider">
-                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Date')"></th>
-                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Document Type')"></th>
-                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Driver')"></th>
-                            <th class="p-4 border-b border-gray-200 dark:border-gray-800" x-text="t('Creator')"></th>
-                            <th class="p-4 border-b border-gray-200 dark:border-gray-800 min-w-[120px]" x-text="t('Due Date')"></th>
-                            <th class="p-4 border-b border-gray-200 dark:border-gray-800 text-right" x-text="t('Actions')"></th>
+                        <tr class="text-app-text-muted text-[11px] font-bold uppercase tracking-wider">
+                            <th class="p-4 border-b border-app-border" x-text="t('Date')"></th>
+                            <th class="p-4 border-b border-app-border" x-text="t('Document Type')"></th>
+                            <th class="p-4 border-b border-app-border" x-text="t('Driver')"></th>
+                            <th class="p-4 border-b border-app-border" x-text="t('Creator')"></th>
+                            <th class="p-4 border-b border-app-border min-w-[120px]" x-text="t('Due Date')"></th>
+                            <th class="p-4 border-b border-app-border text-right" x-text="t('Actions')"></th>
                         </tr>
                     </thead>
-                    <tbody class="text-sm divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody class="text-sm divide-y divide-app-border">
                             {% for record in history_records %}
-                            <tr class="hover:bg-brand/5 dark:hover:bg-gray-800/30 transition-colors">
-                                <td class="p-4 text-gray-600 dark:text-gray-400 font-medium text-xs">{{ record.created_at|date:"Y-m-d H:i" }}</td>
-                                <td class="p-4 font-bold text-gray-900 dark:text-gray-100">{{ record.get_doc_type_display }}</td>
+                            <tr class="hover:bg-brand/5 transition-colors">
+                                <td class="p-4 text-app-text-muted font-medium text-xs">{{ record.created_at|date:"Y-m-d H:i" }}</td>
+                                <td class="p-4 font-bold text-app-text">{{ record.get_doc_type_display }}</td>
                                 <td class="p-4">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
+                                        <div class="w-6 h-6 rounded-full bg-app-bg border border-app-border flex items-center justify-center text-[10px] font-bold text-app-text-muted">
                                             {{ record.driver.full_name|make_list|first }}
                                         </div>
-                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ record.driver.full_name }}</span>
+                                        <span class="font-medium text-app-text">{{ record.driver.full_name }}</span>
                                     </div>
                                 </td>
-                                <td class="p-4 text-gray-600 dark:text-gray-400">{{ record.creator.get_full_name }}</td>
+                                <td class="p-4 text-app-text-muted">{{ record.creator.get_full_name }}</td>
                                 <td class="p-4">
                                     {% if record.due_date %}
                                         <span class="px-2.5 py-1 bg-brand/10 text-brand rounded-md text-xs font-bold border border-brand/20">{{ record.due_date|date:"Y-m-d" }}</span>
