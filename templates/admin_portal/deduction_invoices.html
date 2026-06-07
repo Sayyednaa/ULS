@@ -85,6 +85,14 @@
                     <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Contractor {{ app_currency }}')"></label>{{ form.contractor_deduction_kd }}</div>
                     <div><label class="block text-xs font-medium text-app-text-muted mb-1" x-text="t('Company {{ app_currency }}')"></label>{{ form.company_deduction_kd }}</div>
                 </div>
+
+                <div class="flex items-center gap-3 mt-2 mb-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="{{ form.traffic_violation.name }}" id="{{ form.traffic_violation.id_for_label }}" class="sr-only peer" {% if form.traffic_violation.value %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-app-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
+                    </label>
+                    <span class="text-sm font-bold text-app-text" x-text="t('Traffic Violation ?')"></span>
+                </div>
                 <!-- Installment Plan (Premium Switch) -->
                 <div class="p-5 bg-brand/5 border border-brand/20 rounded-2xl" x-data="{ isInstallment: {% if form.is_installment_plan.value %}true{% else %}false{% endif %} }">
                     <div class="flex items-center gap-3 mb-4">
@@ -136,7 +144,12 @@
                                 {% if d.driver %}<span class="text-emerald-500 font-bold">🚗 {{ d.driver.full_name }}</span>{% endif %}
                                 {% if d.employee %}<span class="text-blue-500 font-bold">👤 {{ d.employee.get_full_name }}</span>{% endif %}
                             </td>
-                            <td class="px-4 py-3 text-sm text-app-text-muted max-w-[200px] truncate">{{ d.reason }}</td>
+                            <td class="px-4 py-3 text-sm text-app-text-muted max-w-[200px] truncate">
+                                {{ d.reason }}
+                                {% if d.traffic_violation %}
+                                <span class="text-[10px] bg-red-100 text-red-600 px-1 rounded ml-1" x-text="t('Traffic Violation')"></span>
+                                {% endif %}
+                            </td>
                             <td class="px-4 py-3 text-sm text-app-text-muted">{{ d.get_contracting_company_display }}</td>
                             <td class="px-4 py-3 text-sm text-right text-red-500 font-black">{{ d.contractor_deduction_kd|kwd }}</td>
                             <td class="px-4 py-3 text-sm text-right text-red-500 font-black">{{ d.company_deduction_kd|kwd }}</td>

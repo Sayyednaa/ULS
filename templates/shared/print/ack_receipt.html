@@ -1,28 +1,20 @@
 {% extends "shared/print_layout.html" %}
 
+{% block document_title %}
+<div class="text-center mb-8">
+    <h2 class="font-bold text-xl">إقرار استلام</h2>
+    <h2 class="font-bold text-xl">Acknowledgment of receipt</h2>
+</div>
+{% endblock %}
+
 {% block document_content %}
 <div class="text-sm font-bold">
-    <div class="flex justify-between items-center mb-8">
-        <div></div>
-        <div class="text-center">
-            <h2 class="text-xl">إقرار استلام</h2>
-            <h2 class="text-xl">Acknowledgment of receipt</h2>
-        </div>
-        <div></div>
-    </div>
-    
     <div class="flex justify-between gap-8 leading-relaxed mb-6">
         <div class="w-1/2">
-            <p>I, <span class="font-bold underline">{{ driver.full_name }}</span> ,</p>
-            <p>the undersigned, declare that,</p>
-            <p>Civil ID No: <span class="font-bold">{{ driver.civil_id_number }}</span></p>
-            <p>That I have received from: <span class="font-bold">{{ company_name }}</span> Company for delivering consumer orders.</p>
+            <p>I, the undersigned, declare that I have received from: <span class="font-bold">{{ company_name }}</span> Company for delivering consumer orders.</p>
         </div>
         <div class="w-1/2 text-right" dir="rtl">
-            <p>أقر أنا/ <span class="font-bold underline">{{ driver_name_ar }}</span></p>
-            <p>الموقع أدناه ،</p>
-            <p>بطاقة مدنية رقم : <span class="font-bold">{{ civil_id_ar }}</span></p>
-            <p>بأنني قد إستلمت من : السادة / <span class="font-bold">{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية.</p>
+            <p>أقر أنا الموقع أدناه، بأنني قد إستلمت من: السادة / <span class="font-bold">{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية.</p>
         </div>
     </div>
     
@@ -69,7 +61,7 @@
         </table>
     </div>
     
-    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium bg-gray-50 p-6 rounded-lg border border-gray-200 no-print">
+    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium bg-gray-50 p-6 rounded-lg border border-gray-200 no-print avoid-page-break">
         <div class="w-1/2">
             <p>As of <span class="font-bold">{{ date_en }}</span>, I am fully responsible for them, and in the event of any damage or loss, I bear full legal responsibility.</p>
             <div class="mt-8 font-bold">
@@ -86,7 +78,7 @@
         </div>
     </div>
     
-    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium border border-black p-6 print-only" style="display: none;">
+    <div class="flex justify-between gap-8 leading-relaxed mb-12 font-medium border border-black p-6 print-only avoid-page-break" style="display: none;">
         <div class="w-1/2">
             <p>As of <span class="font-bold">{{ date_en }}</span>, I am fully responsible for them, and in the event of any damage or loss, I bear full legal responsibility.</p>
             <div class="mt-8 font-bold">
@@ -103,7 +95,7 @@
         </div>
     </div>
     
-    <div class="text-center mt-12 font-bold">
+    <div class="text-center mt-12 font-bold avoid-page-break">
         <p class="text-lg">المفوض بالتوقيع</p>
         <p class="text-lg">Authorized signatory</p>
     </div>

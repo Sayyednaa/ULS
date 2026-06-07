@@ -14,6 +14,9 @@ urlpatterns = [
 
     # Archive
     path('archive/', views.ArchiveListView.as_view(), name='archive_list'),
+    path('archive/add/', views.ArchiveAddView.as_view(), name='archive_add'),
+    path('archive/<uuid:pk>/edit/', views.ArchiveEditView.as_view(), name='archive_edit'),
+    path('archive/<uuid:pk>/delete/', views.ArchiveDeleteView.as_view(), name='archive_delete'),
     path('archive/export/', views.ArchiveExportView.as_view(), name='archive_export'),
 
     # Notifications
@@ -21,6 +24,10 @@ urlpatterns = [
     path('notifications/<uuid:pk>/read/', views.NotificationReadView.as_view(), name='notification_read'),
     path('notifications/read-all/', views.NotificationReadAllView.as_view(), name='notification_read_all'),
     path('notifications/clear-all/', views.NotificationClearAllView.as_view(), name='notification_clear_all'),
+
+    # P&L
+    path('pnl/', views.PnLDashboardView.as_view(), name='pnl_dashboard'),
+    path('pnl/expense/add/', views.ExpenseAddView.as_view(), name='expense_add'),
 
     # Messages
     path('messages/', views.MessageInboxView.as_view(), name='message_inbox'),

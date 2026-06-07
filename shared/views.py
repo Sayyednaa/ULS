@@ -274,6 +274,14 @@ class ArchiveListView(StaffRequiredMixin, CompanyDataMixin, View):
         paginator = Paginator(qs, 20)
         page_obj = paginator.get_page(request.GET.get('page'))
 
+        # Fetch drivers for the Add Archive modal
+        drivers = self.get_queryset_by_company(Driver).filter(is_active=True).values('id', 'full_name', 'civil_id_number')
+        drivers_list = list(drivers)
+        for d in drivers_list:
+            d['id'] = str(d['id'])
+            
+        import json
+
         return render(request, 'shared/archive.html', {
             'page_obj': page_obj,
             'q': q,
@@ -282,8 +290,81 @@ class ArchiveListView(StaffRequiredMixin, CompanyDataMixin, View):
             'month': month_str,
             'company_choices': COMPANY_CHOICES,
             'contract_choices': CONTRACT_CHOICES,
+            'drivers_json': json.dumps(drivers_list),
         })
 
+
+class ArchiveAddView(StaffRequiredMixin, CompanyDataMixin, View):
+    def post(self, request):
+        import json
+        from django.http import JsonResponse
+        from core.models import Driver
+        
+        try:
+            data = json.loads(request.body)
+        except:
+            data = {}
+            
+        driver_id = data.get('driver_id')
+        archive_number = data.get('archive_number', '')
+        archive_date = data.get('archive_date')
+        
+        if not driver_id or not archive_date:
+            return JsonResponse({'error': 'Driver and Archive Date are required'}, status=400)
+            
+        try:
+            driver = self.get_queryset_by_company(Driver).get(id=driver_id)
+        except Driver.DoesNotExist:
+            return JsonResponse({'error': 'Driver not found'}, status=404)
+            
+        InvoiceArchive.objects.create(
+            driver=driver,
+            driver_name=driver.full_name,
+            archive_number=archive_number,
+            archive_date=archive_date,
+            cash=0,
+            main_orders=0,
+            additional_orders=0,
+            hours=0,
+            archived_by=request.user
+        )
+        
+        return JsonResponse({'success': True})
+
+class ArchiveEditView(AdminManagerRequiredMixin, CompanyDataMixin, View):
+    def post(self, request, pk):
+        import json
+        from django.http import JsonResponse
+        from core.models import Driver
+        try:
+            data = json.loads(request.body)
+        except:
+            data = {}
+            
+        archive_number = data.get('archive_number', '')
+        archive_date = data.get('archive_date')
+        
+        if not archive_date:
+            return JsonResponse({'error': 'Archive Date is required'}, status=400)
+            
+        try:
+            archive = self.get_queryset_by_company(InvoiceArchive, company_field='driver__company').get(id=pk)
+            archive.archive_number = archive_number
+            archive.archive_date = archive_date
+            archive.save()
+            return JsonResponse({'success': True})
+        except InvoiceArchive.DoesNotExist:
+            return JsonResponse({'error': 'Archive not found'}, status=404)
+
+class ArchiveDeleteView(AdminManagerRequiredMixin, CompanyDataMixin, View):
+    def post(self, request, pk):
+        from django.http import JsonResponse
+        try:
+            archive = self.get_queryset_by_company(InvoiceArchive, company_field='driver__company').get(id=pk)
+            archive.delete()
+            return JsonResponse({'success': True})
+        except InvoiceArchive.DoesNotExist:
+            return JsonResponse({'error': 'Archive not found'}, status=404)
 
 class ArchiveExportView(StaffRequiredMixin, CompanyDataMixin, View):
     def get(self, request):
@@ -675,6 +756,52 @@ class SaveOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
                 company=driver.company
             )
             
+            # Auto-create Deduction if penalty_deduction
+            if doc_type == 'penalty_deduction':
+                from core.models import Deduction, DeductionInstallment
+                from datetime import date
+                deduction_amount = float(data.get('deduction_amount', 0) or 0)
+                if deduction_amount > 0:
+                    doc_date_str = data.get('doc_date')
+                    try:
+                        from datetime import datetime
+                        doc_date = datetime.strptime(doc_date_str, '%Y-%m-%d').date() if doc_date_str else datetime.now().date()
+                    except:
+                        doc_date = date.today()
+                        
+                    is_installment = bool(data.get('is_installment', False))
+                    total_installments = int(data.get('total_installments', 1) or 1) if is_installment else 1
+                    reason = data.get('violation_reason', 'Administrative Penalty Deduction')
+                    
+                    deduction = Deduction.objects.create(
+                        driver=driver,
+                        employee=None,
+                        reason=reason,
+                        deduction_date=doc_date,
+                        contracting_company=driver.contract_type or 'other',
+                        contractor_deduction_kd=0,
+                        company_deduction_kd=deduction_amount,
+                        is_installment_plan=is_installment,
+                        total_installments=total_installments,
+                        traffic_violation=False,
+                        company=driver.company,
+                        submitted_by=request.user
+                    )
+                    
+                    if is_installment and total_installments > 1:
+                        base_amount = deduction_amount / total_installments
+                        for i in range(total_installments):
+                            month = (doc_date.month + i - 1) % 12 + 1
+                            year = doc_date.year + (doc_date.month + i - 1) // 12
+                            actual_due_date = date(year, month, min(doc_date.day, 28))
+                            
+                            DeductionInstallment.objects.create(
+                                deduction=deduction,
+                                amount=base_amount,
+                                due_date=actual_due_date,
+                                status='pending'
+                            )
+            
             return JsonResponse({'success': True, 'history_id': str(history_record.id)})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
@@ -718,17 +845,15 @@ class PrintOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
         date_month_en = record.created_at.strftime('%B %Y')
         date_month_ar = to_arabic_digits(date_month_en)
         
-        # Get Arabic company name and logo
-        company_name = dict(COMPANY_CHOICES).get(record.company.name if record.company else '', data.get('company_name', ''))
+        system_settings = SystemSettings.objects.first()
+        company_name = system_settings.brand_name if system_settings else data.get('company_name', '')
         company_name_ar = data.get('company_name_ar', '')
         
         company_logo_url = None
         if record.company and record.company.logo:
             company_logo_url = record.company.logo.url
-        else:
-            system_settings = SystemSettings.objects.first()
-            if system_settings and system_settings.logo:
-                company_logo_url = system_settings.logo.url
+        elif system_settings and system_settings.logo:
+            company_logo_url = system_settings.logo.url
         
         context = {
             'record': record,
@@ -739,7 +864,7 @@ class PrintOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
             'date_ar': data.get('formatted_date_ar') or date_ar,
             'date_month_en': data.get('formatted_date_month') or date_month_en,
             'date_month_ar': data.get('formatted_date_month_ar') or date_month_ar,
-            'company_name': data.get('company_name') or company_name,
+            'company_name': company_name,
             'company_name_ar': data.get('company_name_ar') or company_name_ar,
             'company_logo_url': company_logo_url,
             'driver_name_ar': data.get('driver_name_ar', ''),
@@ -808,17 +933,13 @@ class PreviewOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
             date_month_en = now.strftime('%B %Y')
         date_month_ar = to_arabic_digits(date_month_en)
         
-        company = driver.company if driver else request.user.company
-        company_name = dict(COMPANY_CHOICES).get(company.name if company else '', data.get('company_name', ''))
+        system_settings = SystemSettings.objects.first()
+        company_name = system_settings.brand_name if system_settings else data.get('company_name', '')
         company_name_ar = data.get('company_name_ar', '')
         
         company_logo_url = None
-        if company and company.logo:
-            company_logo_url = company.logo.url
-        else:
-            system_settings = SystemSettings.objects.first()
-            if system_settings and system_settings.logo:
-                company_logo_url = system_settings.logo.url
+        if system_settings and system_settings.logo:
+            company_logo_url = system_settings.logo.url
                 
         # Mock a record for the template
         class MockRecord:
@@ -836,7 +957,7 @@ class PreviewOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
             'date_ar': data.get('formatted_date_ar') or date_ar,
             'date_month_en': data.get('formatted_date_month') or date_month_en,
             'date_month_ar': data.get('formatted_date_month_ar') or date_month_ar,
-            'company_name': data.get('company_name') or company_name,
+            'company_name': company_name,
             'company_name_ar': data.get('company_name_ar') or company_name_ar,
             'company_logo_url': company_logo_url,
             'driver_name_ar': data.get('driver_name_ar', ''),
@@ -875,3 +996,118 @@ class DeleteOperationDocumentView(StaffRequiredMixin, CompanyDataMixin, View):
         record.delete()
         django_messages.success(request, 'Document record deleted successfully.')
         return redirect('operation_documents')
+
+from django.db.models import Sum
+
+class PnLDashboardView(AdminManagerRequiredMixin, CompanyDataMixin, View):
+    def get(self, request):
+        from core.models import DriverExpense, Company, Driver
+        import json
+        
+        # Base querysets
+        user = self.request.user
+        expenses_qs = self.get_queryset_by_company(DriverExpense, company_field='driver__company')
+        
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        if start_date:
+            expenses_qs = expenses_qs.filter(date__gte=start_date)
+        if end_date:
+            expenses_qs = expenses_qs.filter(date__lte=end_date)
+            
+        if user.is_superuser and not user.company:
+            companies_qs = Company.objects.all()
+        else:
+            companies_qs = Company.objects.filter(id=user.company.id) if user.company else Company.objects.none()
+        drivers_qs = self.get_queryset_by_company(Driver)
+        
+        # Contract-wise Expenses
+        contract_expenses = {}
+        # Get all distinct contract types from drivers in this company
+        from core.models import CONTRACT_CHOICES
+        contract_types = dict(CONTRACT_CHOICES)
+        for c_key, c_name in contract_types.items():
+            total = expenses_qs.filter(driver__contract_type=c_key).aggregate(Sum('total_expense'))['total_expense__sum'] or 0
+            contract_expenses[c_name] = float(total)
+            
+        # Driver-wise Expenses
+        driver_expenses = {}
+        for d in drivers_qs:
+            agg = expenses_qs.filter(driver=d).aggregate(
+                Sum('petrol'), Sum('oil_change'), Sum('repair_vehicle'),
+                Sum('room_rent'), Sum('sim_recharge'), Sum('car_rent'),
+                Sum('emp_salary'), Sum('total_expense')
+            )
+            driver_expenses[str(d.id)] = {
+                'name': d.full_name,
+                'total': float(agg['total_expense__sum'] or 0),
+                'breakdown': [
+                    float(agg['petrol__sum'] or 0),
+                    float(agg['oil_change__sum'] or 0),
+                    float(agg['repair_vehicle__sum'] or 0),
+                    float(agg['room_rent__sum'] or 0),
+                    float(agg['sim_recharge__sum'] or 0),
+                    float(agg['car_rent__sum'] or 0),
+                    float(agg['emp_salary__sum'] or 0)
+                ]
+            }
+            
+        drivers_json = json.dumps([
+            {'id': str(d.id), 'full_name': d.full_name, 'civil_id_number': d.civil_id_number}
+            for d in drivers_qs.filter(is_active=True)
+        ])
+        
+        context = {
+            'start_date': start_date or '',
+            'end_date': end_date or '',
+            'contract_names_json': json.dumps(list(contract_expenses.keys())),
+            'contract_totals_json': json.dumps(list(contract_expenses.values())),
+            'driver_expenses_json': json.dumps(driver_expenses),
+            'drivers_json': drivers_json
+        }
+        return render(request, 'shared/pnl.html', context)
+
+class ExpenseAddView(AdminManagerRequiredMixin, CompanyDataMixin, View):
+    def post(self, request):
+        import json
+        from django.http import JsonResponse
+        from core.models import Driver, DriverExpense
+        
+        try:
+            data = json.loads(request.body)
+        except:
+            data = {}
+            
+        driver_id = data.get('driver_id')
+        if not driver_id:
+            return JsonResponse({'error': 'Driver is required'}, status=400)
+            
+        try:
+            driver = self.get_queryset_by_company(Driver).get(id=driver_id)
+        except Driver.DoesNotExist:
+            return JsonResponse({'error': 'Driver not found'}, status=404)
+            
+        try:
+            petrol = float(data.get('petrol') or 0)
+            oil_change = float(data.get('oil_change') or 0)
+            repair_vehicle = float(data.get('repair_vehicle') or 0)
+            room_rent = float(data.get('room_rent') or 0)
+            sim_recharge = float(data.get('sim_recharge') or 0)
+            car_rent = float(data.get('car_rent') or 0)
+            emp_salary = float(data.get('emp_salary') or 0)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid numeric values'}, status=400)
+            
+        DriverExpense.objects.create(
+            driver=driver,
+            company=driver.company,
+            petrol=petrol,
+            oil_change=oil_change,
+            repair_vehicle=repair_vehicle,
+            room_rent=room_rent,
+            sim_recharge=sim_recharge,
+            car_rent=car_rent,
+            emp_salary=emp_salary,
+            created_by=request.user
+        )
+        return JsonResponse({'success': True})

@@ -324,7 +324,7 @@ class DeductionForm(forms.ModelForm):
             'driver', 'employee', 'reason', 'deduction_date',
             'contracting_company', 'contractor_deduction_kd',
             'company_deduction_kd', 'is_installment_plan', 
-            'total_installments', 'pdf_proof',
+            'total_installments', 'pdf_proof', 'traffic_violation',
         ]
         widgets = {
             'driver': forms.Select(attrs={'class': TW_SELECT}),
@@ -336,6 +336,7 @@ class DeductionForm(forms.ModelForm):
             'company_deduction_kd': forms.NumberInput(attrs={'class': TW_INPUT, 'step': '0.001'}),
             'pdf_proof': forms.FileInput(attrs={'class': TW_FILE}),
             'is_installment_plan': forms.CheckboxInput(attrs={'class': TW_CHECKBOX}),
+            'traffic_violation': forms.CheckboxInput(attrs={'class': TW_CHECKBOX}),
             'total_installments': forms.NumberInput(attrs={'class': TW_INPUT, 'min': 1}),
         }
 
@@ -363,7 +364,7 @@ class EmployeeDeductionForm(DeductionForm):
             'driver', 'reason', 'deduction_date',
             'contracting_company', 'contractor_deduction_kd',
             'company_deduction_kd', 'is_installment_plan', 
-            'total_installments', 'pdf_proof',
+            'total_installments', 'pdf_proof', 'traffic_violation',
         ]
 
     def clean(self):

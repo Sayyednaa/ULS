@@ -1,17 +1,20 @@
 {% extends "shared/print_layout.html" %}
 
+{% block document_title %}
+<div class="text-center mb-8">
+    <h2 class="font-bold text-xl mb-1">رسالة تحذير</h2>
+    <h2 class="font-bold text-xl mb-6">Warning Letter</h2>
+</div>
+{% endblock %}
+
 {% block document_content %}
-<h2 class="text-center font-bold text-xl mb-1">رسالة تحذير</h2>
-<h2 class="text-center font-bold text-xl mb-6">Warning Letter</h2>
 <div class="flex justify-between gap-8 text-sm leading-relaxed mb-12">
     <div class="w-1/2">
-        <p class="font-bold mb-2">Dear Mr. <span>{{ driver.full_name }}</span>,</p>
-        <p>Kindly be informed that this is a First written warning to indicate your negligence in failing to (<span class="underline underline-offset-4 font-semibold">{{ data.violation_reason|default:'_______________________' }}</span>), which violates the obligations imposed upon you.</p>
+        <p>Kindly be informed that this is a {% if data.warning_level == '1' %}first{% elif data.warning_level == '2' %}second{% else %}third{% endif %} written warning to indicate your negligence in failing to (<span class="underline underline-offset-4 font-semibold">{{ data.violation_reason|default:'_______________________' }}</span>), which violates the obligations imposed upon you.</p>
         <br>
         <p>Please be informed, further strict disciplinary action will apply in case of repetition.</p>
     </div>
     <div class="w-1/2 text-right" dir="rtl">
-        <p class="font-bold mb-2">السيد/ <span>{{ driver_name_ar }}</span>،</p>
         <p>يرجى العلم بأن هذا الكتاب هو تحذير مكتوب <span>{% if data.warning_level == '1' %}أول{% elif data.warning_level == '2' %}ثاني{% else %}ثالث{% endif %}</span> للإشارة الى إهمالك في (<span class="underline underline-offset-4 font-semibold">{{ data.violation_reason_ar|default:'_______________________' }}</span>) الذي ينتهك الالتزامات المفروضة عليك.</p>
         <br>
         <p>يرجى العلم بأنه في حال التكرار فإنه سيتم إتخاذ اجراءات تأديبية اشد صرامة.</p>
@@ -19,7 +22,7 @@
 </div>
 
 <!-- Warning Checkboxes -->
-<div class="flex justify-between text-center font-bold text-sm mb-16 px-10">
+<div class="flex justify-between text-center font-bold text-sm mb-16 px-10 avoid-page-break">
     <div class="flex flex-col items-center">
         <p class="mb-1 text-gray-700">1st Written Warning</p>
         <p class="mb-3 text-gray-700">تحذير مكتوب أول</p>
@@ -50,7 +53,7 @@
 </div>
 
 <!-- Warning Signatures -->
-<div class="flex justify-between mt-8 text-sm border-t border-gray-200 print:border-black pt-8">
+<div class="flex justify-between mt-8 text-sm border-t border-gray-200 print:border-black pt-8 avoid-page-break">
     <div>
         <p class="mb-4">Name: Mr. <span>{{ driver.full_name }}</span></p>
         <p>Signature:</p>
@@ -61,7 +64,7 @@
     </div>
 </div>
 
-<div class="flex justify-between mt-8 font-bold text-sm">
+<div class="flex justify-between mt-8 font-bold text-sm avoid-page-break">
     <div>
         <p class="mb-4">Name: HR.</p>
         <p>Signature:</p>

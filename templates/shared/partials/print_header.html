@@ -1,0 +1,43 @@
+<style>
+    .print-header-layout { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 30px;
+        margin-bottom: 40px;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: transparent !important;
+    }
+    .print-brand { display: flex; align-items: center; gap: 20px; }
+    .print-brand-logo { width: 64px; height: 64px; object-fit: contain; border-radius: 50%; border: 1px solid #e5e7eb; mix-blend-mode: multiply; }
+    .print-brand-info h2 { font-size: 24px; font-weight: 800; color: #111827; letter-spacing: -0.5px; margin:0; text-transform: uppercase; }
+    .print-brand-info p { font-size: 14px; color: #6b7280; font-weight: 500; margin:0; }
+    
+    .print-doc-type { text-align: right; }
+    .print-doc-type p { font-size: 12px; color: #10b981; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin:0;}
+    .print-doc-type h3 { font-size: 18px; font-weight: 800; color: #111827; margin-top: 4px; margin-bottom:0; text-transform: uppercase; }
+</style>
+<div class="print-header-layout">
+    <div class="print-brand">
+        {% if company_logo_url %}
+            <img src="{{ company_logo_url }}" class="print-brand-logo" alt="Logo">
+        {% elif brand_logo %}
+            <img src="{{ brand_logo }}" class="print-brand-logo" alt="Logo">
+        {% else %}
+            <img src="/static/img/logo.png" class="print-brand-logo" alt="Logo">
+        {% endif %}
+        <div class="print-brand-info">
+            <h2>{{ brand_name|default:"UNPREDICTABLE LOGISTICS SOLUTIONS" }}</h2>
+            <p>Official Document</p>
+        </div>
+    </div>
+    <div class="print-doc-type">
+        <p>Official Record</p>
+        {% if alpine_doc_type %}
+            <h3 x-text="{{ alpine_doc_type }}"></h3>
+        {% else %}
+            <h3>{{ doc_title|default:"DOCUMENT" }}</h3>
+        {% endif %}
+    </div>
+</div>

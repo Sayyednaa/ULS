@@ -20,23 +20,7 @@
             position: relative;
         }
 
-        /* Header */
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-        .brand { display: flex; align-items: center; gap: 15px; }
-        .brand-logo { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 1px solid #e5e7eb; }
-        .brand-info h2 { font-size: 24px; font-weight: 800; color: #111827; }
-        .brand-info p { font-size: 12px; color: #6b7280; }
-        
-        .period-info { text-align: right; }
-        .period-info p { font-size: 12px; color: #6b7280; font-weight: 500; }
-        .period-info h3 { font-size: 18px; font-weight: 800; color: #111827; margin-top: 4px; }
+
 
         /* Employee Summary Section */
         .summary-section { display: flex; gap: 40px; margin-bottom: 30px; }
@@ -157,19 +141,7 @@
 
     <div class="slip-container">
         <!-- Header -->
-        <div class="header">
-            <div class="brand">
-                <img src="{{ brand_logo }}" class="brand-logo" alt="Logo">
-                <div class="brand-info">
-                    <h2>{{ brand_name }}</h2>
-                    <p>Fleet Operations & Logistics — Gulf</p>
-                </div>
-            </div>
-            <div class="period-info">
-                <p>Payslip For the Month</p>
-                <h3>{{ month_label }}</h3>
-            </div>
-        </div>
+        {% include 'shared/partials/print_header.html' with doc_title="Payslip: "|add:month_label %}
 
         <!-- Summary -->
         <div class="summary-section">
@@ -301,9 +273,8 @@
                 <div class="qr-label">Verify Slip</div>
             </div>
 
-            <div class="footer-note">
-                <span style="font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; display: block;">Unpredictable Logistics Solutions</span>
-            </div>
+            <!-- Footer Note -->
+            {% include 'shared/partials/print_footer.html' %}
         </div>
     </div>
 

@@ -7,6 +7,8 @@
                         position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; margin: 0; padding: 20px;
                     }
                     .no-print { display: none !important; }
+                    table, tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+                    .avoid-page-break { page-break-inside: avoid; break-inside: avoid; }
                 }
             </style>
             
@@ -16,19 +18,49 @@
             </div>
             
             <div x-show="selectedDriver" class="w-full max-w-4xl mx-auto" dir="ltr">
+                <!-- Document Titles -->
+                <div class="text-center mb-8">
+                    <div x-show="docType === 'warning_letter'">
+                        <h2 class="font-bold text-xl">رسالة تحذير</h2>
+                        <h2 class="font-bold text-xl">Warning Letter</h2>
+                    </div>
+                    <div x-show="docType === 'penalty_deduction'">
+                        <h2 class="font-bold text-xl">قرار خصم</h2>
+                        <h2 class="font-bold text-xl">Penalty Deduction</h2>
+                    </div>
+                    <div x-show="docType === 'deliver_pledge'">
+                        <h2 class="font-bold text-xl">إقرار وتعهد بالاستلام</h2>
+                        <h2 class="font-bold text-xl">Deliver and Pledge</h2>
+                    </div>
+                    <div x-show="docType === 'mobile_receiving'">
+                        <h2 class="font-bold text-xl">إقرار استلام هاتف محمول</h2>
+                        <h2 class="font-bold text-xl">Mobile Receiving</h2>
+                    </div>
+                    <div x-show="docType === 'ack_receipt'">
+                        <h2 class="font-bold text-xl">إقرار استلام</h2>
+                        <h2 class="font-bold text-xl">Acknowledgment of receipt</h2>
+                    </div>
+                    <div x-show="docType === 'car_receipt'">
+                        <h2 class="font-bold text-xl">إقرار استلام سيارة</h2>
+                        <h2 class="font-bold text-xl">Vehicle Receipt Acknowledgment</h2>
+                    </div>
+                </div>
+
                 <!-- Shared Header for all documents -->
                 <div class="flex justify-between items-start mb-8 text-sm">
                     <div>
                         <p class="font-bold">Date: <span x-text="formattedDate"></span></p>
                         <p class="mt-4"><span class="font-bold">Name:</span> <span x-text="selectedDriver.full_name"></span></p>
-                        <p><span class="font-bold">ID#:</span> <span x-text="selectedDriver.civil_id"></span></p>
+                        <p x-show="docType === 'car_receipt'"><span class="font-bold">Nationality:</span> <span x-text="nationality"></span></p>
+                        <p><span class="font-bold">Civil ID:</span> <span x-text="selectedDriver.civil_id"></span></p>
                         <p><span class="font-bold">Designation:</span> <span x-text="selectedDriver.designation"></span></p>
                         <p><span class="font-bold">Company:</span> <span x-text="companyName"></span></p>
                     </div>
                     <div class="text-right" dir="rtl">
                         <p class="font-bold">التاريخ: <span x-text="formattedDateAr"></span></p>
                         <p class="mt-4"><span class="font-bold">الاسم:</span> <span x-text="driverNameAr"></span></p>
-                        <p><span class="font-bold">بطاقة مدنية#:</span> <span x-text="toArabicDigits(selectedDriver.civil_id)"></span></p>
+                        <p x-show="docType === 'car_receipt'"><span class="font-bold">الجنسية:</span> <span x-text="nationalityAr"></span></p>
+                        <p><span class="font-bold">الرقم المدني:</span> <span x-text="toArabicDigits(selectedDriver.civil_id)"></span></p>
                         <p><span class="font-bold">المسمى الوظيفي:</span> <span x-text="selectedDriver.designation === 'Car Driver' ? 'سائق سيارة' : selectedDriver.designation"></span></p>
                         <p><span class="font-bold">شركة:</span> <span x-text="companyNameAr"></span></p>
                     </div>
@@ -36,16 +68,13 @@
 
                 <!-- Warning Letter -->
                 <div x-show="docType === 'warning_letter'">
-                    <h2 class="text-center font-bold text-xl mb-6">رسالة تحذير</h2>
                     <div class="flex justify-between gap-8 text-sm leading-relaxed mb-12">
                         <div class="w-1/2">
-                            <p class="font-bold mb-2">Dear Mr. <span x-text="selectedDriver.full_name"></span>,</p>
-                            <p>Kindly be informed that this is a First written warning to indicate your negligence in failing to (<span class="underline underline-offset-4 font-semibold" x-text="violationReason || '_______________________'"></span>), which violates the obligations imposed upon you.</p>
+                            <p>Kindly be informed that this is a <span x-text="warningLevel === '1' ? 'First' : (warningLevel === '2' ? 'Second' : 'Third')"></span> written warning to indicate your negligence in failing to (<span class="underline underline-offset-4 font-semibold" x-text="violationReason || '_______________________'"></span>), which violates the obligations imposed upon you.</p>
                             <br>
                             <p>Please be informed, further strict disciplinary action will apply in case of repetition.</p>
                         </div>
                         <div class="w-1/2 text-right" dir="rtl">
-                            <p class="font-bold mb-2">السيد/ <span x-text="driverNameAr"></span>،</p>
                             <p>يرجى العلم بأن هذا الكتاب هو تحذير مكتوب <span x-text="warningLevel === '1' ? 'أول' : (warningLevel === '2' ? 'ثاني' : 'ثالث')"></span> للإشارة الى إهمالك في (<span class="underline underline-offset-4 font-semibold" x-text="violationReasonAr || '_______________________'"></span>) الذي ينتهك الالتزامات المفروضة عليك.</p>
                             <br>
                             <p>يرجى العلم بأنه في حال التكرار فإنه سيتم إتخاذ اجراءات تأديبية اشد صرامة.</p>
@@ -104,13 +133,11 @@
                 <div x-show="docType === 'penalty_deduction'">
                     <div class="flex justify-between gap-8 text-sm leading-relaxed mb-8">
                         <div class="w-1/2">
-                            <p class="font-bold mb-2">Dear Mr. <span x-text="selectedDriver.full_name"></span>,</p>
                             <p>Please note that this letter is a deduction decision to (<span class="underline underline-offset-4 font-semibold" x-text="violationReason || '_______________________'"></span>) indicate your neglect to follow the tasks assigned to you which violates the obligations imposed on you. <span class="font-bold" x-text="deductionAmount || '00.00'"></span> KWD will be deducted from your <span class="underline underline-offset-4 font-semibold" x-text="formattedDateMonth"></span> salary, taking into account not exceeding the legal deduction percentage and the amount will be paid in installments after management Approval.</p>
                             <br>
                             <p>Copies of the invoices referred to in this warning have been attached. Kindly review them and take the necessary action in accordance with the approved procedures.</p>
                         </div>
                         <div class="w-1/2 text-right" dir="rtl">
-                            <p class="font-bold mb-2">السيد/ <span x-text="driverNameAr"></span>،</p>
                             <p>يرجى العلم بأن هذا الكتاب هو قرار خصم للإشارة إلى إهمالك اتباع المهام المحدد لك في (<span class="underline underline-offset-4 font-semibold" x-text="violationReasonAr || '_______________________'"></span>) الذي ينتهك الالتزامات المفروضة عليك ، فسيتم خصم <span class="font-bold" x-text="toArabicDigits(deductionAmount || '00.00')"></span> دينار من راتب شهر <span class="underline underline-offset-4 font-semibold" x-text="formattedDateMonthAr"></span> مع مراعاة عدم تجاوز نسبة الخصم القانونية وتقسط المبلغ على دفعات بعد موافقة الإدارة.</p>
                             <br>
                             <p>تم إرفاق نسخ من الفواتير المشار إليها ضمن هذا الإنذار، ويرجى منكم الاطلاع عليها واتخاذ ما يلزم وفق الإجراءات المعتمدة.</p>
@@ -148,22 +175,10 @@
                 <div x-show="docType === 'deliver_pledge' || docType === 'mobile_receiving'" class="text-sm">
                     <div class="flex justify-between items-center mb-6 font-bold">
                         <div>
-                            <p>the undersigned</p>
-                            <p>I hereby declare that I am:</p>
+                            <p>I, the undersigned, hereby declare that:</p>
                         </div>
                         <div class="text-right" dir="rtl">
-                            <p>أقر أنا :</p>
-                            <p>الموقع أدناه</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center mb-6 font-bold">
-                        <div>
-                            <p>the undersigned</p>
-                            <p>I hold civil ID number: <span x-text="selectedDriver ? selectedDriver.civil_id : ''"></span></p>
-                        </div>
-                        <div class="text-right" dir="rtl">
-                            <p>احمل بطاقة مدنية رقم : <span x-text="selectedDriver ? selectedDriver.civil_id : ''"></span></p>
+                            <p>أقر أنا الموقع أدناه :</p>
                         </div>
                     </div>
                     
@@ -203,27 +218,12 @@
 
                 <!-- Acknowledgment of receipt -->
                 <div x-show="docType === 'ack_receipt'" class="text-sm font-bold">
-                    <div class="flex justify-between items-center mb-8">
-                        <div></div>
-                        <div class="text-center">
-                            <h2 class="text-xl">إقرار استلام</h2>
-                            <h2 class="text-xl">Acknowledgment of receipt</h2>
-                        </div>
-                        <div></div>
-                    </div>
-                    
                     <div class="flex justify-between gap-8 leading-relaxed mb-6">
                         <div class="w-1/2">
-                            <p>I, <span class="font-bold underline" x-text="selectedDriver ? selectedDriver.full_name : ''"></span> ,</p>
-                            <p>the undersigned, declare that,</p>
-                            <p>Civil ID No: <span class="font-bold" x-text="selectedDriver ? selectedDriver.civil_id : ''"></span></p>
-                            <p>That I have received from: <span class="font-bold" x-text="companyName"></span> Company for delivering consumer orders.</p>
+                            <p>I, the undersigned, declare that I have received from: <span class="font-bold" x-text="companyName"></span> Company for delivering consumer orders.</p>
                         </div>
                         <div class="w-1/2 text-right" dir="rtl">
-                            <p>أقر أنا/ <span class="font-bold underline" x-text="driverNameAr"></span></p>
-                            <p>الموقع أدناه ،</p>
-                            <p>بطاقة مدنية رقم : <span class="font-bold" x-text="toArabicDigits(selectedDriver ? selectedDriver.civil_id : '')"></span></p>
-                            <p>بأنني قد إستلمت من : السادة / <span class="font-bold" x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية.</p>
+                            <p>أقر أنا الموقع أدناه، بأنني قد إستلمت من: السادة / <span class="font-bold" x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية.</p>
                         </div>
                     </div>
                     
@@ -295,19 +295,12 @@
 
                 <!-- Car Receipt Acknowledgment -->
                 <div x-show="docType === 'car_receipt'" class="text-sm">
-                    <div class="text-center mb-6">
-                        <h2 class="font-bold text-xl">إقرار استلام سيارة</h2>
-                        <h2 class="font-bold text-xl">Vehicle Receipt Acknowledgment</h2>
-                    </div>
-                    
                     <div class="flex justify-between gap-8 leading-relaxed mb-4">
                         <div class="w-1/2">
-                            <p class="font-bold">I, <span class="underline" x-text="selectedDriver ? selectedDriver.full_name : ''"></span>, the undersigned,</p>
-                            <p class="font-bold">nationality <span class="underline px-2" x-text="nationality"></span> , holding Civil ID No. ( <span x-text="selectedDriver ? selectedDriver.civil_id : ''"></span> ), declare that I have received from Messrs. <span x-text="companyName"></span> Company for delivering consumer orders, the vehicle shown in the table below:</p>
+                            <p class="font-bold">I, the undersigned, declare that I have received from Messrs. <span x-text="companyName"></span> Company for delivering consumer orders, the vehicle shown in the table below:</p>
                         </div>
                         <div class="w-1/2 text-right" dir="rtl">
-                            <p class="font-bold">أقر أنا/ <span class="underline" x-text="driverNameAr"></span> .. الموقع أدناه،</p>
-                            <p class="font-bold">.. الجنسية <span class="underline px-2" x-text="nationalityAr"></span> ، أحمل بطاقة مدنية رقم ( <span x-text="toArabicDigits(selectedDriver ? selectedDriver.civil_id : '')"></span> ) بأنني قد استلمت من السادة / <span x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية، سيارة المبين بالجدول أدناه:</p>
+                            <p class="font-bold">أقر أنا الموقع أدناه، بأنني قد استلمت من السادة / <span x-text="companyNameAr"></span> لتوصيل الطلبات الاستهلاكية، سيارة المبين بالجدول أدناه:</p>
                         </div>
                     </div>
                     

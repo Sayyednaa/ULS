@@ -401,6 +401,7 @@ class InvoiceArchive(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     driver = models.ForeignKey(Driver, on_delete=models.PROTECT, related_name='archives')
     driver_name = models.CharField(max_length=200)
+    archive_number = models.CharField(max_length=50, blank=True)
     cash = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     main_orders = models.IntegerField(default=0)
     additional_orders = models.IntegerField(default=0)
@@ -441,6 +442,8 @@ class Deduction(models.Model):
     # New fields for installment plans
     is_installment_plan = models.BooleanField(default=False)
     total_installments = models.IntegerField(default=1)
+    
+    traffic_violation = models.BooleanField(default=False)
     
     pdf_proof = models.FileField(upload_to='deduction_pdfs/', null=True, blank=True, validators=[validate_file_extension])
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
@@ -790,3 +793,35 @@ class MonthlyProfitLoss(models.Model):
 
     def __str__(self):
         return f"P&L: {self.company_name} - {self.contract_name} ({self.month.strftime('%B %Y')})"
+
+class DriverExpense(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name="expenses")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, related_name="expenses")
+    petrol = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    oil_change = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    repair_vehicle = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    room_rent = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    sim_recharge = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    car_rent = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    emp_salary = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    total_expense = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    date = models.DateField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ['-date', '-created_at']
+
+    def save(self, *args, **kwargs):
+        self.total_expense = (
+            self.petrol + self.oil_change + self.repair_vehicle + 
+            self.room_rent + self.sim_recharge + self.car_rent + self.emp_salary
+        )
+        if self.driver and not self.company:
+            self.company = self.driver.company
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Expense: {self.driver.full_name} - {self.total_expense} KWD"
+

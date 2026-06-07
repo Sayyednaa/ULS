@@ -1,17 +1,20 @@
 {% extends "shared/print_layout.html" %}
 
+{% block document_title %}
+<div class="text-center mb-8">
+    <h2 class="font-bold text-xl mb-1">قرار خصم</h2>
+    <h2 class="font-bold text-xl mb-6">Deduction Decision</h2>
+</div>
+{% endblock %}
+
 {% block document_content %}
-<h2 class="text-center font-bold text-xl mb-1">قرار خصم</h2>
-<h2 class="text-center font-bold text-xl mb-6">Deduction Decision</h2>
 <div class="flex justify-between gap-8 text-sm leading-relaxed mb-8">
     <div class="w-1/2">
-        <p class="font-bold mb-2">Dear Mr. <span>{{ driver.full_name }}</span>,</p>
         <p>Please note that this letter is a deduction decision to (<span class="underline underline-offset-4 font-semibold">{{ data.violation_reason|default:'_______________________' }}</span>) indicate your neglect to follow the tasks assigned to you which violates the obligations imposed on you. <span class="font-bold">{{ data.deduction_amount|default:'00.00' }}</span> KWD will be deducted from your <span class="underline underline-offset-4 font-semibold">{{ date_month_en }}</span> salary, taking into account not exceeding the legal deduction percentage and the amount will be paid in installments after management Approval.</p>
         <br>
         <p>Copies of the invoices referred to in this warning have been attached. Kindly review them and take the necessary action in accordance with the approved procedures.</p>
     </div>
     <div class="w-1/2 text-right" dir="rtl">
-        <p class="font-bold mb-2">السيد/ <span>{{ driver_name_ar }}</span>،</p>
         <p>يرجى العلم بأن هذا الكتاب هو قرار خصم للإشارة إلى إهمالك اتباع المهام المحدد لك في (<span class="underline underline-offset-4 font-semibold">{{ data.violation_reason_ar|default:'_______________________' }}</span>) الذي ينتهك الالتزامات المفروضة عليك ، فسيتم خصم <span class="font-bold">{{ deduction_amount_ar|default:'00.00' }}</span> دينار من راتب شهر <span class="underline underline-offset-4 font-semibold">{{ date_month_ar }}</span> مع مراعاة عدم تجاوز نسبة الخصم القانونية وتقسط المبلغ على دفعات بعد موافقة الإدارة.</p>
         <br>
         <p>تم إرفاق نسخ من الفواتير المشار إليها ضمن هذا الإنذار، ويرجى منكم الاطلاع عليها واتخاذ ما يلزم وفق الإجراءات المعتمدة.</p>
@@ -21,7 +24,7 @@
 <p class="text-xs text-gray-500 mb-2 text-right" dir="rtl">{{ company_name_ar }}</p>
 
 <!-- Deduction Tables -->
-<div class="flex justify-between gap-8 mb-12 text-sm">
+<div class="flex justify-between gap-8 mb-12 text-sm avoid-page-break">
     <div class="w-1/2">
         <table class="w-full border-collapse border border-black">
             <tbody>
@@ -45,7 +48,7 @@
 </div>
 
 <!-- Signatures -->
-<div class="flex justify-between mt-6 text-sm border-t border-gray-200 print:border-black pt-6">
+<div class="flex justify-between mt-6 text-sm border-t border-gray-200 print:border-black pt-6 avoid-page-break">
     <div>
         <p class="mb-4">Name: Mr. <span>{{ driver.full_name }}</span></p>
         <p>Signature:</p>
@@ -56,7 +59,7 @@
     </div>
 </div>
 
-<div class="flex justify-between mt-6 font-bold text-sm">
+<div class="flex justify-between mt-6 font-bold text-sm avoid-page-break">
     <div>
         <p class="mb-4">Name: HR.</p>
         <p>Signature:</p>

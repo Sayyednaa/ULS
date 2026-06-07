@@ -1,20 +1,20 @@
 {% extends "shared/print_layout.html" %}
 
+{% block document_title %}
+<div class="text-center mb-8">
+    <h2 class="font-bold text-xl">إقرار استلام سيارة</h2>
+    <h2 class="font-bold text-xl">Vehicle Receipt Acknowledgment</h2>
+</div>
+{% endblock %}
+
 {% block document_content %}
 <div class="text-sm">
-    <div class="text-center mb-6">
-        <h2 class="font-bold text-xl">إقرار استلام سيارة</h2>
-        <h2 class="font-bold text-xl">Vehicle Receipt Acknowledgment</h2>
-    </div>
-    
     <div class="flex justify-between gap-8 leading-relaxed mb-4">
         <div class="w-1/2">
-            <p class="font-bold">I, <span class="underline">{{ driver.full_name }}</span>, the undersigned,</p>
-            <p class="font-bold">nationality <span class="underline px-2">{{ data.nationality }}</span> , holding Civil ID No. ( <span>{{ driver.civil_id_number }}</span> ), declare that I have received from Messrs. <span>{{ company_name }}</span> Company for delivering consumer orders, the vehicle shown in the table below:</p>
+            <p class="font-bold">I, the undersigned, declare that I have received from Messrs. <span>{{ company_name }}</span> Company for delivering consumer orders, the vehicle shown in the table below:</p>
         </div>
         <div class="w-1/2 text-right" dir="rtl">
-            <p class="font-bold">أقر أنا/ <span class="underline">{{ driver_name_ar }}</span> .. الموقع أدناه،</p>
-            <p class="font-bold">.. الجنسية <span class="underline px-2">{{ data.nationality_ar }}</span> ، أحمل بطاقة مدنية رقم ( <span>{{ civil_id_ar }}</span> ) بأنني قد استلمت من السادة / <span>{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية، سيارة المبين بالجدول أدناه:</p>
+            <p class="font-bold">أقر أنا الموقع أدناه، بأنني قد استلمت من السادة / <span>{{ company_name_ar }}</span> لتوصيل الطلبات الاستهلاكية، سيارة المبين بالجدول أدناه:</p>
         </div>
     </div>
     
@@ -107,7 +107,7 @@
         </table>
     </div>
     
-    <div class="flex border border-black p-2 gap-4 text-xs leading-relaxed text-justify">
+    <div class="flex border border-black p-2 gap-4 text-xs leading-relaxed text-justify avoid-page-break">
         <div class="w-1/2">
             As of <span class="font-bold">{{ date_en }}</span>, I acknowledge that the use of the entrusted goods is limited to delivering consumer orders within the scope of the business. I also acknowledge that I am fully responsible for any damages that may occur to them as a result of any accidents or defects in use, whatever they may be. I also acknowledge, irrevocably, that I am solely responsible to the company or any third party, whether a natural or legal person, for any traffic violations, damages, or accidents that occur while the goods are in my custody. I also bear civil and criminal liability for the use of the goods to the company or any third party, and I am a guarantor to the company in the event that a third party claims against it for civil and criminal
         </div>
@@ -117,7 +117,7 @@
     </div>
     
     <!-- Signatures -->
-    <div class="flex justify-between mt-6 text-sm pt-4">
+    <div class="flex justify-between mt-6 text-sm pt-4 avoid-page-break">
         <div>
             <p class="mb-4">Name: Mr. <span>{{ driver.full_name }}</span></p>
             <p>Signature:</p>
@@ -128,7 +128,7 @@
         </div>
     </div>
 
-    <div class="flex justify-between mt-6 font-bold text-sm">
+    <div class="flex justify-between mt-6 font-bold text-sm avoid-page-break">
         <div>
             <p class="mb-4">Name: HR.</p>
             <p>Signature:</p>

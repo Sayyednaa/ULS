@@ -1,27 +1,20 @@
 {% extends "shared/print_layout.html" %}
 
+{% block document_title %}
+<div class="text-center mb-8">
+    <h2 class="font-bold text-xl mb-1">إقرار وتعهد باستلام عهدة</h2>
+    <h2 class="font-bold text-xl mb-6">Delivery and Pledge Acknowledgment</h2>
+</div>
+{% endblock %}
+
 {% block document_content %}
-<h2 class="text-center font-bold text-xl mb-1">إقرار وتعهد باستلام عهدة</h2>
-<h2 class="text-center font-bold text-xl mb-6">Delivery and Pledge Acknowledgment</h2>
 <div class="text-sm">
     <div class="flex justify-between items-center mb-6 font-bold">
         <div>
-            <p>the undersigned</p>
-            <p>I hereby declare that I am:</p>
+            <p>I, the undersigned, hereby declare that:</p>
         </div>
         <div class="text-right" dir="rtl">
-            <p>أقر أنا :</p>
-            <p>الموقع أدناه</p>
-        </div>
-    </div>
-    
-    <div class="flex justify-between items-center mb-6 font-bold">
-        <div>
-            <p>the undersigned</p>
-            <p>I hold civil ID number: <span>{{ driver.civil_id_number }}</span></p>
-        </div>
-        <div class="text-right" dir="rtl">
-            <p>احمل بطاقة مدنية رقم : <span>{{ civil_id_ar }}</span></p>
+            <p>أقر أنا الموقع أدناه :</p>
         </div>
     </div>
     
@@ -37,7 +30,7 @@
     </div>
     
     <!-- Deliver Pledge Signature -->
-    <div class="flex justify-between text-sm mt-12 bg-gray-50 border border-gray-200 p-6 rounded-lg no-print">
+    <div class="flex justify-between text-sm mt-12 bg-gray-50 border border-gray-200 p-6 rounded-lg no-print avoid-page-break">
         <div>
             <p class="mb-4 font-bold text-gray-500">Headquarters and its contents:</p>
             <p class="mb-4"><span class="font-bold">Name:</span> <span>{{ driver.full_name }}</span></p>
@@ -59,7 +52,7 @@
     </div>
     
     <!-- Print specific signature box -->
-    <div class="flex justify-between text-sm mt-12 border border-black p-6 print-only" style="display: none;">
+    <div class="flex justify-between text-sm mt-12 border border-black p-6 print-only avoid-page-break" style="display: none;">
         <div>
             <p class="mb-4 font-bold">Headquarters and its contents:</p>
             <p class="mb-4"><span class="font-bold">Name:</span> <span>{{ driver.full_name }}</span></p>

@@ -216,31 +216,43 @@
     <div class="w-full max-w-4xl flex flex-col items-center justify-center gap-6 relative z-10">
         
         <!-- Top: Vintage Pocket Watch & Branding -->
-        <div class="flex flex-col items-center text-center max-w-sm">
+        <div class="flex flex-col items-center text-center max-w-sm w-full">
             <!-- Wooden Working Clock -->
-            <div class="clock-container">
-                <div class="wooden-clock">
-                    <div class="clock-face">
-                        <div class="number n12"><span>12</span></div>
-                        <div class="number n1"><span>1</span></div>
-                        <div class="number n2"><span>2</span></div>
-                        <div class="number n3"><span>3</span></div>
-                        <div class="number n4"><span>4</span></div>
-                        <div class="number n5"><span>5</span></div>
-                        <div class="number n6"><span>6</span></div>
-                        <div class="number n7"><span>7</span></div>
-                        <div class="number n8"><span>8</span></div>
-                        <div class="number n9"><span>9</span></div>
-                        <div class="number n10"><span>10</span></div>
-                        <div class="number n11"><span>11</span></div>
-                        
-                        <div class="clock-brand">ULS</div>
-                         
-                        <div class="hand hour-hand" id="hourHand"></div>
-                        <div class="hand minute-hand" id="minHand"></div>
-                        <div class="hand second-hand" id="secHand"></div>
-                        <div class="clock-center"></div>
+            <div class="clock-wrapper" style="transform: scale(0.65); transform-origin: top center; height: 140px; margin-bottom: 20px;">
+                <div class="clock-container">
+                    <div class="wooden-clock">
+                        <div class="clock-face">
+                            <div class="number n12"><span>12</span></div>
+                            <div class="number n1"><span>1</span></div>
+                            <div class="number n2"><span>2</span></div>
+                            <div class="number n3"><span>3</span></div>
+                            <div class="number n4"><span>4</span></div>
+                            <div class="number n5"><span>5</span></div>
+                            <div class="number n6"><span>6</span></div>
+                            <div class="number n7"><span>7</span></div>
+                            <div class="number n8"><span>8</span></div>
+                            <div class="number n9"><span>9</span></div>
+                            <div class="number n10"><span>10</span></div>
+                            <div class="number n11"><span>11</span></div>
+                            
+                            <div class="clock-brand">ULS</div>
+                             
+                            <div class="hand hour-hand" id="hourHand"></div>
+                            <div class="hand minute-hand" id="minHand"></div>
+                            <div class="hand second-hand" id="secHand"></div>
+                            <div class="clock-center"></div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Digital Clock -->
+            <div class="flex flex-col items-center mb-6 z-20 relative">
+                <div class="font-mono text-3xl font-bold text-white tracking-[0.1em] bg-black/40 px-6 py-2 rounded-2xl border border-white/10 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.15)] flex items-center justify-center min-w-[200px]" id="digitalClock">
+                    00:00:00
+                </div>
+                <div class="text-emerald-500/80 text-[10px] font-bold uppercase tracking-[0.3em] mt-3" id="digitalDate">
+                    --
                 </div>
             </div>
         </div>
@@ -364,6 +376,9 @@
         const hourHand = document.getElementById("hourHand");
         const minHand = document.getElementById("minHand");
         const secHand = document.getElementById("secHand");
+        const digitalClock = document.getElementById("digitalClock");
+        const digitalDate = document.getElementById("digitalDate");
+        let lastDateString = "";
 
         function updateClock() {
             const now = new Date();
@@ -379,6 +394,24 @@
             if (secHand) secHand.style.transform = `rotate(${secDeg}deg)`;
             if (minHand) minHand.style.transform = `rotate(${minDeg}deg)`;
             if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
+
+            // Update Digital Clock
+            if (digitalClock) {
+                const h = now.getHours().toString().padStart(2, '0');
+                const m = now.getMinutes().toString().padStart(2, '0');
+                const s = now.getSeconds().toString().padStart(2, '0');
+                digitalClock.textContent = `${h}:${m}:${s}`;
+            }
+
+            // Update Digital Date (Only if date has changed to save CPU)
+            if (digitalDate) {
+                const dateOptions = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+                const currentDateString = now.toLocaleDateString('en-US', dateOptions).toUpperCase();
+                if (currentDateString !== lastDateString) {
+                    digitalDate.textContent = currentDateString;
+                    lastDateString = currentDateString;
+                }
+            }
 
             requestAnimationFrame(updateClock);
         }
