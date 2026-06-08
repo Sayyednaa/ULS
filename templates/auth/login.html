@@ -246,15 +246,6 @@
                 </div>
             </div>
 
-            <!-- Digital Clock -->
-            <div class="flex flex-col items-center mb-6 z-20 relative">
-                <div class="font-mono text-3xl font-bold text-white tracking-[0.1em] bg-black/40 px-6 py-2 rounded-2xl border border-white/10 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.15)] flex items-center justify-center min-w-[200px]" id="digitalClock">
-                    00:00:00
-                </div>
-                <div class="text-emerald-500/80 text-[10px] font-bold uppercase tracking-[0.3em] mt-3" id="digitalDate">
-                    --
-                </div>
-            </div>
         </div>
 
         <!-- Right Side: Login Card -->
@@ -376,9 +367,6 @@
         const hourHand = document.getElementById("hourHand");
         const minHand = document.getElementById("minHand");
         const secHand = document.getElementById("secHand");
-        const digitalClock = document.getElementById("digitalClock");
-        const digitalDate = document.getElementById("digitalDate");
-        let lastDateString = "";
 
         function updateClock() {
             const now = new Date();
@@ -394,28 +382,6 @@
             if (secHand) secHand.style.transform = `rotate(${secDeg}deg)`;
             if (minHand) minHand.style.transform = `rotate(${minDeg}deg)`;
             if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
-
-            // Update Digital Clock
-            if (digitalClock) {
-                let h = now.getHours();
-                const ampm = h >= 12 ? 'PM' : 'AM';
-                h = h % 12;
-                h = h ? h : 12;
-                h = h.toString().padStart(2, '0');
-                const m = now.getMinutes().toString().padStart(2, '0');
-                const s = now.getSeconds().toString().padStart(2, '0');
-                digitalClock.textContent = `${h}:${m}:${s} ${ampm}`;
-            }
-
-            // Update Digital Date (Only if date has changed to save CPU)
-            if (digitalDate) {
-                const dateOptions = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
-                const currentDateString = now.toLocaleDateString('en-US', dateOptions).toUpperCase();
-                if (currentDateString !== lastDateString) {
-                    digitalDate.textContent = currentDateString;
-                    lastDateString = currentDateString;
-                }
-            }
 
             requestAnimationFrame(updateClock);
         }
